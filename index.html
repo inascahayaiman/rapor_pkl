@@ -3,7 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Rapor PKL</title>
+<title>e-Rapor PKL SMK</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
+<script src="https://cdn.jsdelivr.net/npm/lucide@0.460.0/dist/umd/lucide.min.js"></script>
 <style>
 :root{
   --bg:#f4f6f9;--card:#fff;--ink:#1c2733;--muted:#5d6b7a;--line:#dde3ea;
@@ -73,6 +75,85 @@ table.grid input.w{width:200px}table.grid input.w2{width:260px}
 .sheet .gap{height:20mm}
 .sheet .kepsek{text-align:center;margin-top:8px}
 #printRoot{display:none}
+
+/* ===== Tema e-Rapor PKL ===== */
+:root{--brand:#0b5db0;--brand-2:#2272c3;--navy:#12304f;--side:#26384d;--bg:#f2f5f9;--err:#d64545;--ok:#2e9e5b;--r:10px}
+body{font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+.card,.tablewrap{border-radius:var(--r)}.card{box-shadow:0 1px 4px rgba(18,48,79,.07)}
+.btn,select,input[type=text],input[type=number],input[type=date],input[type=password]{border-radius:8px}
+input[type=password]{border:1px solid var(--line);padding:6px 8px;min-width:0}
+i[data-lucide],svg.lucide{width:20px;height:20px;flex:none}
+/* login */
+#login{max-width:none;margin:0;text-align:left;min-height:100vh;display:flex;flex-direction:column;background:linear-gradient(180deg,#1c40d8,#132c96)}
+.lg-head{background:linear-gradient(90deg,#0a4390,#0b57b0);color:#fff;padding:9px 20px;display:flex;gap:20px;align-items:center;flex-wrap:wrap;border-bottom:1px solid rgba(255,255,255,.18)}
+.lg-head .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:15px}
+.lg-head .logo{width:38px;height:38px;border-radius:50%;background:#fff;color:var(--brand);display:grid;place-items:center;overflow:hidden}
+.lg-head .logo img{width:100%;height:100%;object-fit:contain}
+.lg-head nav{margin-left:auto;display:flex;gap:2px;flex-wrap:wrap}
+.lg-head nav button{background:none;border:0;color:#fff;font-weight:700;cursor:pointer;padding:8px 10px;border-radius:8px;display:flex;gap:6px;align-items:center;font-size:14px}
+.lg-head nav button.y{color:#ffc933}.lg-head nav button:hover{background:rgba(255,255,255,.12)}
+.lg-head nav i,.lg-head nav svg{width:16px;height:16px}
+.lg-split{display:grid;grid-template-columns:1.9fr 1fr;gap:6px;padding:6px 6px 0;align-items:stretch;flex:1;max-height:max(640px,calc(100vh - 110px))}
+.lg-left{position:relative;overflow:hidden;background:#fff;border-radius:8px;display:grid;grid-template-columns:1fr 1.15fr;gap:26px;align-items:center;padding:34px 40px}
+.lg-left>svg.wave{position:absolute;inset:0;width:100%;height:100%;z-index:0}
+.lg-txt,.lg-left img.ill{position:relative;z-index:1}
+.lg-txt .st{color:#0b3a7a;font-weight:600;margin:0 0 10px}
+.lg-txt h2{margin:0;font-size:clamp(34px,4.4vw,64px);line-height:1.05;font-weight:800;text-align:left;letter-spacing:0}
+.lg-txt h2 .a{display:block;color:#0d3b8c}.lg-txt h2 .b{color:#1473d6}.lg-txt h2 .c{color:#ffb000}
+.vers{display:inline-flex;gap:12px;align-items:center;margin-top:16px;font-weight:800;color:#0d3b8c;font-size:19px}
+.vers::before{content:"";width:56px;height:14px;background:repeating-linear-gradient(115deg,#1a49d6 0 6px,transparent 6px 10px)}
+.lg-left img.ill{width:100%;height:auto;border-radius:12px;box-shadow:0 8px 24px rgba(18,48,79,.28);border:3px solid #fff}
+.lg-right{background:#fff;border-radius:8px;padding:18px 16px}
+.lg-card{background:#fff;border-radius:8px;box-shadow:0 2px 10px rgba(18,48,79,.14);padding:22px 24px;width:100%;max-width:560px;margin:0 auto}
+.lg-card h3{display:flex;justify-content:center;align-items:center;gap:8px;margin:0;font-size:20px;color:#2a3340;letter-spacing:.5px}
+.lg-card form{display:grid;gap:12px}
+.dv{display:flex;align-items:center;gap:10px;color:#9aa5b1;font-size:11.5px;margin:10px 0 14px}
+.dv::before,.dv::after{content:"";flex:1;height:1px;background:#d8dee6}.dv.b{margin:14px 0 0}
+.ig{display:flex;border:1px solid #cfd6df;border-radius:6px;overflow:hidden;background:#fff}
+.ig>label{background:#eef1f5;padding:9px 14px;font-size:14.5px;border-right:1px solid #cfd6df;white-space:nowrap;display:flex;align-items:center}
+.ig input,.ig select{flex:1;min-width:0;width:auto;border:0;border-radius:0;padding:9px 12px;background:#fff}
+.ig input:focus,.ig select:focus{outline:2px solid var(--brand-2);outline-offset:-2px}
+.ig button{background:#0a2a5e;color:#fff;border:0;padding:0 14px;cursor:pointer;display:grid;place-items:center}
+.ig:has(input.bad){border-color:var(--err)}.ig input.bad{background:#fdecea}
+.lg-card .lnk{background:none;border:0;color:var(--brand);cursor:pointer;font-size:13px;padding:0;justify-self:end}
+.lg-card .go{background:#0a2a5e;width:100%;padding:11px;font-size:16px;display:flex;gap:8px;justify-content:center;align-items:center;border-radius:6px}
+.lg-card .go:hover{background:#0d3a80}
+#loginMsg:not(:empty){background:#fdecea;border:1px solid #f3b8b3;border-radius:8px;padding:8px 10px;margin:12px 0 0}
+.lg-foot{background:#0b2f66;color:#fff;font-size:12.5px;font-weight:700;text-align:center;padding:12px;margin-top:auto}
+/* layout aplikasi */
+.shell{display:flex;min-height:100vh}
+#side{width:260px;background:var(--side);color:#cfd9e5;flex:none;display:flex;flex-direction:column;transition:width .2s;position:sticky;top:0;height:100vh}
+.sbrand{display:flex;gap:10px;align-items:center;padding:16px 18px;color:#fff;background:var(--navy);height:60px}
+.sbrand small{display:block;opacity:.7;font-size:11px}.sbrand b{font-size:15px}
+#side .tabs{flex-direction:column;border:0;margin:0;padding:10px;gap:2px}
+#side .tabs button{display:flex;align-items:center;gap:12px;width:100%;text-align:left;color:#cfd9e5;border:0;border-radius:8px;padding:11px 12px}
+#side .tabs button:hover{background:rgba(255,255,255,.08)}
+#side .tabs button.on{background:var(--brand);color:#fff}
+body.collapsed #side{width:68px}body.collapsed .lt{display:none}
+.mainwrap{flex:1;min-width:0;display:flex;flex-direction:column}
+header.top{background:#fff;color:var(--ink);border-bottom:1px solid var(--line);box-shadow:0 1px 4px rgba(18,48,79,.06);height:60px;padding:0 16px;flex-wrap:nowrap;position:sticky;top:0;z-index:20}
+header.top h1{font-size:15px;color:var(--navy);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+header.top .who{color:var(--muted);white-space:nowrap}header.top .who #whoName{color:var(--ink);font-weight:600}
+.ib{background:none;border:0;border-radius:8px;padding:8px;cursor:pointer;color:var(--navy);display:grid;place-items:center}
+header.top button.ib{border:0;color:var(--navy);padding:8px}.ib:hover{background:#eaf1f8}
+main{width:100%;flex:1}.foot{padding:12px 16px;text-align:center;font-size:12.5px;color:var(--muted);border-top:1px solid var(--line);background:#fff}
+#scrim{display:none}
+@media(max-width:900px){
+  .lg-split{grid-template-columns:1fr;max-height:none}.lg-left{grid-template-columns:1fr;padding:22px}.lg-head{gap:8px}.lg-head nav{margin-left:0;width:100%}
+  #side{position:fixed;left:0;top:0;z-index:50;transform:translateX(-100%);transition:transform .2s;width:270px!important}
+  body.open #side{transform:none}body.open #scrim{display:block;position:fixed;inset:0;background:rgba(20,30,45,.4);z-index:45}
+  body.collapsed .lt{display:inline}header.top .who{display:none}main{padding:12px}.row2{grid-template-columns:1fr}
+}
+/* pop-up */
+.pop{position:fixed;inset:0;background:rgba(30,40,55,.4);display:flex;align-items:center;justify-content:center;z-index:60;padding:16px}
+.pbox{background:#fff;border-radius:14px;width:100%;max-width:420px;padding:30px 26px 24px;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,.22);animation:pin .18s ease-out}
+@keyframes pin{from{transform:scale(.92);opacity:0}to{transform:none;opacity:1}}
+.pic svg{width:100px;height:100px;stroke:var(--pc);stroke-width:1.4}
+.pbox h3{font-size:25px;margin:6px 0 8px;color:#222}
+.pbox p{color:var(--muted);margin:0 0 22px;line-height:1.5;white-space:pre-line}
+.pbtn{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.pbtn button{min-width:112px;padding:10px 20px;border-radius:8px;border:0;font-weight:700;cursor:pointer;color:#fff;background:var(--pc)}
+.pbtn button.no{background:#e8edf3;color:var(--ink)}
 @media print{
   @page{size:A4;margin:0}
   body{background:#fff}
@@ -85,31 +166,60 @@ table.grid input.w{width:200px}table.grid input.w2{width:260px}
 </head>
 <body>
 
-<div id="login" class="card hidden">
-  <h2>Rapor PKL</h2>
-  <p class="muted">Masuk dengan NIP dan kata sandi</p>
-  <form id="loginForm" style="text-align:left;display:grid;gap:10px;margin-top:14px">
-    <label class="lbl">NIP<input type="text" id="inNip" inputmode="numeric" autocomplete="username" required style="width:100%"></label>
-    <label class="lbl">Kata sandi<input type="password" id="inPw" autocomplete="current-password" required style="width:100%"></label>
-    <button class="btn" type="submit">Masuk</button>
-  </form>
-  <p id="loginMsg" style="font-size:13px;color:var(--err);min-height:1.2em"></p>
+<div id="login" class="hidden">
+  <div class="lg-head">
+    <div class="brand"><span class="logo" id="lgLogo"><i data-lucide="school"></i></span><span id="lgSchool">SMK</span></div>
+    <div class="brand"><span class="logo"><i data-lucide="clipboard-check"></i></span><span>Aplikasi e-Rapor PKL SMK</span></div>
+    <nav><button type="button" id="btnGoLogin"><i data-lucide="lock-keyhole"></i>Masuk</button><button type="button" class="y" id="btnGuide"><i data-lucide="book-open"></i>Panduan Aplikasi</button><button type="button" class="y rst"><i data-lucide="key-round"></i>Reset Password</button></nav>
+  </div>
+  <div class="lg-split">
+    <div class="lg-left">
+      <svg class="wave" viewBox="0 0 800 500" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="wg" x1="0" x2="1"><stop offset="0" stop-color="#1a49d6"/><stop offset="1" stop-color="#2aa0f0"/></linearGradient></defs><path d="M470 0C560 70 640 90 800 80V0Z" fill="url(#wg)"/><path d="M0 0H210C150 40 60 60 0 150Z" fill="url(#wg)" opacity=".85"/><path d="M0 500V430C120 400 200 470 330 500Z" fill="#1a8fe3" opacity=".9"/><path d="M800 500V440C700 430 620 480 560 500Z" fill="#1a49d6" opacity=".85"/></svg>
+      <div class="lg-txt">
+        <p class="st">Sistem Informasi Pengelolaan Praktik Kerja Lapangan</p>
+        <h2><span class="a">Aplikasi</span><span class="b">e-Rapor</span> <span class="c">PKL SMK</span></h2>
+        <div class="vers">Versi 2026.1</div>
+      </div>
+      <img class="ill" src="pkl-smk.jpg" alt="Siswa SMK melaksanakan PKL di dunia industri: perikanan, ternak, pengolahan hasil pertanian, perangkat lunak dan gim, otomotif" width="1200" height="800" decoding="async">
+    </div>
+    <div class="lg-right"><div class="lg-card">
+      <h3><i data-lucide="log-in"></i>MASUK</h3>
+      <div class="dv">Silahkan Masuk Untuk Memulai Aplikasi</div>
+      <form id="loginForm" novalidate>
+        <div class="ig"><label for="inNip">Username</label><input type="text" id="inNip" inputmode="numeric" autocomplete="username" placeholder="Isi dengan NIP pengguna"></div>
+        <div class="ig"><label for="inPw">Password</label><input type="password" id="inPw" autocomplete="current-password" placeholder="Ketikkan Kata Sandi"><button type="button" id="btnEye" aria-label="Tampilkan kata sandi"><i data-lucide="eye"></i></button></div>
+        <div class="ig"><label for="selTa">Tahun Pelajaran :</label><select id="selTa"></select></div>
+        <div class="ig"><label for="selSem">Semester</label><select id="selSem"><option>Ganjil</option><option>Genap</option></select></div>
+        <button type="button" class="lnk rst">Lupa Password ?</button>
+        <button class="btn go" type="submit"><i data-lucide="lock-open"></i>Masuk</button>
+      </form>
+      <p id="loginMsg" style="font-size:13px;color:var(--err);margin:0"></p>
+      <div class="dv b">Isi User &amp; Password dengan benar</div>
+    </div></div>
+  </div>
+  <div class="lg-foot">Aplikasi e-Rapor PKL SMK | Versi 2026.1 | Sistem Informasi Pengelolaan Praktik Kerja Lapangan</div>
 </div>
 
-<div id="app" class="hidden">
+<div id="app" class="hidden"><div class="shell">
+<aside id="side">
+  <div class="sbrand"><i data-lucide="clipboard-check"></i><span class="lt"><b>e-Rapor PKL</b><small>SMK</small></span></div>
+  <div class="tabs" id="tabs">
+    <button data-tab="nilai" class="on"><i data-lucide="pencil-line"></i><span class="lt">Input Nilai</span></button>
+    <button data-tab="rapor"><i data-lucide="file-text"></i><span class="lt">Rapor</span></button>
+    <button data-tab="penempatan" id="tabPen" class="hidden"><i data-lucide="map-pin"></i><span class="lt">Penempatan</span></button>
+    <button data-tab="pengguna" id="tabUser" class="hidden"><i data-lucide="users"></i><span class="lt">Pengguna</span></button>
+  </div>
+</aside>
+<div id="scrim"></div>
+<div class="mainwrap">
   <header class="top">
-    <h1 id="appTitle">Rapor PKL</h1>
+    <button class="ib" id="btnMenu" aria-label="Menu"><i data-lucide="menu"></i></button>
+    <h1 id="appTitle">e-Rapor PKL</h1>
     <div class="who"><div id="whoName"></div><div id="whoRole"></div></div>
-    <button id="btnLogout">Keluar</button>
+    <button class="ib" id="btnChangePw" title="Ganti kata sandi"><i data-lucide="key-round"></i></button>
+    <button class="ib" id="btnLogout" title="Keluar"><i data-lucide="log-out"></i></button>
   </header>
   <main>
-    <div class="tabs" id="tabs">
-      <button data-tab="nilai" class="on">Input Nilai</button>
-      <button data-tab="rapor">Rapor</button>
-      <button data-tab="penempatan" id="tabPen" class="hidden">Penempatan</button>
-      <button data-tab="pengguna" id="tabUser" class="hidden">Pengguna</button>
-      <button id="btnChangePw" style="margin-left:auto">Ganti kata sandi</button>
-    </div>
     <div class="bar">
       <label for="selKelas">Kelas</label>
       <select id="selKelas"></select>
@@ -158,7 +268,8 @@ table.grid input.w{width:200px}table.grid input.w2{width:260px}
       <div class="tablewrap"><table class="grid" id="gridUser"></table></div>
     </section>
   </main>
-</div>
+  <footer class="foot">© e-Rapor PKL SMK · Sistem Informasi Pengelolaan Praktik Kerja Lapangan</footer>
+</div></div></div>
 
 <div id="pwModal" class="modal hidden"><form class="card" id="pwForm" style="display:grid;gap:10px">
   <h3 style="margin:0">Ganti kata sandi</h3>
@@ -172,7 +283,7 @@ table.grid input.w{width:200px}table.grid input.w2{width:260px}
 
 <div id="printRoot"></div>
 <div id="busy" class="hidden">Memuat…</div>
-<div id="toast" class="hidden"></div>
+<div id="pop" class="pop hidden"><div class="pbox" role="dialog" aria-modal="true"><div class="pic" id="popI"></div><h3 id="popT"></h3><p id="popM"></p><div class="pbtn" id="popB"></div></div></div>
 
 <script>
 /* ====== KONFIGURASI: ganti nilai ini ====== */
@@ -185,9 +296,30 @@ const BULAN = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus
 const S = { token:null, boot:null, kelas:null, cache:{}, tab:'nilai', dudiNames:new Set() };
 
 /* ---------- util ---------- */
-function toast(msg, type){
-  const t=$('#toast'); t.textContent=msg; t.className=type||''; t.classList.remove('hidden');
-  clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.add('hidden'), type==='err'?6000:2500);
+const POP={ok:['circle-check','#8BCF72','Berhasil'],err:['circle-x','#E65B5B','Gagal'],deny:['shield-x','#E9A23B','Ditolak'],warn:['triangle-alert','#E9B33B','Peringatan!'],info:['info','#55A8DC','Informasi'],ask:['circle-help','#55A8DC','Konfirmasi']};
+let popRes=null;
+const icons=()=>{ try{ window.lucide&&lucide.createIcons(); }catch(e){} };
+function popClose(v){ $('#pop').classList.add('hidden'); const r=popRes; popRes=null; if(r) r(v); }
+function popup(type,msg,o={}){
+  const [ic,col,ttl]=POP[type]||POP.info;
+  if(popRes) popClose(false);
+  return new Promise(res=>{
+    popRes=res; const p=$('#pop'); p.style.setProperty('--pc',col);
+    $('#popI').innerHTML='<i data-lucide="'+ic+'"></i>';
+    $('#popT').textContent=o.title||ttl; $('#popM').textContent=msg||'';
+    $('#popB').innerHTML=(o.no?'<button class="no" data-r="0">'+esc(o.no)+'</button>':'')+'<button class="yes" data-r="1">'+esc(o.yes||'Oke')+'</button>';
+    p.classList.remove('hidden'); icons(); $('#popB .yes').focus();
+  });
+}
+$('#pop').addEventListener('click',e=>{
+  const b=e.target.closest('button[data-r]');
+  if(b) popClose(b.dataset.r==='1'); else if(e.target.id==='pop') popClose(!$('#popB .no'));
+});
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&!$('#pop').classList.contains('hidden')) popClose(false); });
+function toast(msg,type){
+  if(type==='ok') return popup('ok',msg);
+  if(type==='err') return popup(/hak akses|tidak berhak|tidak dapat Anda akses/i.test(msg)?'deny':'err',msg);
+  return popup('info',msg);
 }
 function busy(on){ $('#busy').classList.toggle('hidden', !on); }
 function ssGet(k){ try{return sessionStorage.getItem(k)}catch(e){return null} }
@@ -213,21 +345,26 @@ async function api(action, payload){
 /* ---------- login ---------- */
 function showLogin(msg){
   $('#app').classList.add('hidden'); $('#pwModal').classList.add('hidden'); $('#login').classList.remove('hidden');
-  $('#loginMsg').textContent = msg||'';
+  $('#loginMsg').textContent = msg||''; loginBrand(); icons();
 }
 function logout(msg){
   S.token=null; S.boot=null; ssSet('rapor_token',null); S.cache={};
   $('#inPw').value=''; showLogin(msg);
 }
 $('#loginForm').onsubmit=async e=>{
-  e.preventDefault(); busy(true); $('#loginMsg').textContent='';
+  e.preventDefault(); $('#loginMsg').textContent='';
+  ['#inNip','#inPw'].forEach(i=>$(i).classList.remove('bad'));
+  const miss=!$('#inNip').value.trim()?'#inNip':!$('#inPw').value?'#inPw':null;
+  if(miss){ $(miss).classList.add('bad'); $(miss).focus(); $('#loginMsg').textContent=(miss==='#inNip'?'Nama pengguna':'Kata sandi')+' wajib diisi'; return; }
+  S.ta=$('#selTa').value; S.sem=$('#selSem').value; ssSet('rapor_ta',S.ta); ssSet('rapor_sem',S.sem);
+  busy(true);
   try{
     const d = await api('login',{ nip:$('#inNip').value.trim(), password:$('#inPw').value });
     S.token=d.token; ssSet('rapor_token',d.token); $('#inPw').value='';
     busy(false); await start();
-  }catch(err){ busy(false); $('#loginMsg').textContent=err.message; }
+  }catch(err){ busy(false); $('#loginMsg').textContent=err.message; $('#inPw').classList.add('bad'); }
 };
-$('#btnLogout').onclick=()=>logout('');
+$('#btnLogout').onclick=async()=>{ if(await popup('ask','Apakah Anda yakin ingin keluar dari aplikasi?',{yes:'Ya, Keluar',no:'Batal'})) logout(''); };
 
 /* ---------- ganti kata sandi ---------- */
 function openPw(forced){
@@ -260,7 +397,9 @@ async function start(){
   const b=S.boot;
   if(b.user.wajibGanti){ $('#login').classList.add('hidden'); $('#app').classList.add('hidden'); openPw(true); return; }
   $('#login').classList.add('hidden'); $('#app').classList.remove('hidden');
-  $('#appTitle').textContent = 'Rapor PKL · '+(b.sekolah.nama_sekolah||'')+' · '+(b.sekolah.tahun_ajaran||'');
+  $('#appTitle').textContent = 'Rapor PKL · '+(b.sekolah.nama_sekolah||'')+' · '+(S.ta||b.sekolah.tahun_ajaran||'')+(S.sem?' · '+S.sem:'');
+  try{ localStorage.setItem('rapor_school',JSON.stringify({n:b.sekolah.nama_sekolah||'',l:b.sekolah.logo_url||b.sekolah.logo||''})); }catch(e){}
+  icons();
   $('#whoName').textContent=b.user.nama+' ('+b.user.nip+')'; $('#whoRole').textContent = b.user.role==='admin'?'Admin · akses semua kelas':'Guru pembimbing';
   $('#tabPen').classList.toggle('hidden', b.user.role!=='admin');
   $('#tabUser').classList.toggle('hidden', b.user.role!=='admin');
@@ -271,7 +410,7 @@ async function start(){
   S.kelas=sel.value; await loadKelas();
 }
 $('#selKelas').onchange=async e=>{
-  if(anyDirty() && !confirm('Ada perubahan belum disimpan. Pindah kelas dan buang perubahan?')){ e.target.value=S.kelas; return; }
+  if(anyDirty() && !(await popup('warn','Ada perubahan belum disimpan. Pindah kelas dan buang perubahan?',{yes:'Lanjutkan',no:'Batal'}))){ e.target.value=S.kelas; return; }
   delete S.cache[S.kelas]; S.kelas=e.target.value; await loadKelas();
 };
 
@@ -304,8 +443,8 @@ window.addEventListener('beforeunload',e=>{ if(anyDirty()){ e.preventDefault(); 
 
 /* ---------- tabs ---------- */
 $('#tabs').onclick=e=>{
-  const b=e.target.closest('button'); if(!b) return;
-  S.tab=b.dataset.tab;
+  const b=e.target.closest('button'); if(!b||!b.dataset.tab) return;
+  S.tab=b.dataset.tab; document.body.classList.remove('open');
   document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x===b));
   renderAll();
 };
@@ -433,7 +572,7 @@ async function renderUsers(){
 }
 $('#gridUser').addEventListener('click',async e=>{
   const b=e.target.closest('[data-reset]'); if(!b) return;
-  if(!confirm('Reset kata sandi NIP '+b.dataset.reset+' ke kata sandi bawaan?')) return;
+  if(!(await popup('ask','Reset kata sandi NIP '+b.dataset.reset+' ke kata sandi bawaan?',{yes:'Ya, Reset',no:'Batal'}))) return;
   busy(true);
   try{ await api('resetPassword',{nip:b.dataset.reset}); toast('Kata sandi direset','ok'); }catch(err){ toast(err.message,'err'); }
   busy(false); renderUsers();
@@ -501,7 +640,7 @@ function doPrint(rows){
   window.print();
 }
 $('#btnPrint1').onclick=()=>{ const r=rowsNow().find(x=>x.nis===$('#selSiswa').value); if(r) doPrint([r]); };
-$('#btnPrintAll').onclick=()=>{ const rows=rowsNow(); if(rows.length && confirm(`Cetak ${rows.length} rapor kelas ${S.kelas}?`)) doPrint(rows); };
+$('#btnPrintAll').onclick=async()=>{ const rows=rowsNow(); if(rows.length && await popup('ask',`Cetak ${rows.length} rapor kelas ${S.kelas}?`,{yes:'Ya, Cetak',no:'Batal'})) doPrint(rows); };
 
 /* ---------- boot ---------- */
 (function init(){
@@ -509,6 +648,28 @@ $('#btnPrintAll').onclick=()=>{ const rows=rowsNow(); if(rows.length && confirm(
   if(t && tokExp(t)>Date.now()+60000){ S.token=t; start(); }
   else showLogin('');
 })();
+
+/* ---------- tampilan: login, sidebar, panduan ---------- */
+function loginBrand(){
+  let o={}; try{ o=JSON.parse(localStorage.getItem('rapor_school')||'{}'); }catch(e){}
+  if(o.n) $('#lgSchool').textContent=o.n;
+  if(/^https:/.test(o.l||'')) $('#lgLogo').innerHTML='<img alt="Logo sekolah" src="'+esc(o.l)+'">';
+}
+(function(){
+  const d=new Date(), y=d.getFullYear(), m=d.getMonth()+1, t=m>=7?y:y-1;
+  $('#selTa').innerHTML=[t-1,t,t+1].map(v=>`<option${v===t?' selected':''}>${v}/${v+1}</option>`).join('');
+  $('#selSem').value=ssGet('rapor_sem')||(m>=7?'Ganjil':'Genap');
+  if(ssGet('rapor_ta')) $('#selTa').value=ssGet('rapor_ta');
+  S.ta=$('#selTa').value; S.sem=$('#selSem').value;
+})();
+$('#btnGoLogin').onclick=()=>$('#inNip').focus();
+$('#btnEye').onclick=()=>{ const i=$('#inPw'), show=i.type==='password'; i.type=show?'text':'password';
+  $('#btnEye').innerHTML='<i data-lucide="'+(show?'eye-off':'eye')+'"></i>'; icons(); };
+document.querySelectorAll('.rst').forEach(b=>b.onclick=()=>popup('info','Kata sandi hanya dapat direset oleh Administrator. Hubungi admin sekolah dengan menyebutkan NIP Anda; setelah direset, Anda akan diminta membuat kata sandi baru saat masuk.'));
+$('#btnGuide').onclick=()=>popup('info','1. Masuk dengan NIP dan kata sandi.\n2. Pilih kelas, lalu isi nilai PKL pada menu Input Nilai.\n3. Simpan perubahan.\n4. Buka menu Rapor untuk melihat dan mencetak laporan.',{title:'Panduan Aplikasi'});
+$('#btnMenu').onclick=()=>{ if(innerWidth<=900) document.body.classList.toggle('open'); else document.body.classList.toggle('collapsed'); };
+$('#scrim').onclick=()=>document.body.classList.remove('open');
+loginBrand(); icons();
 </script>
 </body>
 </html>
