@@ -1,0 +1,514 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rapor PKL</title>
+<style>
+:root{
+  --bg:#f4f6f9;--card:#fff;--ink:#1c2733;--muted:#5d6b7a;--line:#dde3ea;
+  --brand:#1f4e78;--brand-2:#2f6fa8;--ok:#1b7f4b;--warn:#b26a00;--err:#b3261e;--dirty:#fff6d6;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+button,input,select{font:inherit}
+.hidden{display:none!important}
+header.top{background:var(--brand);color:#fff;padding:12px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+header.top h1{font-size:18px;margin:0;flex:1;min-width:180px}
+header.top .who{font-size:13px;opacity:.9;text-align:right}
+header.top button{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.6);border-radius:6px;padding:5px 10px;cursor:pointer}
+main{max-width:1280px;margin:0 auto;padding:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:16px}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:14px;flex-wrap:wrap}
+.tabs button{border:0;background:none;padding:10px 14px;cursor:pointer;color:var(--muted);border-bottom:3px solid transparent;font-weight:600}
+.tabs button.on{color:var(--brand);border-bottom-color:var(--brand)}
+.bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.bar label{font-weight:600;font-size:13px;color:var(--muted)}
+select,input[type=text],input[type=number],input[type=date]{border:1px solid var(--line);border-radius:6px;padding:6px 8px;background:#fff;color:var(--ink);min-width:0}
+input:focus,select:focus{outline:2px solid var(--brand-2);outline-offset:-1px}
+.btn{background:var(--brand);color:#fff;border:0;border-radius:6px;padding:8px 14px;cursor:pointer;font-weight:600}
+.btn:hover{background:var(--brand-2)}.btn:disabled{opacity:.5;cursor:default}
+.btn.sec{background:#fff;color:var(--brand);border:1px solid var(--brand)}
+.spacer{flex:1}
+.tpbox{font-size:13px;color:var(--muted);background:#f0f5fa;border-radius:8px;padding:8px 12px;margin-bottom:12px}
+.tpbox b{color:var(--ink)}
+.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:8px;max-height:68vh}
+table.grid{border-collapse:collapse;width:100%;font-size:14px}
+table.grid th,table.grid td{border-bottom:1px solid var(--line);padding:4px 6px;white-space:nowrap}
+table.grid th{position:sticky;top:0;background:#eaf1f8;z-index:1;text-align:left;font-size:12.5px}
+table.grid td.n{text-align:center;color:var(--muted)}
+table.grid tr.dirty td{background:var(--dirty)}
+table.grid input[type=number]{width:62px;text-align:center}
+table.grid input.s{width:50px}
+table.grid input.cat{width:340px}
+table.grid input.w{width:200px}table.grid input.w2{width:260px}
+.na{font-weight:700;text-align:center;min-width:40px}
+.invalid{border-color:var(--err)!important;background:#fdecea!important}
+.muted{color:var(--muted)}
+.lbl{font-weight:600;font-size:13px;color:var(--muted);display:grid;gap:4px}
+.modal{position:fixed;inset:0;background:rgba(20,30,45,.55);display:flex;align-items:center;justify-content:center;z-index:45;padding:16px}
+.modal .card{max-width:400px;width:100%;margin:0}
+#login{max-width:420px;margin:12vh auto;text-align:center}
+#login h2{margin:0 0 4px;color:var(--brand)}
+#toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#1c2733;color:#fff;padding:10px 16px;border-radius:8px;z-index:50;max-width:92vw}
+#toast.err{background:var(--err)}#toast.ok{background:var(--ok)}
+#busy{position:fixed;inset:0;background:rgba(255,255,255,.6);display:flex;align-items:center;justify-content:center;z-index:40;font-weight:600;color:var(--brand)}
+
+/* ---------- Lembar rapor ---------- */
+.sheet{background:#fff;width:210mm;min-height:297mm;margin:0 auto;padding:14mm 16mm;color:#000;font:12pt/1.35 Arial,Helvetica,sans-serif;box-shadow:0 1px 6px rgba(0,0,0,.15)}
+.sheet h2,.sheet h3{text-align:center;margin:0;font-size:13pt;letter-spacing:.3px}
+.sheet .sub{text-align:center;margin:2px 0 12px}
+.sheet table.id{width:100%;border-collapse:collapse;margin-bottom:10px}
+.sheet table.id td{padding:1.5px 0;vertical-align:top}
+.sheet table.id td.l{width:36%}.sheet table.id td.c{width:3%}
+.sheet table.tp{width:100%;border-collapse:collapse;margin:6px 0 10px}
+.sheet table.tp th,.sheet table.tp td{border:1px solid #000;padding:4px 6px;vertical-align:top}
+.sheet table.tp th{text-align:center;background:#eee}
+.sheet table.tp td.c{text-align:center}
+.sheet .box{border:1px solid #000;padding:6px 8px;min-height:20mm;margin-bottom:10px}
+.sheet table.att{border-collapse:collapse;margin-bottom:12px}
+.sheet table.att td{padding:1px 10px 1px 0}
+.sheet .sign{display:flex;justify-content:space-between;margin-top:10px;text-align:center}
+.sheet .sign>div{width:44%}
+.sheet .gap{height:20mm}
+.sheet .kepsek{text-align:center;margin-top:8px}
+#printRoot{display:none}
+@media print{
+  @page{size:A4;margin:0}
+  body{background:#fff}
+  body>*:not(#printRoot){display:none!important}
+  #printRoot{display:block!important}
+  .sheet{box-shadow:none;margin:0;page-break-after:always;break-after:page;height:297mm;overflow:hidden}
+  .sheet:last-child{page-break-after:auto;break-after:auto}
+}
+</style>
+</head>
+<body>
+
+<div id="login" class="card hidden">
+  <h2>Rapor PKL</h2>
+  <p class="muted">Masuk dengan NIP dan kata sandi</p>
+  <form id="loginForm" style="text-align:left;display:grid;gap:10px;margin-top:14px">
+    <label class="lbl">NIP<input type="text" id="inNip" inputmode="numeric" autocomplete="username" required style="width:100%"></label>
+    <label class="lbl">Kata sandi<input type="password" id="inPw" autocomplete="current-password" required style="width:100%"></label>
+    <button class="btn" type="submit">Masuk</button>
+  </form>
+  <p id="loginMsg" style="font-size:13px;color:var(--err);min-height:1.2em"></p>
+</div>
+
+<div id="app" class="hidden">
+  <header class="top">
+    <h1 id="appTitle">Rapor PKL</h1>
+    <div class="who"><div id="whoName"></div><div id="whoRole"></div></div>
+    <button id="btnLogout">Keluar</button>
+  </header>
+  <main>
+    <div class="tabs" id="tabs">
+      <button data-tab="nilai" class="on">Input Nilai</button>
+      <button data-tab="rapor">Rapor</button>
+      <button data-tab="penempatan" id="tabPen" class="hidden">Penempatan</button>
+      <button data-tab="pengguna" id="tabUser" class="hidden">Pengguna</button>
+      <button id="btnChangePw" style="margin-left:auto">Ganti kata sandi</button>
+    </div>
+    <div class="bar">
+      <label for="selKelas">Kelas</label>
+      <select id="selKelas"></select>
+      <span class="spacer"></span>
+      <span id="saveInfo" class="muted"></span>
+    </div>
+
+    <section id="v-nilai" class="card">
+      <div class="tpbox" id="tpBox"></div>
+      <div class="bar">
+        <button class="btn" id="btnSaveNilai" disabled>Simpan perubahan</button>
+        <span class="muted">Baris yang berubah ditandai kuning. Nilai 0–100, kosong = belum dinilai.</span>
+      </div>
+      <div class="tablewrap"><table class="grid" id="gridNilai"></table></div>
+    </section>
+
+    <section id="v-rapor" class="hidden">
+      <div class="card">
+        <div class="bar">
+          <label for="selSiswa">Siswa</label>
+          <select id="selSiswa" style="min-width:260px"></select>
+          <button class="btn sec" id="btnPrev">‹</button>
+          <button class="btn sec" id="btnNext">›</button>
+          <span class="spacer"></span>
+          <button class="btn" id="btnPrint1">Cetak / PDF siswa ini</button>
+          <button class="btn sec" id="btnPrintAll">Cetak satu kelas</button>
+        </div>
+        <p class="muted" style="margin:0;font-size:13px">Di jendela cetak pilih “Simpan sebagai PDF”. Ukuran A4, matikan opsi “Header dan footer”.</p>
+      </div>
+      <div style="overflow:auto"><div id="preview"></div></div>
+    </section>
+
+    <section id="v-penempatan" class="card hidden">
+      <div class="bar">
+        <button class="btn" id="btnSavePen" disabled>Simpan perubahan</button>
+        <span class="spacer"></span>
+        <label>Terapkan tanggal ke semua siswa kelas</label>
+        <input type="date" id="allMulai"><input type="date" id="allSelesai">
+        <button class="btn sec" id="btnApplyDates">Terapkan</button>
+      </div>
+      <div class="tablewrap"><table class="grid" id="gridPen"></table></div>
+      <datalist id="dlDudi"></datalist><datalist id="dlGuru"></datalist>
+    </section>
+    <section id="v-pengguna" class="card hidden">
+      <p class="muted" style="margin-top:0">Reset mengembalikan kata sandi pengguna ke kata sandi awal dan memaksa penggantian saat login berikutnya. Tambah/ubah pengguna langsung di tab <b>Pengguna</b> pada Google Sheets.</p>
+      <div class="tablewrap"><table class="grid" id="gridUser"></table></div>
+    </section>
+  </main>
+</div>
+
+<div id="pwModal" class="modal hidden"><form class="card" id="pwForm" style="display:grid;gap:10px">
+  <h3 style="margin:0">Ganti kata sandi</h3>
+  <p class="muted" id="pwHint" style="margin:0;font-size:13px">Minimal 8 karakter dan berbeda dari kata sandi bawaan.</p>
+  <label class="lbl">Kata sandi lama<input type="password" id="pwOld" autocomplete="current-password" required></label>
+  <label class="lbl">Kata sandi baru<input type="password" id="pwNew" autocomplete="new-password" minlength="8" required></label>
+  <label class="lbl">Ulangi kata sandi baru<input type="password" id="pwNew2" autocomplete="new-password" minlength="8" required></label>
+  <div class="bar" style="margin:0"><button class="btn" type="submit">Simpan</button><button class="btn sec" type="button" id="pwCancel">Batal</button></div>
+  <p id="pwMsg" style="margin:0;font-size:13px;color:var(--err);min-height:1.2em"></p>
+</form></div>
+
+<div id="printRoot"></div>
+<div id="busy" class="hidden">Memuat…</div>
+<div id="toast" class="hidden"></div>
+
+<script>
+/* ====== KONFIGURASI: ganti nilai ini ====== */
+const API_URL   = 'https://script.google.com/macros/s/AKfycbw_sDjFVaIoTQj5K1QGI78G1viwwUmzUMlckGg-DtsWO_p_mJ7fT_QYtp0rIji936n-/exec';
+/* ============================================== */
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const BULAN = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+const S = { token:null, boot:null, kelas:null, cache:{}, tab:'nilai', dudiNames:new Set() };
+
+/* ---------- util ---------- */
+function toast(msg, type){
+  const t=$('#toast'); t.textContent=msg; t.className=type||''; t.classList.remove('hidden');
+  clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.add('hidden'), type==='err'?6000:2500);
+}
+function busy(on){ $('#busy').classList.toggle('hidden', !on); }
+function ssGet(k){ try{return sessionStorage.getItem(k)}catch(e){return null} }
+function ssSet(k,v){ try{ v==null?sessionStorage.removeItem(k):sessionStorage.setItem(k,v) }catch(e){} }
+function tokExp(t){ try{ return JSON.parse(atob(t.split('.')[0].replace(/-/g,'+').replace(/_/g,'/'))).exp }catch(e){ return 0 } }
+function tglID(iso){
+  const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(iso||''); if(!m) return iso||'';
+  return `${+m[3]} ${BULAN[+m[2]-1]} ${m[1]}`;
+}
+const ucfirst = s => s ? s.charAt(0).toUpperCase()+s.slice(1) : '';
+
+async function api(action, payload){
+  const res = await fetch(API_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body: JSON.stringify({ action, token:S.token, ...payload }) });
+  const j = await res.json();
+  if(!j.ok){
+    if(j.auth){ logout(j.error); }
+    throw new Error(j.error||'Gagal');
+  }
+  return j.data;
+}
+
+/* ---------- login ---------- */
+function showLogin(msg){
+  $('#app').classList.add('hidden'); $('#pwModal').classList.add('hidden'); $('#login').classList.remove('hidden');
+  $('#loginMsg').textContent = msg||'';
+}
+function logout(msg){
+  S.token=null; S.boot=null; ssSet('rapor_token',null); S.cache={};
+  $('#inPw').value=''; showLogin(msg);
+}
+$('#loginForm').onsubmit=async e=>{
+  e.preventDefault(); busy(true); $('#loginMsg').textContent='';
+  try{
+    const d = await api('login',{ nip:$('#inNip').value.trim(), password:$('#inPw').value });
+    S.token=d.token; ssSet('rapor_token',d.token); $('#inPw').value='';
+    busy(false); await start();
+  }catch(err){ busy(false); $('#loginMsg').textContent=err.message; }
+};
+$('#btnLogout').onclick=()=>logout('');
+
+/* ---------- ganti kata sandi ---------- */
+function openPw(forced){
+  S.pwForced=!!forced; $('#pwMsg').textContent=''; $('#pwForm').reset();
+  $('#pwHint').textContent = forced ? 'Ini login pertama (atau kata sandi baru direset). Anda wajib membuat kata sandi baru: minimal 8 karakter dan berbeda dari kata sandi bawaan.' : 'Minimal 8 karakter dan berbeda dari kata sandi lama/bawaan.';
+  $('#pwCancel').classList.toggle('hidden',!!forced);
+  $('#pwModal').classList.remove('hidden');
+}
+$('#btnChangePw').onclick=()=>openPw(false);
+$('#pwCancel').onclick=()=>$('#pwModal').classList.add('hidden');
+$('#pwForm').onsubmit=async e=>{
+  e.preventDefault();
+  if($('#pwNew').value!==$('#pwNew2').value){ $('#pwMsg').textContent='Pengulangan kata sandi tidak sama'; return; }
+  busy(true);
+  try{
+    const d=await api('changePassword',{oldPassword:$('#pwOld').value,newPassword:$('#pwNew').value});
+    S.token=d.token; ssSet('rapor_token',d.token);
+    $('#pwModal').classList.add('hidden'); busy(false); toast('Kata sandi diganti','ok');
+    if(S.pwForced) await start();
+  }catch(err){ busy(false); $('#pwMsg').textContent=err.message; }
+};
+
+/* ---------- start ---------- */
+async function start(){
+  busy(true);
+  try{
+    S.boot = await api('init',{});
+  }catch(e){ busy(false); toast(e.message,'err'); return; }
+  busy(false);
+  const b=S.boot;
+  if(b.user.wajibGanti){ $('#login').classList.add('hidden'); $('#app').classList.add('hidden'); openPw(true); return; }
+  $('#login').classList.add('hidden'); $('#app').classList.remove('hidden');
+  $('#appTitle').textContent = 'Rapor PKL · '+(b.sekolah.nama_sekolah||'')+' · '+(b.sekolah.tahun_ajaran||'');
+  $('#whoName').textContent=b.user.nama+' ('+b.user.nip+')'; $('#whoRole').textContent = b.user.role==='admin'?'Admin · akses semua kelas':'Guru pembimbing';
+  $('#tabPen').classList.toggle('hidden', b.user.role!=='admin');
+  $('#tabUser').classList.toggle('hidden', b.user.role!=='admin');
+  $('#dlGuru').innerHTML = (b.guru||[]).map(g=>`<option value="${esc(g)}">`).join('');
+  const sel=$('#selKelas');
+  sel.innerHTML = b.kelas.map(k=>`<option>${esc(k.nama_kelas)}</option>`).join('');
+  if(!b.kelas.length){ toast('Tidak ada kelas yang dapat Anda akses. Hubungi admin.','err'); return; }
+  S.kelas=sel.value; await loadKelas();
+}
+$('#selKelas').onchange=async e=>{
+  if(anyDirty() && !confirm('Ada perubahan belum disimpan. Pindah kelas dan buang perubahan?')){ e.target.value=S.kelas; return; }
+  delete S.cache[S.kelas]; S.kelas=e.target.value; await loadKelas();
+};
+
+function kelasInfo(){ return S.boot.kelas.find(k=>k.nama_kelas===S.kelas); }
+function tpList(){
+  const kp=kelasInfo().kode_program;
+  return S.boot.tp.filter(t=>t.kode_program===kp).sort((a,b)=>a.no_tp-b.no_tp);
+}
+function programInfo(){ return S.boot.program.find(p=>p.kode_program===kelasInfo().kode_program)||{}; }
+
+async function loadKelas(){
+  if(!S.cache[S.kelas]){
+    busy(true);
+    try{
+      const rows = await api('siswa',{kelas:S.kelas});
+      rows.forEach(r=>{ r._o = snap(r); });
+      S.cache[S.kelas]=rows;
+      rows.forEach(r=>{ if(r.nama_dudi) S.dudiNames.add(r.nama_dudi); });
+    }catch(e){ toast(e.message,'err'); }
+    busy(false);
+  }
+  $('#dlDudi').innerHTML=[...S.dudiNames].sort().map(n=>`<option value="${esc(n)}">`).join('');
+  renderAll();
+}
+const snap = r => JSON.stringify([r.tp1,r.tp2,r.tp3,r.tp4,r.catatan,r.sakit,r.izin,r.alpa,r.nama_dudi,r.alamat_dudi,r.instruktur,r.guru_pembimbing,r.tgl_mulai,r.tgl_selesai]);
+const rowsNow = () => S.cache[S.kelas]||[];
+const dirtyRows = () => rowsNow().filter(r=>snap(r)!==r._o);
+const anyDirty = () => Object.values(S.cache).some(rs=>rs.some(r=>snap(r)!==r._o));
+window.addEventListener('beforeunload',e=>{ if(anyDirty()){ e.preventDefault(); e.returnValue=''; } });
+
+/* ---------- tabs ---------- */
+$('#tabs').onclick=e=>{
+  const b=e.target.closest('button'); if(!b) return;
+  S.tab=b.dataset.tab;
+  document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x===b));
+  renderAll();
+};
+function renderAll(){
+  ['nilai','rapor','penempatan','pengguna'].forEach(t=>$('#v-'+t).classList.toggle('hidden',S.tab!==t));
+  if(!S.boot||!S.kelas) return;
+  if(S.tab==='nilai') renderNilai();
+  if(S.tab==='rapor') renderRaporSelect();
+  if(S.tab==='penempatan') renderPen();
+  if(S.tab==='pengguna') renderUsers();
+  updateSaveButtons();
+}
+function updateSaveButtons(){
+  const n=dirtyRows().length;
+  $('#btnSaveNilai').disabled=!n; $('#btnSavePen').disabled=!n;
+  $('#saveInfo').textContent = n? `${n} baris belum disimpan` : '';
+}
+
+/* ---------- nilai: hitung ---------- */
+function nilaiNA(r){
+  const v=[r.tp1,r.tp2,r.tp3,r.tp4].filter(x=>x!==''&&x!==null&&x!==undefined).map(Number);
+  return v.length ? Math.round(v.reduce((a,b)=>a+b,0)/v.length) : '';
+}
+function deskripsi(skor, teks){
+  if(skor===''||skor==null) return '';
+  const k=[...S.boot.kriteria].map(x=>({min:+x.nilai_min,aw:x.awalan,ak:x.akhiran})).sort((a,b)=>b.min-a.min).find(x=>skor>=x.min);
+  return k? `${k.aw} ${teks}${k.ak}` : '';
+}
+
+/* ---------- nilai: tampilan ---------- */
+function renderNilai(){
+  const tps=tpList();
+  $('#tpBox').innerHTML = `<b>${esc(programInfo().program_keahlian||'')}</b> — `+tps.map(t=>`<b>TP${t.no_tp}</b> ${esc(t.teks_tp)}`).join(' · ');
+  const rows=rowsNow();
+  let h=`<thead><tr><th>No</th><th>Nama</th><th>NIS</th><th>TP1</th><th>TP2</th><th>TP3</th><th>TP4</th><th>NA</th><th>Sakit</th><th>Izin</th><th>Alpa</th><th>Catatan</th></tr></thead><tbody>`;
+  rows.forEach((r,i)=>{
+    h+=`<tr data-i="${i}"><td class="n">${i+1}</td><td>${esc(r.nama)}</td><td class="muted">${esc(r.nis)}</td>`;
+    ['tp1','tp2','tp3','tp4'].forEach(f=>h+=`<td><input type="number" min="0" max="100" step="1" data-f="${f}" value="${esc(r[f])}"></td>`);
+    h+=`<td class="na" data-na>${esc(nilaiNA(r))}</td>`;
+    ['sakit','izin','alpa'].forEach(f=>h+=`<td><input class="s" type="number" min="0" max="366" step="1" data-f="${f}" value="${esc(r[f])}"></td>`);
+    h+=`<td><input class="cat" type="text" maxlength="500" data-f="catatan" value="${esc(r.catatan)}"></td></tr>`;
+  });
+  $('#gridNilai').innerHTML=h+'</tbody>';
+  rows.forEach((r,i)=>markDirty($('#gridNilai tbody').children[i], r));
+}
+function markDirty(tr,r){ tr.classList.toggle('dirty', snap(r)!==r._o); }
+
+$('#gridNilai').addEventListener('input',e=>{
+  const inp=e.target, tr=inp.closest('tr'); if(!tr||!inp.dataset.f) return;
+  const r=rowsNow()[+tr.dataset.i], f=inp.dataset.f;
+  if(f==='catatan'){ r[f]=inp.value; }
+  else{
+    const raw=inp.value.trim(); const max=f.startsWith('tp')?100:366;
+    const bad = raw!=='' && (isNaN(+raw) || +raw<0 || +raw>max);
+    inp.classList.toggle('invalid',bad);
+    if(!bad) r[f] = raw===''? (f.startsWith('tp')?'':0) : Math.round(+raw);
+    else r._bad=true;
+  }
+  tr.querySelector('[data-na]').textContent=nilaiNA(r);
+  markDirty(tr,r); updateSaveButtons();
+});
+
+$('#btnSaveNilai').onclick=async()=>{
+  if($('#gridNilai .invalid')){ toast('Perbaiki nilai yang berwarna merah dulu','err'); return; }
+  const d=dirtyRows(); if(!d.length) return;
+  busy(true);
+  try{
+    for(let i=0;i<d.length;i+=100){
+      const chunk=d.slice(i,i+100).map(r=>({nis:r.nis,tp1:r.tp1,tp2:r.tp2,tp3:r.tp3,tp4:r.tp4,catatan:r.catatan,sakit:r.sakit,izin:r.izin,alpa:r.alpa}));
+      await api('saveNilai',{rows:chunk});
+      d.slice(i,i+100).forEach(r=>r._o=snap(r));
+    }
+    toast(`${d.length} baris tersimpan`,'ok');
+  }catch(e){ toast(e.message,'err'); }
+  busy(false); renderNilai(); updateSaveButtons();
+};
+
+/* ---------- penempatan (admin) ---------- */
+function renderPen(){
+  const rows=rowsNow();
+  let h=`<thead><tr><th>No</th><th>Nama</th><th>Nama DuDi</th><th>Alamat DuDi</th><th>Instruktur</th><th>Guru pembimbing</th><th>Mulai</th><th>Selesai</th></tr></thead><tbody>`;
+  rows.forEach((r,i)=>{
+    h+=`<tr data-i="${i}"><td class="n">${i+1}</td><td>${esc(r.nama)}</td>`+
+      `<td><input class="w" type="text" list="dlDudi" data-f="nama_dudi" value="${esc(r.nama_dudi)}"></td>`+
+      `<td><input class="w2" type="text" data-f="alamat_dudi" value="${esc(r.alamat_dudi)}"></td>`+
+      `<td><input class="w" type="text" data-f="instruktur" value="${esc(r.instruktur)}"></td>`+
+      `<td><input class="w" type="text" list="dlGuru" data-f="guru_pembimbing" value="${esc(r.guru_pembimbing)}"></td>`+
+      `<td><input type="date" data-f="tgl_mulai" value="${esc(r.tgl_mulai)}"></td>`+
+      `<td><input type="date" data-f="tgl_selesai" value="${esc(r.tgl_selesai)}"></td></tr>`;
+  });
+  $('#gridPen').innerHTML=h+'</tbody>';
+  rows.forEach((r,i)=>markDirty($('#gridPen tbody').children[i],r));
+}
+$('#gridPen').addEventListener('input',e=>{
+  const inp=e.target, tr=inp.closest('tr'); if(!tr||!inp.dataset.f) return;
+  const r=rowsNow()[+tr.dataset.i]; r[inp.dataset.f]=inp.value;
+  markDirty(tr,r); updateSaveButtons();
+});
+$('#btnApplyDates').onclick=()=>{
+  const m=$('#allMulai').value, s=$('#allSelesai').value; if(!m&&!s) return;
+  rowsNow().forEach(r=>{ if(m) r.tgl_mulai=m; if(s) r.tgl_selesai=s; });
+  renderPen(); updateSaveButtons();
+};
+$('#btnSavePen').onclick=async()=>{
+  const d=dirtyRows(); if(!d.length) return;
+  busy(true);
+  try{
+    for(let i=0;i<d.length;i+=100){
+      const chunk=d.slice(i,i+100).map(r=>({nis:r.nis,nama_dudi:r.nama_dudi,alamat_dudi:r.alamat_dudi,instruktur:r.instruktur,guru_pembimbing:r.guru_pembimbing,tgl_mulai:r.tgl_mulai,tgl_selesai:r.tgl_selesai}));
+      await api('savePenempatan',{rows:chunk});
+      d.slice(i,i+100).forEach(r=>r._o=snap(r));
+    }
+    toast(`${d.length} baris tersimpan`,'ok');
+  }catch(e){ toast(e.message,'err'); }
+  busy(false); renderPen(); updateSaveButtons();
+};
+
+/* ---------- pengguna (admin) ---------- */
+async function renderUsers(){
+  let rows=[];
+  try{ rows=await api('listUsers',{}); }catch(e){ toast(e.message,'err'); return; }
+  let h='<thead><tr><th>NIP</th><th>Nama</th><th>Role</th><th>Aktif</th><th>Kata sandi</th><th></th></tr></thead><tbody>';
+  rows.forEach(u=>{ h+=`<tr><td>${esc(u.nip)||'<span class="muted">(kosong - tidak bisa login)</span>'}</td><td>${esc(u.nama)}</td><td>${esc(u.role)}</td><td>${esc(u.aktif)}</td><td>${u.sudahGanti?'sudah diganti':'bawaan'}</td><td>${u.nip&&/^\d+$/.test(String(u.nip).replace(/\D/g,''))?`<button class="btn sec" data-reset="${esc(u.nip)}">Reset</button>`:''}</td></tr>`; });
+  $('#gridUser').innerHTML=h+'</tbody>';
+}
+$('#gridUser').addEventListener('click',async e=>{
+  const b=e.target.closest('[data-reset]'); if(!b) return;
+  if(!confirm('Reset kata sandi NIP '+b.dataset.reset+' ke kata sandi bawaan?')) return;
+  busy(true);
+  try{ await api('resetPassword',{nip:b.dataset.reset}); toast('Kata sandi direset','ok'); }catch(err){ toast(err.message,'err'); }
+  busy(false); renderUsers();
+});
+
+/* ---------- rapor ---------- */
+function renderRaporSelect(){
+  const rows=rowsNow(), sel=$('#selSiswa'), keep=sel.value;
+  sel.innerHTML=rows.map((r,i)=>`<option value="${esc(r.nis)}">${i+1}. ${esc(r.nama)}</option>`).join('');
+  if(keep && rows.some(r=>r.nis===keep)) sel.value=keep;
+  renderPreview();
+}
+function renderPreview(){
+  const r=rowsNow().find(x=>x.nis===$('#selSiswa').value);
+  $('#preview').innerHTML = r? raporHTML(r) : '<p class="muted">Tidak ada siswa.</p>';
+}
+$('#selSiswa').onchange=renderPreview;
+$('#btnPrev').onclick=()=>step(-1); $('#btnNext').onclick=()=>step(1);
+function step(d){ const s=$('#selSiswa'); const i=s.selectedIndex+d; if(i>=0&&i<s.options.length){ s.selectedIndex=i; renderPreview(); } }
+
+function raporHTML(r){
+  const sk=S.boot.sekolah, kl=kelasInfo(), pr=programInfo(), tps=tpList();
+  const na=nilaiNA(r);
+  const tpRows = tps.map((t,i)=>{
+    const sc=r['tp'+t.no_tp];
+    return `<tr><td class="c">${i+1}</td><td>${esc(ucfirst(t.teks_tp))}</td><td class="c">${esc(sc)}</td><td>${esc(deskripsi(sc===''?'':+sc,t.teks_tp))}</td></tr>`;
+  }).join('');
+  const att=v=>(+v>0? v : '-');
+  return `<div class="sheet">
+  <h2>LAPORAN HASIL BELAJAR PRAKTIK KERJA LAPANGAN (PKL)</h2>
+  <h3>${esc((sk.nama_sekolah||'').toUpperCase())}</h3>
+  <div class="sub">${esc(sk.tahun_ajaran||'')}</div>
+  <table class="id">
+    <tr><td class="l">Nama Peserta Didik</td><td class="c">:</td><td>${esc(r.nama)}</td></tr>
+    <tr><td class="l">NISN / NIS</td><td class="c">:</td><td>${esc(r.nisn)} / ${esc(r.nis)}</td></tr>
+    <tr><td class="l">Kelas / Fase</td><td class="c">:</td><td>${esc(r.kelas)} / ${esc(sk.fase||'')}</td></tr>
+    <tr><td class="l">Program Keahlian</td><td class="c">:</td><td>${esc(pr.program_keahlian||'')}</td></tr>
+    <tr><td class="l">Konsentrasi Keahlian</td><td class="c">:</td><td>${esc(pr.konsentrasi_keahlian||'')}</td></tr>
+    <tr><td class="l">Nama DuDi PKL</td><td class="c">:</td><td>${esc(r.nama_dudi)}</td></tr>
+    <tr><td class="l">Alamat DuDi PKL</td><td class="c">:</td><td>${esc(r.alamat_dudi)}</td></tr>
+    <tr><td class="l">Tanggal PKL</td><td class="c">:</td><td>Mulai ${esc(tglID(r.tgl_mulai))} &nbsp; Selesai ${esc(tglID(r.tgl_selesai))}</td></tr>
+    <tr><td class="l">Semester</td><td class="c">:</td><td>${esc(sk.semester||'')}</td></tr>
+    <tr><td class="l">Nama Instruktur</td><td class="c">:</td><td>${esc(r.instruktur)}</td></tr>
+    <tr><td class="l">Nama Pembimbing</td><td class="c">:</td><td>${esc(r.guru_pembimbing)}</td></tr>
+  </table>
+  <table class="tp"><thead><tr><th style="width:8%">No</th><th style="width:38%">Tujuan Pembelajaran</th><th style="width:10%">Nilai</th><th>Deskripsi</th></tr></thead><tbody>${tpRows}</tbody></table>
+  <div><b>Catatan:</b></div>
+  <div class="box">${esc(r.catatan)}</div>
+  <div><b>Kehadiran</b></div>
+  <table class="att">
+    <tr><td>Sakit</td><td>:</td><td>${esc(att(r.sakit))}</td><td>Hari</td></tr>
+    <tr><td>Ijin</td><td>:</td><td>${esc(att(r.izin))}</td><td>Hari</td></tr>
+    <tr><td>Tanpa Keterangan</td><td>:</td><td>${esc(att(r.alpa))}</td><td>Hari</td></tr>
+  </table>
+  <div style="text-align:right">${esc(sk.tempat_ttd||'')}, ${esc(sk.tanggal_rapor||'')}</div>
+  <div class="sign">
+    <div>Orang Tua / Wali Peserta Didik<div class="gap"></div>(................................)</div>
+    <div>Wali Kelas<div class="gap"></div><u>${esc(kl.wali_kelas)}</u><br>NIP. ${esc(kl.nip_wali)}</div>
+  </div>
+  <div class="kepsek">Mengetahui,<br>Kepala Sekolah<div class="gap"></div><u>${esc(sk.kepala_sekolah||'')}</u><br>NIP. ${esc(sk.nip_kepsek||'')}</div>
+  </div>`;
+}
+function doPrint(rows){
+  $('#printRoot').innerHTML = rows.map(raporHTML).join('');
+  window.print();
+}
+$('#btnPrint1').onclick=()=>{ const r=rowsNow().find(x=>x.nis===$('#selSiswa').value); if(r) doPrint([r]); };
+$('#btnPrintAll').onclick=()=>{ const rows=rowsNow(); if(rows.length && confirm(`Cetak ${rows.length} rapor kelas ${S.kelas}?`)) doPrint(rows); };
+
+/* ---------- boot ---------- */
+(function init(){
+  const t=ssGet('rapor_token');
+  if(t && tokExp(t)>Date.now()+60000){ S.token=t; start(); }
+  else showLogin('');
+})();
+</script>
+</body>
+</html>
