@@ -132,6 +132,20 @@ i[data-lucide],svg.lucide{width:20px;height:20px;flex:none}
 .lg-card .go:hover{background:#0d3a80}
 #loginMsg:not(:empty){background:#fdecea;border:1px solid #f3b8b3;border-radius:8px;padding:8px 10px;margin:12px 0 0}
 .lg-foot{background:#0b2f66;color:#fff;font-size:12.5px;font-weight:700;text-align:center;padding:12px;margin-top:auto}
+/* penyempurnaan proporsi login */
+.lg-head{padding:8px 22px;gap:16px}
+.lg-head .logo{width:46px;height:46px;padding:3px;background:#fff}
+.lg-head .logo img{width:100%;height:100%;object-fit:contain;display:block}
+.lg-head .vsep{width:1px;height:30px;background:rgba(255,255,255,.35)}
+.lg-split{grid-template-columns:minmax(0,1.2fr) minmax(400px,1fr);gap:8px;padding:8px 8px 0}
+.lg-left{gap:22px;padding:30px 34px;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.lg-txt .st{text-wrap:balance;font-size:15px}
+.lg-txt h2{font-size:clamp(30px,3.3vw,54px);text-wrap:balance}
+.vers{font-size:17px}
+.lg-right{display:flex;align-items:center;justify-content:center;padding:24px}
+.lg-card{max-width:520px;padding:30px 32px}
+.lg-card h3{font-size:24px}
+@media(max-width:1180px){.lg-left{grid-template-columns:1fr}.lg-left img.ill{max-width:520px;justify-self:center}}
 /* layout aplikasi */
 .shell{display:flex;min-height:100vh}
 #side{width:260px;background:var(--side);color:#cfd9e5;flex:none;display:flex;flex-direction:column;transition:width .2s;position:sticky;top:0;height:100vh}
@@ -180,8 +194,9 @@ main{width:100%;flex:1}.foot{padding:12px 16px;text-align:center;font-size:12.5p
 
 <div id="login" class="hidden">
   <div class="lg-head">
-    <div class="brand"><span class="logo" id="lgLogo"><i data-lucide="school"></i></span><span id="lgSchool">SMK</span></div>
-    <div class="brand"><span class="logo"><i data-lucide="clipboard-check"></i></span><span>Aplikasi e-Rapor PKL SMK</span></div>
+    <div class="brand"><span class="logo" id="lgLogo"><img src="logo-sekolah.png" alt="Logo SMK Negeri 2 Purbalingga" width="44" height="44"></span><span id="lgSchool">SMK Negeri 2 Purbalingga</span></div>
+    <span class="vsep" aria-hidden="true"></span>
+    <div class="brand"><span class="logo"><img src="logo-rapor.png" alt="Logo Aplikasi e-Rapor PKL SMK" width="44" height="44"></span><span>Aplikasi e-Rapor PKL SMK</span></div>
     <nav><button type="button" id="btnGoLogin"><i data-lucide="lock-keyhole"></i>Masuk</button><button type="button" class="y" id="btnGuide"><i data-lucide="book-open"></i>Panduan Aplikasi</button><button type="button" class="y rst"><i data-lucide="key-round"></i>Reset Password</button></nav>
   </div>
   <div class="lg-split">
@@ -198,7 +213,7 @@ main{width:100%;flex:1}.foot{padding:12px 16px;text-align:center;font-size:12.5p
       <h3><i data-lucide="log-in"></i>MASUK</h3>
       <div class="dv">Silahkan Masuk Untuk Memulai Aplikasi</div>
       <form id="loginForm" novalidate>
-        <div class="ig"><label for="inNip">Username</label><input type="text" id="inNip" inputmode="numeric" autocomplete="username" placeholder="Isi dengan NIP pengguna"></div>
+        <div class="ig"><label for="inNip">Username</label><input type="text" id="inNip" inputmode="numeric" autocomplete="username" placeholder="Isi dengan NIP"></div>
         <div class="ig"><label for="inPw">Password</label><input type="password" id="inPw" autocomplete="current-password" placeholder="Ketikkan Kata Sandi"><button type="button" id="btnEye" aria-label="Tampilkan kata sandi"><i data-lucide="eye"></i></button></div>
         <div class="ig"><label for="selTa">Tahun Pelajaran</label><select id="selTa"></select></div>
         <div class="ig"><label for="selSem">Semester</label><select id="selSem"><option>Ganjil</option><option>Genap</option></select></div>
