@@ -146,6 +146,26 @@ i[data-lucide],svg.lucide{width:20px;height:20px;flex:none}
 .lg-card{max-width:520px;padding:30px 32px}
 .lg-card h3{font-size:24px}
 @media(max-width:1180px){.lg-left{grid-template-columns:1fr}.lg-left img.ill{max-width:520px;justify-self:center}}
+/* panel kiri ala e-Rapor SMK */
+.lg-left{container-type:inline-size;padding:0;gap:0;grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);grid-template-rows:auto 1fr;align-items:center;min-height:560px}
+.lg-top{grid-column:1;grid-row:1;position:relative;z-index:1;padding:34px 0 0 40px;align-self:start}
+.lg-top .st{font-weight:700;color:#0b3a7a;font-size:15px;line-height:1.35;margin:0 0 10px;max-width:400px;text-wrap:balance}
+.lg-top .stars{display:flex;align-items:center;gap:8px;color:#1a49d6;font-size:11px;max-width:360px}
+.lg-top .stars::before,.lg-top .stars::after{content:"";flex:1;height:2px;background:#1a49d6}
+.lg-txt{grid-column:1;grid-row:2;position:relative;z-index:1;padding:12px 0 44px 40px}
+.lg-txt .ap{display:flex;align-items:center;gap:16px}
+.aplogo{width:clamp(64px,9cqw,100px);height:auto;border-radius:50%;box-shadow:0 4px 14px rgba(18,48,79,.25);flex:none}
+.lg-txt .ap .a{font-size:clamp(30px,5.6cqw,60px);font-weight:800;color:#0d3b8c;line-height:1}
+.lg-txt h2{font-size:clamp(28px,4.7cqw,52px);line-height:1.1;margin:8px 0 0;font-weight:800;text-align:left;text-wrap:balance}
+.lg-txt h2 .b{color:#1473d6}.lg-txt h2 .c{color:#ffb000}
+.vers{display:flex;align-items:center;gap:12px;margin-top:18px;font-weight:800;color:#0d3b8c;font-size:clamp(15px,1.9cqw,20px);max-width:420px}
+.vers::before{content:"";width:56px;height:14px;flex:none;background:repeating-linear-gradient(115deg,#1a49d6 0 6px,transparent 6px 10px)}
+.vers::after{content:"";flex:1;height:2px;background:linear-gradient(90deg,#1a49d6,#2aa0f0)}
+.lg-left img.ill{grid-column:2;grid-row:1/3;width:100%;max-width:none;aspect-ratio:5/4;object-fit:cover;align-self:center;border-radius:16px 0 0 16px;border:4px solid #fff;border-right:0;box-shadow:0 10px 30px rgba(18,48,79,.3);margin:0;position:relative;z-index:1}
+@media(max-width:1180px){.lg-left{grid-template-columns:1fr;grid-template-rows:auto}.lg-top,.lg-txt,.lg-left img.ill{grid-column:1;grid-row:auto}.lg-txt{padding:12px 24px 24px 40px}.lg-left img.ill{border-radius:0;border-width:4px 0 0;aspect-ratio:16/9}}
+/* skala teks */
+.lg-head .brand{font-size:14.5px}.lg-head nav button{font-size:13.5px}
+.lg-card h3{font-size:22px}.dv{font-size:12px}.ig>label,.ig input,.ig select{font-size:14.5px}.lg-card .lnk{font-size:13.5px}.lg-card .go{font-size:15.5px}.lg-foot{font-size:12px}
 /* layout aplikasi */
 .shell{display:flex;min-height:100vh}
 #side{width:260px;background:var(--side);color:#cfd9e5;flex:none;display:flex;flex-direction:column;transition:width .2s;position:sticky;top:0;height:100vh}
@@ -165,7 +185,7 @@ header.top button.ib{border:0;color:var(--navy);padding:8px}.ib:hover{background
 main{width:100%;flex:1}.foot{padding:12px 16px;text-align:center;font-size:12.5px;color:var(--muted);border-top:1px solid var(--line);background:#fff}
 #scrim{display:none}
 @media(max-width:900px){
-  .lg-split{grid-template-columns:1fr;max-height:none}.lg-left{grid-template-columns:1fr;padding:22px}.lg-head{gap:8px}.lg-head nav{margin-left:0;width:100%}
+  .lg-split{grid-template-columns:1fr;max-height:none}.lg-left{grid-template-columns:1fr}.lg-head{gap:8px}.lg-head nav{margin-left:0;width:100%}
   #side{position:fixed;left:0;top:0;z-index:50;transform:translateX(-100%);transition:transform .2s;width:270px!important}
   body.open #side{transform:none}body.open #scrim{display:block;position:fixed;inset:0;background:rgba(20,30,45,.4);z-index:45}
   body.collapsed .lt{display:inline}header.top .who{display:none}main{padding:12px}.row2{grid-template-columns:1fr}
@@ -202,9 +222,10 @@ main{width:100%;flex:1}.foot{padding:12px 16px;text-align:center;font-size:12.5p
   <div class="lg-split">
     <div class="lg-left">
       <svg class="wave" viewBox="0 0 800 500" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="wg" x1="0" x2="1"><stop offset="0" stop-color="#1a49d6"/><stop offset="1" stop-color="#2aa0f0"/></linearGradient></defs><path d="M470 0C560 70 640 90 800 80V0Z" fill="url(#wg)"/><path d="M0 0H210C150 40 60 60 0 150Z" fill="url(#wg)" opacity=".85"/><path d="M0 500V430C120 400 200 470 330 500Z" fill="#1a8fe3" opacity=".9"/><path d="M800 500V440C700 430 620 480 560 500Z" fill="#1a49d6" opacity=".85"/></svg>
+      <div class="lg-top"><p class="st">Sistem Informasi Pengelolaan Praktik Kerja Lapangan</p><div class="stars" aria-hidden="true">★ ★ ★</div></div>
       <div class="lg-txt">
-        <p class="st">Sistem Informasi Pengelolaan Praktik Kerja Lapangan</p>
-        <h2><span class="a">Aplikasi</span><span class="b">e-Rapor</span> <span class="c">PKL SMK</span></h2>
+        <div class="ap"><img class="aplogo" src="logo-rapor.png" alt="" width="100" height="100"><span class="a">Aplikasi</span></div>
+        <h2><span class="b">e-Rapor</span> <span class="c">PKL SMK</span></h2>
         <div class="vers">Versi 2026.1</div>
       </div>
       <img class="ill" src="pkl-smk.jpg" alt="Siswa SMK melaksanakan PKL di dunia industri: perikanan, ternak, pengolahan hasil pertanian, perangkat lunak dan gim, otomotif" width="1200" height="800" decoding="async">
