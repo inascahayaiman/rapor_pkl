@@ -43,8 +43,9 @@ table.grid tr.dirty td{background:var(--dirty)}
 table.grid input[type=number]{width:62px;text-align:center}
 table.grid input.s{width:50px}
 table.grid input.cat{width:260px}
-.dcell{max-width:320px;min-width:220px;white-space:normal!important;font-size:12.5px;line-height:1.35;color:var(--ink)}
+.dcell{max-width:240px;min-width:170px;white-space:normal!important;font-size:12.5px;line-height:1.35;color:var(--ink)}
 .dcell small{display:block;color:var(--muted)}
+.btn.sec.on{background:var(--brand);color:#fff;border-color:var(--brand)}
 table.grid input.w{width:200px}table.grid input.w2{width:260px}
 .na{font-weight:700;text-align:center;min-width:40px}
 .invalid{border-color:var(--err)!important;background:#fdecea!important}
@@ -416,12 +417,14 @@ table.dt td{white-space:normal;padding:8px 10px;vertical-align:top}table.dt th{p
       <div class="tpbox" id="tpBox"></div>
       <div class="bar">
         <button class="btn" id="btnSaveNilai" disabled><i data-lucide="save"></i> Simpan perubahan</button>
-        <a href="#rekap" class="btn sec" style="text-decoration:none;display:inline-flex;gap:6px;align-items:center"><i data-lucide="clipboard-list"></i> Lihat Rekapitulasi Nilai</a>
+        <button type="button" class="btn sec sm" id="btnTogDescN" title="Tampilkan atau sembunyikan kolom Deskripsi TP 1 s.d. TP 4"><i data-lucide="file-text"></i> Deskripsi TP</button>
+        <button type="button" class="btn sec sm on" id="btnTogCatN" title="Tampilkan atau sembunyikan kolom Deskripsi Catatan"><i data-lucide="message-square-text"></i> Deskripsi Catatan</button>
+        <a href="#rekap" class="btn sec sm" style="text-decoration:none;display:inline-flex;gap:6px;align-items:center"><i data-lucide="clipboard-list"></i> Rekapitulasi Nilai</a>
         <span class="spacer"></span>
         <label for="qNilai">Cari Siswa</label>
         <input type="search" id="qNilai" placeholder="Ketik NIS, NISN, atau Nama…">
       </div>
-      <p class="muted" style="margin:0 0 10px;font-size:13px">Baris yang berubah ditandai kuning. Nilai TP berupa bilangan bulat 0–100 (kosong = belum dinilai). Nilai Akhir (NA) = rata-rata TP yang terisi (dibulatkan). Kehadiran (Sakit/Izin/Alpa) dalam hari (0–366).</p>
+      <p class="muted" style="margin:0 0 10px;font-size:13px">Baris yang berubah ditandai kuning. Nilai TP 0–100 (kosong = belum dinilai). Nilai Akhir (NA) = rata-rata TP terisi (dibulatkan). Gunakan tombol <b>Deskripsi TP</b> / <b>Deskripsi Catatan</b> di atas atau pada baris siswa jika tabel terlalu lebar.</p>
       <div class="tablewrap"><table class="grid" id="gridNilai"></table></div>
     </section>
 
@@ -433,7 +436,9 @@ table.dt td{white-space:normal;padding:8px 10px;vertical-align:top}table.dt th{p
         </div>
         <div class="tpbox" id="rkSummary">Memuat ringkasan rekapitulasi…</div>
         <div class="ubar">
-          <a href="#nilai" class="btn sec" style="text-decoration:none;display:inline-flex;gap:6px;align-items:center"><i data-lucide="pencil-line"></i> Ke Input Nilai</a>
+          <a href="#nilai" class="btn sec sm" style="text-decoration:none;display:inline-flex;gap:6px;align-items:center"><i data-lucide="pencil-line"></i> Ke Input Nilai</a>
+          <button type="button" class="btn sec sm" id="btnTogDescR" title="Tampilkan atau sembunyikan kolom Deskripsi TP 1 s.d. TP 4 di tabel"><i data-lucide="file-text"></i> Kolom Deskripsi TP</button>
+          <button type="button" class="btn sec sm" id="btnTogCatR" title="Tampilkan atau sembunyikan kolom Deskripsi Catatan di tabel"><i data-lucide="message-square-text"></i> Kolom Deskripsi Catatan</button>
           <span class="spacer"></span>
           <label class="lbl" style="display:flex;align-items:center;gap:6px">Program <select id="rkFProg"><option value="">Semua Program</option></select></label>
           <label class="lbl" style="display:flex;align-items:center;gap:6px">Kelas <select id="rkFKelas"><option value="">Semua Kelas</option></select></label>
@@ -798,17 +803,17 @@ document.addEventListener('fullscreenchange',()=>{ $('#btnFull').innerHTML='<i d
 const plain=(cols,rows)=>rows.map(r=>cols.map(c=>String(r[c.k]??'')));
 function tableHTML(cols,rows){ return '<table border="1"><thead><tr>'+cols.map(c=>`<th>${esc(c.h)}</th>`).join('')+'</tr></thead><tbody>'+plain(cols,rows).map(r=>'<tr>'+r.map(v=>`<td${/^\d{8,}$/.test(v)?' style="mso-number-format:\'\\@\'"':''}>${esc(v)}</td>`).join('')+'</tr>').join('')+'</tbody></table>'; }
 function DT(host,o){
-  const st={q:'',n:10,p:1}, ec=()=>o.cols.filter(c=>!c.nx);
+  const st={q:'',n:10,p:1}, ec=()=>o.cols.filter(c=>!c.nx), vc=()=>o.cols.filter(c=>!(typeof c.hide==='function'?c.hide():c.hide));
   host.innerHTML=`<div class="dt-bar"><label>Tampilkan <select data-n><option>5</option><option selected>10</option><option>25</option><option>50</option><option>100</option></select> data</label>
   <div class="dt-btns"><button type="button" class="btn sec sm" data-x="copy"><i data-lucide="copy"></i>Copy</button><button type="button" class="btn sec sm" data-x="xls"><i data-lucide="file-spreadsheet"></i>Excel</button><button type="button" class="btn sec sm" data-x="pdf" title="Pilih Simpan sebagai PDF di jendela cetak"><i data-lucide="file-text"></i>PDF</button><button type="button" class="btn sec sm" data-x="print"><i data-lucide="printer"></i>Print</button></div>
   <label class="dt-s">Cari <input type="search" data-q placeholder="Ketik untuk mencari"></label></div>
   <div class="tablewrap"><table class="grid dt" data-t></table></div><div class="dt-foot" data-f></div>`;
   const filt=()=>{ const q=st.q.trim().toLowerCase(); return q?o.rows.filter(r=>o.cols.some(c=>String(r[c.k]??'').toLowerCase().includes(q))):o.rows; };
   function draw(){
-    const f=filt(), pages=Math.max(1,Math.ceil(f.length/st.n)); st.p=Math.min(Math.max(1,st.p),pages);
+    const f=filt(), vcols=vc(), pages=Math.max(1,Math.ceil(f.length/st.n)); st.p=Math.min(Math.max(1,st.p),pages);
     const s=(st.p-1)*st.n, part=f.slice(s,s+st.n);
-    host.querySelector('[data-t]').innerHTML='<thead><tr>'+o.cols.map(c=>`<th>${esc(c.h)}</th>`).join('')+'</tr></thead><tbody>'+
-      (part.length?part.map(r=>'<tr>'+o.cols.map(c=>`<td>${c.html?c.html(r):esc(r[c.k])}</td>`).join('')+'</tr>').join(''):`<tr><td colspan="${o.cols.length}" class="muted" style="text-align:center;padding:18px">${o.rows.length?'Tidak ada data yang cocok dengan pencarian.':esc(o.empty||'Belum ada data.')}</td></tr>`)+'</tbody>';
+    host.querySelector('[data-t]').innerHTML='<thead><tr>'+vcols.map(c=>`<th${c.c?' class="'+c.c+'"':''}>${esc(c.h)}</th>`).join('')+'</tr></thead><tbody>'+
+      (part.length?part.map(r=>'<tr>'+vcols.map(c=>`<td${c.c?' class="'+c.c+'"':''}>${c.html?c.html(r):esc(r[c.k])}</td>`).join('')+'</tr>').join(''):`<tr><td colspan="${vcols.length}" class="muted" style="text-align:center;padding:18px">${o.rows.length?'Tidak ada data yang cocok dengan pencarian.':esc(o.empty||'Belum ada data.')}</td></tr>`)+'</tbody>';
     let a=Math.max(1,st.p-2), z=Math.min(pages,a+4); a=Math.max(1,z-4);
     let nums=''; for(let i=a;i<=z;i++) nums+=`<button type="button" data-p="${i}" class="${i===st.p?'on':''}">${i}</button>`;
     host.querySelector('[data-f]').innerHTML=`<span>${f.length?`Menampilkan ${s+1}–${s+part.length} dari ${f.length} data`:'Tidak ada data'}${f.length!==o.rows.length?` (disaring dari ${o.rows.length})`:''}</span><div class="pg"><button type="button" data-p="${st.p-1}" ${st.p<=1?'disabled':''}>Sebelumnya</button>${nums}<button type="button" data-p="${st.p+1}" ${st.p>=pages?'disabled':''}>Berikutnya</button></div>`;
@@ -1021,12 +1026,13 @@ function renderSoon(){
 }
 
 /* ---------- nilai: hitung ---------- */
+const NV={showDesc:false,showCat:true};
 function nilaiNA(r){
   const v=[r.tp1,r.tp2,r.tp3,r.tp4].filter(x=>x!==''&&x!==null&&x!==undefined).map(Number);
   return v.length ? Math.round(v.reduce((a,b)=>a+b,0)/v.length) : '';
 }
 function deskripsi(skor, teks){
-  if(skor===''||skor==null) return '';
+  if(skor===''||skor==null||!teks) return '';
   const k=[...S.boot.kriteria].map(x=>({min:+x.nilai_min,aw:x.awalan,ak:x.akhiran})).sort((a,b)=>b.min-a.min).find(x=>skor>=x.min);
   return k? `${k.aw} ${teks}${k.ak?' '+String(k.ak).replace(/^\s+/,''):''}`.trim() : '';
 }
@@ -1040,17 +1046,12 @@ function progByKelas(namaKelas){
   if(!kl) return {};
   return (S.boot.program||[]).find(p=>p.kode_program===kl.kode_program)||{kode_program:kl.kode_program,program_keahlian:''};
 }
-function deskripsiSiswa(r,tps){
+function deskripsiPerTP(r,no,tps){
   const list=tps||tpByKelas(r.kelas);
-  const parts=[];
-  list.forEach(t=>{
-    const sc=r['tp'+t.no_tp];
-    if(sc!==''&&sc!==null&&sc!==undefined){
-      const d=deskripsi(+sc,t.teks_tp);
-      if(d) parts.push(`TP${t.no_tp}: ${d}`);
-    }
-  });
-  return parts.join('; ');
+  const t=list.find(x=>+x.no_tp===+no);
+  const sc=r['tp'+no];
+  if(!t||sc===''||sc===null||sc===undefined) return '';
+  return deskripsi(+sc,t.teks_tp);
 }
 function statusNilaiSiswa(r,tps){
   const list=tps||tpByKelas(r.kelas);
@@ -1060,27 +1061,59 @@ function statusNilaiSiswa(r,tps){
   const anyFilled=[1,2,3,4].some(n=>r['tp'+n]!==''&&r['tp'+n]!==null&&r['tp'+n]!==undefined);
   return anyFilled?'Dalam Proses':'Belum Dinilai';
 }
-function fmtKehadiran(r){
-  return `S: ${Number(r.sakit||0)} · I: ${Number(r.izin||0)} · A: ${Number(r.alpa||0)}`;
+
+/* Modal pop-up untuk melihat Deskripsi TP 1-4 atau Deskripsi Catatan per siswa */
+function popDeskripsiTP(r,tps){
+  const list=tps||tpByKelas(r.kelas);
+  const rows=[1,2,3,4].map(no=>{
+    const t=list.find(x=>+x.no_tp===no);
+    const sc=r['tp'+no];
+    const d=deskripsiPerTP(r,no,list);
+    return `<tr><td class="cnum"><b>TP ${no}</b></td><td>${t?esc(t.teks_tp):'<span class="muted">TP belum diatur</span>'}</td><td class="cnum"><b>${sc!==''&&sc!=null?esc(sc):'-'}</b></td><td>${d?esc(d):'<span class="muted">Belum ada deskripsi (nilai kosong)</span>'}</td></tr>`;
+  }).join('');
+  openModal(`<h3 style="margin:0 0 10px"><i data-lucide="file-text"></i> Deskripsi Capaian per TP</h3>
+  <p class="muted" style="margin:0 0 10px;font-size:.88em"><b>${esc(r.nama)}</b> · NIS ${esc(r.nis)} · Kelas ${esc(r.kelas)} · Nilai Akhir: <b>${nilaiNA(r)!==''?nilaiNA(r):'-'}</b></p>
+  <div class="tablewrap" style="max-height:52vh;margin-bottom:12px"><table class="grid dt"><thead><tr><th style="width:64px">TP</th><th>Tujuan Pembelajaran</th><th style="width:70px">Nilai</th><th>Deskripsi Capaian</th></tr></thead><tbody>${rows}</tbody></table></div>
+  <div class="bar" style="margin:0"><button class="btn sec" type="button" data-mc>Tutup</button></div>`,1);
+}
+function popCatatanSiswa(r,editable,onSave){
+  const tutup=penTutup();
+  const canEdit=editable&&!tutup;
+  openModal(`<form id="catModalForm" style="display:grid;gap:10px"><h3 style="margin:0"><i data-lucide="message-square-text"></i> Deskripsi Catatan PKL</h3>
+  <p class="muted" style="margin:0;font-size:.88em"><b>${esc(r.nama)}</b> · NIS ${esc(r.nis)} · Kelas ${esc(r.kelas)}</p>
+  <label class="lbl">Catatan Pembimbing <small>(maks. 500 karakter)</small><textarea id="catModalIn" maxlength="500" placeholder="Tuliskan catatan perkembangan/sikap siswa selama PKL…" ${canEdit?'':'disabled'}>${esc(r.catatan||'')}</textarea></label>
+  <div class="bar" style="margin:0">${canEdit?'<button class="btn" type="submit">Terapkan Catatan</button>':''}<button class="btn sec" type="button" data-mc>Tutup</button></div></form>`,1);
+  if(canEdit){
+    $('#catModalForm').onsubmit=e=>{
+      e.preventDefault();
+      r.catatan=$('#catModalIn').value;
+      closeModal();
+      if(onSave) onSave();
+    };
+  }
 }
 
 /* ---------- nilai: tampilan ---------- */
 function renderNilai(){
   const kl=kelasInfo()||{}, tps=tpList(), pr=programInfo();
   const tpMap={}; tps.forEach(t=>{ tpMap[t.no_tp]=t.teks_tp; });
+  $('#btnTogDescN').classList.toggle('on',NV.showDesc);
+  $('#btnTogCatN').classList.toggle('on',NV.showCat);
   $('#tpBox').innerHTML = `<div><b>Kelas:</b> ${esc(S.kelas||'-')} &nbsp;·&nbsp; <b>Program Keahlian:</b> ${esc(pr.program_keahlian||kl.kode_program||'-')}${pr.konsentrasi_keahlian?' ('+esc(pr.konsentrasi_keahlian)+')':''}</div>`+
     `<div style="margin-top:4px">`+(tps.length?tps.map(t=>`<b>TP${t.no_tp}:</b> ${esc(t.teks_tp)}`).join(' &nbsp;·&nbsp; '):'<span class="muted">Belum ada referensi Tujuan Pembelajaran untuk program ini.</span>')+`</div>`;
   const rows=rowsNow(), q=($('#qNilai')?$('#qNilai').value:'').trim().toLowerCase();
   const tutup=penTutup(), dis=tutup?' disabled':'';
   let h=`<thead><tr><th>No</th><th>NIS</th><th>NISN</th><th>Nama Siswa</th><th>Kelas</th><th>Program Keahlian</th>`+
     [1,2,3,4].map(n=>`<th title="${esc(tpMap[n]||'Tujuan Pembelajaran '+n)}">TP ${n}</th>`).join('')+
-    `<th>Nilai Akhir</th><th>Deskripsi</th><th>Catatan</th><th colspan="3" style="text-align:center">Kehadiran (Hari)<br><small>Sakit · Izin · Alpa</small></th></tr></thead><tbody>`;
+    `<th>Nilai Akhir</th>`+
+    (NV.showDesc?[1,2,3,4].map(n=>`<th>Deskripsi TP ${n}</th>`).join(''):`<th>Deskripsi TP</th>`)+
+    (NV.showCat?`<th>Deskripsi Catatan</th>`:`<th>Catatan</th>`)+
+    `<th>Sakit</th><th>Izin</th><th>Alpa</th></tr></thead><tbody>`;
   let shown=0;
   rows.forEach((r,i)=>{
     if(q && ![r.nis,r.nisn,r.nama,r.kelas].some(v=>String(v||'').toLowerCase().includes(q))) return;
     shown++;
     const progName=r.program_keahlian||pr.program_keahlian||kl.kode_program||'';
-    const dText=deskripsiSiswa(r,tps);
     h+=`<tr data-i="${i}" data-nis="${esc(r.nis)}"><td class="n">${shown}</td>`+
       `<td class="muted">${esc(r.nis)}</td><td class="muted">${esc(r.nisn||'-')}</td>`+
       `<td><b>${esc(r.nama)}</b></td><td>${esc(r.kelas)}</td><td>${esc(progName)}</td>`;
@@ -1089,16 +1122,29 @@ function renderNilai(){
       h+=`<td><input type="number" min="0" max="100" step="1" title="${esc(ttl)}" data-f="${f}" value="${esc(r[f])}"${dis}></td>`;
     });
     h+=`<td class="na" data-na>${esc(nilaiNA(r))}</td>`;
-    h+=`<td class="dcell" data-desc>${dText?esc(dText):'<small>Belum ada nilai TP</small>'}</td>`;
-    h+=`<td><input class="cat" type="text" maxlength="500" placeholder="Catatan pembimbing…" data-f="catatan" value="${esc(r.catatan)}"${dis}></td>`;
+    if(NV.showDesc){
+      [1,2,3,4].forEach(no=>{
+        const d=deskripsiPerTP(r,no,tps);
+        h+=`<td class="dcell" data-dtp="${no}">${d?esc(d):'<small>-</small>'}</td>`;
+      });
+    }else{
+      const cnt=[1,2,3,4].filter(no=>deskripsiPerTP(r,no,tps)!=='').length;
+      h+=`<td class="cnum"><button type="button" class="btn sec sm" data-na-act="desc" data-i="${i}"><i data-lucide="file-text"></i> Deskripsi TP (${cnt}/4)</button></td>`;
+    }
+    if(NV.showCat){
+      h+=`<td><div style="display:flex;gap:4px;align-items:center"><input class="cat" type="text" maxlength="500" placeholder="Catatan pembimbing…" data-f="catatan" value="${esc(r.catatan)}"${dis}><button type="button" class="btn sec sm" title="Buka editor catatan" data-na-act="cat" data-i="${i}"><i data-lucide="maximize-2"></i></button></div></td>`;
+    }else{
+      h+=`<td class="cnum"><button type="button" class="btn sec sm" data-na-act="cat" data-i="${i}"><i data-lucide="message-square-text"></i> ${r.catatan?'Lihat/Edit Catatan':'Isi Catatan'}</button></td>`;
+    }
     ['sakit','izin','alpa'].forEach(f=>{
       const lbl=f==='sakit'?'Sakit':(f==='izin'?'Izin':'Alpa (Tanpa Keterangan)');
       h+=`<td><input class="s" type="number" min="0" max="366" step="1" title="${lbl} (hari)" data-f="${f}" value="${esc(r[f])}"${dis}></td>`;
     });
     h+=`</tr>`;
   });
+  const colSpan = 14 + (NV.showDesc?3:0);
   if(!shown){
-    h+=`<tr><td colspan="15" class="muted" style="text-align:center;padding:18px">${rows.length?'Tidak ada siswa yang cocok dengan pencarian.':'Belum ada siswa pada kelas ini.'}</td></tr>`;
+    h+=`<tr><td colspan="${colSpan}" class="muted" style="text-align:center;padding:18px">${rows.length?'Tidak ada siswa yang cocok dengan pencarian.':'Belum ada siswa pada kelas ini.'}</td></tr>`;
   }
   $('#gridNilai').innerHTML=h+'</tbody>';
   Array.from($('#gridNilai tbody').querySelectorAll('tr[data-i]')).forEach(tr=>{
@@ -1108,7 +1154,16 @@ function renderNilai(){
 }
 function markDirty(tr,r){ if(tr&&r) tr.classList.toggle('dirty', snap(r)!==r._o); }
 
+$('#btnTogDescN').onclick=()=>{ NV.showDesc=!NV.showDesc; renderNilai(); };
+$('#btnTogCatN').onclick=()=>{ NV.showCat=!NV.showCat; renderNilai(); };
 $('#qNilai').addEventListener('input',()=>{ if(S.tab==='nilai') renderNilai(); });
+
+$('#gridNilai').addEventListener('click',e=>{
+  const b=e.target.closest('[data-na-act]'); if(!b) return;
+  const r=rowsNow()[+b.dataset.i]; if(!r) return;
+  if(b.dataset.naAct==='desc') popDeskripsiTP(r,tpList());
+  if(b.dataset.naAct==='cat') popCatatanSiswa(r,true,()=>{ renderNilai(); updateSaveButtons(); });
+});
 
 $('#gridNilai').addEventListener('input',e=>{
   const inp=e.target, tr=inp.closest('tr'); if(!tr||!inp.dataset.f) return;
@@ -1126,10 +1181,22 @@ $('#gridNilai').addEventListener('input',e=>{
     }else r._bad=true;
   }
   tr.querySelector('[data-na]').textContent=nilaiNA(r);
-  const dCell=tr.querySelector('[data-desc]');
-  if(dCell){
-    const dText=deskripsiSiswa(r,tpList());
-    dCell.innerHTML=dText?esc(dText):'<small>Belum ada nilai TP</small>';
+  const tps=tpList();
+  if(NV.showDesc){
+    [1,2,3,4].forEach(no=>{
+      const c=tr.querySelector(`[data-dtp="${no}"]`);
+      if(c){
+        const d=deskripsiPerTP(r,no,tps);
+        c.innerHTML=d?esc(d):'<small>-</small>';
+      }
+    });
+  }else{
+    const btnD=tr.querySelector('[data-na-act="desc"]');
+    if(btnD){
+      const cnt=[1,2,3,4].filter(no=>deskripsiPerTP(r,no,tps)!=='').length;
+      btnD.innerHTML=`<i data-lucide="file-text"></i> Deskripsi TP (${cnt}/4)`;
+      icons();
+    }
   }
   markDirty(tr,r); updateSaveButtons();
 });
@@ -1151,36 +1218,53 @@ $('#btnSaveNilai').onclick=async()=>{
 };
 
 /* ---------- rekapitulasi nilai ---------- */
-const RK={rows:[],prog:'',kelas:'',stat:'',ctl:null,opt:null,loaded:false};
+const RK={rows:[],prog:'',kelas:'',stat:'',showDesc:false,showCat:false,ctl:null,opt:null,loaded:false};
 function resetRekap(){ RK.rows=[]; RK.prog=''; RK.kelas=''; RK.stat=''; RK.ctl=null; RK.opt=null; RK.loaded=false; }
 const RK_COLS=[
-  {h:'No',k:'no'},
+  {h:'No',k:'no',c:'cnum'},
   {h:'NIS',k:'nis'},
   {h:'NISN',k:'nisn'},
   {h:'Nama Siswa',k:'nama',html:r=>`<b>${esc(r.nama)}</b>`},
   {h:'Kelas',k:'kelas'},
   {h:'Program Keahlian',k:'program_keahlian'},
-  {h:'Nilai TP 1',k:'tp1',html:r=>r.tp1!==''?esc(r.tp1):'<span class="muted">-</span>'},
-  {h:'Nilai TP 2',k:'tp2',html:r=>r.tp2!==''?esc(r.tp2):'<span class="muted">-</span>'},
-  {h:'Nilai TP 3',k:'tp3',html:r=>r.tp3!==''?esc(r.tp3):'<span class="muted">-</span>'},
-  {h:'Nilai TP 4',k:'tp4',html:r=>r.tp4!==''?esc(r.tp4):'<span class="muted">-</span>'},
-  {h:'Nilai Akhir',k:'na',html:r=>`<b class="na">${r.na!==''?esc(r.na):'-'}</b>`},
-  {h:'Deskripsi',k:'deskripsi',html:r=>r.deskripsi?`<div class="dcell">${esc(r.deskripsi)}</div>`:'<span class="muted">-</span>'},
-  {h:'Catatan',k:'catatan',html:r=>r.catatan?esc(r.catatan):'<span class="muted">-</span>'},
-  {h:'Kehadiran',k:'kehadiran'},
+  {h:'Nilai TP 1',k:'tp1',c:'cnum',html:r=>r.tp1!==''?esc(r.tp1):'<span class="muted">-</span>'},
+  {h:'Nilai TP 2',k:'tp2',c:'cnum',html:r=>r.tp2!==''?esc(r.tp2):'<span class="muted">-</span>'},
+  {h:'Nilai TP 3',k:'tp3',c:'cnum',html:r=>r.tp3!==''?esc(r.tp3):'<span class="muted">-</span>'},
+  {h:'Nilai TP 4',k:'tp4',c:'cnum',html:r=>r.tp4!==''?esc(r.tp4):'<span class="muted">-</span>'},
+  {h:'Nilai Akhir',k:'na',c:'cnum',html:r=>`<b class="na">${r.na!==''?esc(r.na):'-'}</b>`},
+  {h:'Deskripsi TP 1',k:'desc_tp1',hide:()=>!RK.showDesc,html:r=>r.desc_tp1?`<div class="dcell">${esc(r.desc_tp1)}</div>`:'<span class="muted">-</span>'},
+  {h:'Deskripsi TP 2',k:'desc_tp2',hide:()=>!RK.showDesc,html:r=>r.desc_tp2?`<div class="dcell">${esc(r.desc_tp2)}</div>`:'<span class="muted">-</span>'},
+  {h:'Deskripsi TP 3',k:'desc_tp3',hide:()=>!RK.showDesc,html:r=>r.desc_tp3?`<div class="dcell">${esc(r.desc_tp3)}</div>`:'<span class="muted">-</span>'},
+  {h:'Deskripsi TP 4',k:'desc_tp4',hide:()=>!RK.showDesc,html:r=>r.desc_tp4?`<div class="dcell">${esc(r.desc_tp4)}</div>`:'<span class="muted">-</span>'},
+  {h:'Catatan',k:'catatan',hide:()=>!RK.showCat,html:r=>r.catatan?`<div class="dcell">${esc(r.catatan)}</div>`:'<span class="muted">-</span>'},
+  {h:'Sakit',k:'sakit',c:'cnum'},
+  {h:'Izin',k:'izin',c:'cnum'},
+  {h:'Alpa',k:'alpa',c:'cnum'},
   {h:'Status',k:'status',html:r=>bdg(r.status==='Lengkap'?'g':(r.status==='Dalam Proses'?'y':'n'),r.status)},
-  {h:'Aksi',k:'aksi',nx:1,html:r=>`<div class="rowact"><button type="button" class="btn sec sm" data-rka="detail" data-nis="${esc(r.nis)}">Detail</button><button type="button" class="btn sec sm" data-rka="edit" data-nis="${esc(r.nis)}" data-kelas="${esc(r.kelas)}">Edit Nilai</button></div>`}
+  {h:'Deskripsi & Aksi',k:'aksi',nx:1,html:r=>{
+    const cnt=[1,2,3,4].filter(n=>r['desc_tp'+n]).length;
+    return `<div class="rowact">`+
+      `<button type="button" class="btn sec sm" data-rka="desc" data-nis="${esc(r.nis)}" title="Lihat Deskripsi TP 1 s.d. TP 4"><i data-lucide="file-text"></i> Deskripsi TP (${cnt}/4)</button>`+
+      `<button type="button" class="btn sec sm" data-rka="cat" data-nis="${esc(r.nis)}" title="Lihat Deskripsi Catatan"><i data-lucide="message-square-text"></i> Deskripsi Catatan</button>`+
+      `<button type="button" class="btn sec sm" data-rka="edit" data-nis="${esc(r.nis)}" data-kelas="${esc(r.kelas)}"><i data-lucide="pencil-line"></i> Edit</button>`+
+    `</div>`;
+  }}
 ];
 
 function decorateRekapRow(r){
   const tps=tpByKelas(r.kelas), pr=progByKelas(r.kelas);
-  const na=nilaiNA(r), desc=deskripsiSiswa(r,tps), st=statusNilaiSiswa(r,tps);
+  const na=nilaiNA(r), st=statusNilaiSiswa(r,tps);
   return Object.assign({},r,{
     kode_program:r.kode_program||pr.kode_program||'',
     program_keahlian:r.program_keahlian||pr.program_keahlian||r.kode_program||'',
     na:na,
-    deskripsi:desc,
-    kehadiran:fmtKehadiran(r),
+    desc_tp1:deskripsiPerTP(r,1,tps),
+    desc_tp2:deskripsiPerTP(r,2,tps),
+    desc_tp3:deskripsiPerTP(r,3,tps),
+    desc_tp4:deskripsiPerTP(r,4,tps),
+    sakit:Number(r.sakit||0),
+    izin:Number(r.izin||0),
+    alpa:Number(r.alpa||0),
     status:st
   });
 }
@@ -1206,6 +1290,8 @@ function updateRekapSummary(rows){
 }
 
 async function renderRekap(force){
+  $('#btnTogDescR').classList.toggle('on',RK.showDesc);
+  $('#btnTogCatR').classList.toggle('on',RK.showCat);
   icons();
   if(!RK.loaded||force){
     busy(true);
@@ -1241,6 +1327,8 @@ async function renderRekap(force){
   }
 }
 
+$('#btnTogDescR').onclick=()=>{ RK.showDesc=!RK.showDesc; renderRekap(false); };
+$('#btnTogCatR').onclick=()=>{ RK.showCat=!RK.showCat; renderRekap(false); };
 $('#rkRefresh').onclick=()=>renderRekap(true);
 $('#rkFProg').onchange=e=>{ RK.prog=e.target.value; renderRekap(false); };
 $('#rkFKelas').onchange=e=>{ RK.kelas=e.target.value; renderRekap(false); };
@@ -1249,29 +1337,8 @@ $('#rkDT').addEventListener('click',async e=>{
   const b=e.target.closest('[data-rka]'); if(!b) return;
   const nis=b.dataset.nis, act=b.dataset.rka;
   const r=RK.rows.find(x=>x.nis===nis); if(!r) return;
-  if(act==='detail'){
-    const tps=tpByKelas(r.kelas);
-    const tpDetail=tps.map(t=>{
-      const sc=r['tp'+t.no_tp];
-      return `<tr><td><b>TP ${t.no_tp}</b> — ${esc(t.teks_tp)}</td><td style="text-align:center"><b>${sc!==''?esc(sc):'-'}</b></td><td>${esc(sc!==''?deskripsi(+sc,t.teks_tp):'-')}</td></tr>`;
-    }).join('');
-    openModal(`<h3 style="margin:0 0 12px"><i data-lucide="clipboard-check"></i> Detail Nilai PKL Siswa</h3>
-    <div class="prof" style="margin-bottom:12px"><span class="av">${esc((r.nama||'?').charAt(0).toUpperCase())}</span>
-    <dl>
-      <dt>Nama Siswa</dt><dd>${esc(r.nama)}</dd>
-      <dt>NIS / NISN</dt><dd>${esc(r.nis)} / ${esc(r.nisn||'-')}</dd>
-      <dt>Kelas / Program</dt><dd>${esc(r.kelas)} / ${esc(r.program_keahlian||'-')}</dd>
-      <dt>Tempat PKL (DUDI)</dt><dd>${esc(r.nama_dudi||'Belum ditempatkan')}</dd>
-      <dt>Guru Pembimbing</dt><dd>${esc(r.guru_pembimbing||'-')}</dd>
-      <dt>Nilai Akhir (NA)</dt><dd><b style="font-size:1.15em">${r.na!==''?esc(r.na):'-'}</b> &nbsp; ${bdg(r.status==='Lengkap'?'g':(r.status==='Dalam Proses'?'y':'n'),r.status)}</dd>
-      <dt>Kehadiran</dt><dd>Sakit: ${r.sakit||0} hari · Izin: ${r.izin||0} hari · Alpa: ${r.alpa||0} hari</dd>
-      <dt>Catatan</dt><dd>${esc(r.catatan||'-')}</dd>
-    </dl></div>
-    <div class="tablewrap" style="max-height:38vh;margin-bottom:12px"><table class="grid dt"><thead><tr><th>Tujuan Pembelajaran</th><th>Nilai</th><th>Deskripsi Capaian</th></tr></thead><tbody>${tpDetail||'<tr><td colspan="3" class="muted">Belum ada TP pada program ini.</td></tr>'}</tbody></table></div>
-    <div class="bar" style="margin:0"><button class="btn" type="button" id="rkGoEdit"><i data-lucide="pencil-line"></i> Edit di Input Nilai</button><button class="btn sec" type="button" data-mc>Tutup</button></div>`,1);
-    $('#rkGoEdit').onclick=()=>{ closeModal(); S.kelas=r.kelas; $('#selKelas').value=r.kelas; location.hash='nilai'; };
-    return;
-  }
+  if(act==='desc') return popDeskripsiTP(r);
+  if(act==='cat') return popCatatanSiswa(r,false);
   if(act==='edit'){
     S.kelas=r.kelas; $('#selKelas').value=r.kelas; location.hash='nilai';
   }
