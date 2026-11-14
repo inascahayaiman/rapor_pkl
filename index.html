@@ -316,6 +316,14 @@ table.dt td{white-space:normal;padding:8px 10px;vertical-align:top}table.dt th{p
 .soon{text-align:center;padding:40px 16px}.soon svg{width:48px;height:48px;color:var(--brand)}.soon h2{margin:10px 0 6px}.soon p{max-width:520px;margin:0 auto 16px;color:var(--muted)}
 .ptab{font:11pt/1.3 Arial,sans-serif;color:#000;padding:12mm}.ptab h2{margin:0 0 10px;font-size:14pt}
 .ptab table{border-collapse:collapse;width:100%}.ptab th,.ptab td{border:1px solid #000;padding:4px 6px;text-align:left;vertical-align:top}.ptab th{background:#eee}
+.av{overflow:hidden}.av img{width:100%;height:100%;object-fit:cover;display:block}
+.modal .card.w{max-width:560px;max-height:92vh;overflow:auto}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.fgrid .full{grid-column:1/-1}
+@media(max-width:560px){.fgrid{grid-template-columns:1fr}}
+.lbl input,.lbl select{font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:inherit;width:100%;box-sizing:border-box}
+.lbl small{font-weight:400;color:var(--muted)}
+.rowact{display:flex;gap:4px;flex-wrap:wrap}.rowact .btn{padding:4px 8px;font-size:.82em}
+.ubar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px}.ubar select{padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:inherit}
 </style>
 </head>
 <body>
@@ -344,7 +352,7 @@ table.dt td{white-space:normal;padding:8px 10px;vertical-align:top}table.dt th{p
       <h3><i data-lucide="log-in"></i>MASUK</h3>
       <div class="dv">Silahkan Masuk Untuk Memulai Aplikasi</div>
       <form id="loginForm" novalidate>
-        <div class="ig"><label for="inNip">Username</label><input type="text" id="inNip" inputmode="numeric" autocomplete="username" placeholder="Isi dengan NIP"></div>
+        <div class="ig"><label for="inNip">Username</label><input type="text" id="inNip" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="Username atau NIP"></div>
         <div class="ig"><label for="inPw">Password</label><input type="password" id="inPw" autocomplete="current-password" placeholder="Ketikkan Kata Sandi"><button type="button" id="btnEye" aria-label="Tampilkan kata sandi"><i data-lucide="eye"></i></button></div>
         <div class="ig"><label for="selTa">Tahun Pelajaran</label><select id="selTa"></select></div>
         <div class="ig"><label for="selSem">Semester</label><select id="selSem"><option>Ganjil</option><option>Genap</option></select></div>
@@ -427,17 +435,20 @@ table.dt td{white-space:normal;padding:8px 10px;vertical-align:top}table.dt th{p
       <div class="tablewrap"><table class="grid" id="gridPen"></table></div>
       <datalist id="dlDudi"></datalist><datalist id="dlGuru"></datalist>
     </section>
-    <section id="v-pengguna" class="card hidden">
-      <p class="muted" style="margin-top:0">Reset mengembalikan kata sandi pengguna ke kata sandi awal dan memaksa penggantian saat login berikutnya. Tambah/ubah pengguna langsung di tab <b>Pengguna</b> pada Google Sheets.</p>
-      <div class="tablewrap"><table class="grid" id="gridUser"></table></div>
-    </section>
+    <section id="v-pengguna" class="hidden"><div class="pnl">
+      <h3 style="margin-bottom:14px"><i data-lucide="users"></i>Data Pengguna</h3>
+      <div class="ubar"><button type="button" class="btn" id="uAdd"><i data-lucide="user-plus"></i> Tambah Pengguna</button><button type="button" class="btn sec" id="uImp"><i data-lucide="upload"></i> Import Excel</button><button type="button" class="btn sec" id="uTpl"><i data-lucide="download"></i> Template Import</button><span class="spacer"></span>
+        <label class="lbl" style="display:flex;align-items:center;gap:6px">Role <select id="uFRole"><option value="">Semua</option><option value="admin">Administrator</option><option value="kepsek">Kepala Sekolah</option><option value="wali_kelas">Wali Kelas</option><option value="guru">Guru Pembimbing</option></select></label>
+        <label class="lbl" style="display:flex;align-items:center;gap:6px">Status <select id="uFStat"><option value="">Semua</option><option value="aktif">Aktif</option><option value="nonaktif">Nonaktif</option></select></label></div>
+      <div id="usrDT"></div><input type="file" id="uFile" class="hidden" accept=".xlsx,.csv,text/csv">
+    </div></section>
   </main>
   <footer class="foot">© e-Rapor PKL SMK · Sistem Informasi Pengelolaan Praktik Kerja Lapangan</footer>
 </div></div></div>
 
 <div id="pwModal" class="modal hidden"><form class="card" id="pwForm" style="display:grid;gap:10px">
   <h3 style="margin:0">Ganti kata sandi</h3>
-  <p class="muted" id="pwHint" style="margin:0;font-size:13px">Minimal 8 karakter dan berbeda dari kata sandi bawaan.</p>
+  <p class="muted" id="pwHint" style="margin:0;font-size:13px">Minimal 8 karakter, memuat huruf dan angka, dan berbeda dari kata sandi lama.</p>
   <label class="lbl">Kata sandi lama<input type="password" id="pwOld" autocomplete="current-password" required></label>
   <label class="lbl">Kata sandi baru<input type="password" id="pwNew" autocomplete="new-password" minlength="8" required></label>
   <label class="lbl">Ulangi kata sandi baru<input type="password" id="pwNew2" autocomplete="new-password" minlength="8" required></label>
@@ -445,6 +456,7 @@ table.dt td{white-space:normal;padding:8px 10px;vertical-align:top}table.dt th{p
   <p id="pwMsg" style="margin:0;font-size:13px;color:var(--err);min-height:1.2em"></p>
 </form></div>
 
+<div id="mdl" class="modal hidden"></div>
 <div id="printRoot"></div>
 <div id="toast" class="hidden" role="status"></div>
 <div id="busy" class="hidden">Memuat…</div>
@@ -459,6 +471,7 @@ const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const BULAN = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
 const S = { token:null, boot:null, kelas:null, cache:{}, tab:'nilai', dudiNames:new Set() };
+const ROLE_LABEL={admin:'Administrator',kepsek:'Kepala Sekolah',wali_kelas:'Wali Kelas',guru:'Guru Pembimbing'};
 
 /* ---------- util ---------- */
 const POP={ok:['circle-check','#8BCF72','Berhasil'],err:['circle-x','#E65B5B','Gagal'],deny:['shield-x','#E9A23B','Ditolak'],warn:['triangle-alert','#E9B33B','Peringatan!'],info:['info','#55A8DC','Informasi'],ask:['circle-help','#55A8DC','Konfirmasi']};
@@ -513,7 +526,7 @@ function showLogin(msg){
   $('#loginMsg').textContent = msg||''; loginBrand(); icons();
 }
 function logout(msg){
-  S.token=null; S.boot=null; S.dash=null; S.dashErr=null; ssSet('rapor_token',null); S.cache={};
+  resetUsers(); S.token=null; S.boot=null; S.dash=null; S.dashErr=null; ssSet('rapor_token',null); S.cache={};
   $('#inPw').value=''; showLogin(msg);
 }
 $('#loginForm').onsubmit=async e=>{
@@ -524,7 +537,7 @@ $('#loginForm').onsubmit=async e=>{
   S.ta=$('#selTa').value; S.sem=$('#selSem').value; ssSet('rapor_ta',S.ta); ssSet('rapor_sem',S.sem);
   busy(true);
   try{
-    const d = await api('login',{ nip:$('#inNip').value.trim(), password:$('#inPw').value });
+    const d = await api('login',{ username:$('#inNip').value.trim(), password:$('#inPw').value });
     S.token=d.token; ssSet('rapor_token',d.token); $('#inPw').value='';
     busy(false); await start();
   }catch(err){ busy(false); $('#loginMsg').textContent=err.message; $('#inPw').classList.add('bad'); }
@@ -534,7 +547,7 @@ $('#btnLogout').onclick=async()=>{ if(await popup('ask','Apakah Anda yakin ingin
 /* ---------- ganti kata sandi ---------- */
 function openPw(forced){
   S.pwForced=!!forced; $('#pwMsg').textContent=''; $('#pwForm').reset();
-  $('#pwHint').textContent = forced ? 'Ini login pertama (atau kata sandi baru direset). Anda wajib membuat kata sandi baru: minimal 8 karakter dan berbeda dari kata sandi bawaan.' : 'Minimal 8 karakter dan berbeda dari kata sandi lama/bawaan.';
+  $('#pwHint').textContent = forced ? 'Ini login pertama (atau kata sandi baru direset). Anda wajib membuat kata sandi baru: minimal 8 karakter, memuat huruf dan angka.' : 'Minimal 8 karakter, memuat huruf dan angka, dan berbeda dari kata sandi lama.';
   $('#pwCancel').classList.toggle('hidden',!!forced);
   $('#pwModal').classList.remove('hidden');
 }
@@ -569,7 +582,7 @@ async function start(){
   $('#dlGuru').innerHTML = (b.guru||[]).map(g=>`<option value="${esc(g)}">`).join('');
   const sel=$('#selKelas');
   sel.innerHTML = b.kelas.map(k=>`<option>${esc(k.nama_kelas)}</option>`).join('');
-  if(!b.kelas.length&&b.user.role!=='admin') toast('Tidak ada kelas yang dapat Anda akses. Hubungi admin.','err');
+  if(!b.kelas.length&&b.user.role==='guru') toast('Tidak ada kelas yang dapat Anda akses. Hubungi admin.','err');
   S.kelas=sel.value||null;
   drawBell(); if(b.user.role==='admin'&&!S.dash) loadDash();
   routeNow();
@@ -636,9 +649,10 @@ const MENU=[
   {r:'pengaturan',t:'Pengaturan',i:'settings'},{r:'backup',t:'Backup dan Restore',i:'database-backup'},{r:'log',t:'Log Aktivitas',i:'scroll-text'}
 ];
 const KELAS_VIEWS=['nilai','rapor','penempatan'];
-const homeRoute=()=>S.boot&&S.boot.user.role==='admin'?'dashboard':'nilai';
+const homeRoute=()=>{ const r=S.boot&&S.boot.user.role; return r==='admin'?'dashboard':(r==='guru'?'nilai':'profil'); };
+function canRoute(r){ const ro=ROUTES[r], role=S.boot.user.role; if(!ro) return false; if(r==='profil') return true; if(ro.admin) return role==='admin'; return role==='admin'||role==='guru'; }
 function buildNav(){
-  const adm=S.boot.user.role==='admin', ok=r=>adm||!ROUTES[r].admin;
+  const adm=S.boot.user.role==='admin', ok=r=>canRoute(r);
   const leaf=m=>`<a class="mi" href="#${m.r}" data-route="${m.r}"><i data-lucide="${m.i}"></i><span class="lt">${esc(m.t)}</span></a>`;
   $('#nav').innerHTML=MENU.map(m=>{
     if(m.g){ if(!adm) return '';
@@ -669,7 +683,7 @@ function drawCrumb(){
 function routeNow(){
   if(!S.boot) return;
   let r=location.hash.slice(1);
-  if(!ROUTES[r]||(ROUTES[r].admin&&S.boot.user.role!=='admin')){ r=homeRoute(); history.replaceState(null,'','#'+r); }
+  if(!ROUTES[r]||!canRoute(r)){ r=homeRoute(); history.replaceState(null,'','#'+r); }
   S.route=r; S.tab=ROUTES[r].v; document.body.classList.remove('open');
   markNav(); drawCrumb();
   if(KELAS_VIEWS.includes(S.tab)&&S.kelas&&!S.cache[S.kelas]) loadKelas(); else renderAll();
@@ -680,9 +694,9 @@ function applyShell(){
   const b=S.boot, sk=b.sekolah;
   $('#hdPeriod').textContent='TP '+(sk.tahun_ajaran||S.ta||'-')+' · Semester '+(sk.semester||S.sem||'-');
   $('#sbSchool').textContent=sk.nama_sekolah||'Sistem Informasi PKL';
-  $('#whoName').textContent=b.user.nama; $('#whoRole').textContent=b.user.role==='admin'?'Administrator':'Guru Pembimbing';
-  $('#avatar').textContent=(b.user.nama.trim().charAt(0)||'?').toUpperCase();
-  $('#pfRole').textContent=b.user.role==='admin'?'Administrator':'Guru Pembimbing';
+  $('#whoName').textContent=b.user.nama; $('#whoRole').textContent=ROLE_LABEL[b.user.role]||b.user.role;
+  $('#avatar').innerHTML=avHTML(b.user);
+  $('#pfRole').textContent=ROLE_LABEL[b.user.role]||b.user.role;
 }
 
 function renderAll(){
@@ -742,10 +756,10 @@ document.addEventListener('fullscreenchange',()=>{ $('#btnFull').innerHTML='<i d
 
 /* ---------- tabel data: cari, jumlah baris, halaman, copy/excel/pdf/print ---------- */
 const plain=(cols,rows)=>rows.map(r=>cols.map(c=>String(r[c.k]??'')));
-function tableHTML(cols,rows){ return '<table border="1"><thead><tr>'+cols.map(c=>`<th>${esc(c.h)}</th>`).join('')+'</tr></thead><tbody>'+plain(cols,rows).map(r=>'<tr>'+r.map(v=>`<td>${esc(v)}</td>`).join('')+'</tr>').join('')+'</tbody></table>'; }
+function tableHTML(cols,rows){ return '<table border="1"><thead><tr>'+cols.map(c=>`<th>${esc(c.h)}</th>`).join('')+'</tr></thead><tbody>'+plain(cols,rows).map(r=>'<tr>'+r.map(v=>`<td${/^\d{8,}$/.test(v)?' style="mso-number-format:\'\\@\'"':''}>${esc(v)}</td>`).join('')+'</tr>').join('')+'</tbody></table>'; }
 function DT(host,o){
-  const st={q:'',n:10,p:1};
-  host.innerHTML=`<div class="dt-bar"><label>Tampilkan <select data-n><option>5</option><option selected>10</option><option>25</option><option>50</option></select> data</label>
+  const st={q:'',n:10,p:1}, ec=()=>o.cols.filter(c=>!c.nx);
+  host.innerHTML=`<div class="dt-bar"><label>Tampilkan <select data-n><option>5</option><option selected>10</option><option>25</option><option>50</option><option>100</option></select> data</label>
   <div class="dt-btns"><button type="button" class="btn sec sm" data-x="copy"><i data-lucide="copy"></i>Copy</button><button type="button" class="btn sec sm" data-x="xls"><i data-lucide="file-spreadsheet"></i>Excel</button><button type="button" class="btn sec sm" data-x="pdf" title="Pilih Simpan sebagai PDF di jendela cetak"><i data-lucide="file-text"></i>PDF</button><button type="button" class="btn sec sm" data-x="print"><i data-lucide="printer"></i>Print</button></div>
   <label class="dt-s">Cari <input type="search" data-q placeholder="Ketik untuk mencari"></label></div>
   <div class="tablewrap"><table class="grid dt" data-t></table></div><div class="dt-foot" data-f></div>`;
@@ -766,27 +780,28 @@ function DT(host,o){
     const x=e.target.closest('[data-x]'); if(!x) return;
     const f=filt(); if(!f.length){ snack('Tidak ada data untuk diproses'); return; }
     if(x.dataset.x==='copy'){
-      const tsv=[o.cols.map(c=>c.h)].concat(plain(o.cols,f)).map(r=>r.join('\t')).join('\n');
+      const tsv=[ec().map(c=>c.h)].concat(plain(ec(),f)).map(r=>r.join('\t')).join('\n');
       try{ await navigator.clipboard.writeText(tsv); snack(f.length+' baris disalin'); }catch(err){ snack('Gagal menyalin; izinkan akses clipboard'); }
     }else if(x.dataset.x==='xls'){
-      const blob=new Blob(['\ufeff<html><head><meta charset="utf-8"></head><body>'+tableHTML(o.cols,f)+'</body></html>'],{type:'application/vnd.ms-excel'});
+      const blob=new Blob(['\ufeff<html><head><meta charset="utf-8"></head><body>'+tableHTML(ec(),f)+'</body></html>'],{type:'application/vnd.ms-excel'});
       const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=o.title.replace(/[^\w]+/g,'-')+'.xls'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),1000);
     }else{
-      $('#printRoot').innerHTML=`<div class="ptab"><h2>${esc(o.title)}</h2>${tableHTML(o.cols,f)}</div>`; window.print();
+      $('#printRoot').innerHTML=`<div class="ptab"><h2>${esc(o.title)}</h2>${tableHTML(ec(),f)}</div>`; window.print();
     }
   };
   draw(); icons();
+  return {redraw(){ st.p=1; draw(); icons(); }};
 }
 
 /* ---------- dashboard admin ---------- */
 const GUIDE_APP=[
- ['Masuk','Masuk dengan NIP dan kata sandi. Pada login pertama atau setelah reset, Anda wajib membuat kata sandi baru.'],
+ ['Masuk','Masuk dengan username (atau NIP) dan kata sandi. Pada login pertama atau setelah reset, Anda wajib membuat kata sandi baru.'],
  ['Dashboard','Pantau jumlah pengguna, siswa, DUDI, status PKL, dan progres penilaian. Klik kartu statistik untuk membuka halaman terkait.'],
  ['Buka / Tutup Penilaian','Gunakan tombol pada panel Status Pelaksanaan PKL. Saat ditutup, guru tidak dapat menyimpan nilai; Administrator tetap dapat.'],
  ['Data Penempatan','Pilih kelas, isi DuDi, alamat, instruktur, guru pembimbing, dan tanggal PKL, lalu simpan perubahan.'],
  ['Input Nilai PKL','Pilih kelas, isi nilai TP1–TP4, kehadiran, dan catatan, lalu simpan. Baris yang berubah ditandai kuning.'],
  ['Cetak Nilai PKL','Pilih siswa untuk pratinjau, lalu cetak per siswa atau satu kelas. Di jendela cetak pilih Simpan sebagai PDF (A4, tanpa header dan footer).'],
- ['Data Pengguna','Lihat daftar akun dan reset kata sandi. Tambah atau ubah pengguna saat ini dilakukan langsung di Google Sheets.'],
+ ['Data Pengguna','Tambah, lihat, ubah, aktifkan/nonaktifkan, dan hapus pengguna (Administrator, Kepala Sekolah, Wali Kelas, Guru Pembimbing); reset kata sandi; import dan export Excel.'],
  ['Data Referensi lain','Sekolah, Program, Kelas, TP, Kriteria, dan Siswa sementara diubah langsung di Google Sheets.'],
  ['Keluar','Buka menu profil di kanan atas, lalu pilih Keluar.']];
 function infoData(){
@@ -892,13 +907,73 @@ function drawBell(){
 }
 
 /* ---------- profil dan halaman belum tersedia ---------- */
-function renderProfil(){
-  const u=S.boot.user, sk=S.boot.sekolah;
-  $('#v-profil').innerHTML=`<div class="pnl"><h3 style="margin-bottom:16px"><i data-lucide="user-round"></i>Profil Saya</h3><div class="prof"><span class="av">${esc((u.nama.trim().charAt(0)||'?').toUpperCase())}</span>
-  <dl><dt>Nama</dt><dd>${esc(u.nama)}</dd><dt>NIP</dt><dd>${esc(u.nip)}</dd><dt>Peran</dt><dd>${u.role==='admin'?'Administrator':'Guru Pembimbing'}</dd><dt>Sekolah</dt><dd>${esc(sk.nama_sekolah||'-')}</dd><dt>Tahun / Semester</dt><dd>${esc(sk.tahun_ajaran||'-')} / ${esc(sk.semester||'-')}</dd></dl></div>
-  <div class="acts"><button class="btn" data-pf="pw"><i data-lucide="key-round"></i> Ganti Kata Sandi</button></div></div>`; icons();
+/* ---------- modal umum ---------- */
+function openModal(html,wide){
+  const m=$('#mdl'); m.innerHTML=`<div class="card${wide?' w':''}" role="dialog" aria-modal="true">${html}</div>`;
+  m.classList.remove('hidden'); icons(); const f=m.querySelector('input:not([disabled]),select:not([disabled])'); if(f) f.focus();
 }
-$('#v-profil').addEventListener('click',e=>{ if(e.target.closest('[data-pf="pw"]')) openPw(false); });
+function closeModal(){ const m=$('#mdl'); m.classList.add('hidden'); m.innerHTML=''; }
+$('#mdl').addEventListener('click',e=>{ if(e.target.closest('[data-mc]')) closeModal(); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&!$('#mdl').classList.contains('hidden')&&$('#pop').classList.contains('hidden')) closeModal(); });
+
+/* ---------- profil ---------- */
+const okFoto=f=>/^data:image\/jpeg;base64,[A-Za-z0-9+\/=]+$/.test(f||'');
+const avHTML=u=>okFoto(u.foto)?`<img src="${esc(u.foto)}" alt="Foto profil">`:esc((String(u.nama||'').trim().charAt(0)||'?').toUpperCase());
+function fmtWaktu(s){ const m=/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}:\d{2})/.exec(s||''); return m?`${+m[3]} ${BULAN[+m[2]-1]} ${m[1]}, ${m[4]} WIB`:(s||'-'); }
+function renderProfil(){
+  const u=S.boot.user, sk=S.boot.sekolah, adm=u.role==='admin';
+  $('#v-profil').innerHTML=`<div class="pnl"><h3 style="margin-bottom:16px"><i data-lucide="user-round"></i>Profil Saya</h3><div class="prof"><span class="av">${avHTML(u)}</span>
+  <dl><dt>Nama Lengkap</dt><dd>${esc(u.nama)}</dd><dt>Username</dt><dd>${esc(u.username||'-')}</dd><dt>NIP</dt><dd>${esc(u.nip||'-')}</dd><dt>Role</dt><dd>${esc(ROLE_LABEL[u.role]||u.role)}</dd><dt>Status</dt><dd>${u.aktif?bdg('g','Aktif'):bdg('r','Nonaktif')}</dd><dt>Login Terakhir</dt><dd>${esc(fmtWaktu(u.loginTerakhir))}</dd><dt>Sekolah</dt><dd>${esc(sk.nama_sekolah||'-')}</dd><dt>Tahun / Semester</dt><dd>${esc(sk.tahun_ajaran||'-')} / ${esc(sk.semester||'-')}</dd></dl></div>
+  <div class="acts" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px">${adm?'<button class="btn" data-pf="nama"><i data-lucide="pencil"></i> Ubah Nama Lengkap</button>':''}<button class="btn" data-pf="foto"><i data-lucide="image"></i> Ganti Foto Profil</button>${okFoto(u.foto)?'<button class="btn sec" data-pf="rmfoto">Hapus Foto</button>':''}<button class="btn" data-pf="pw"><i data-lucide="key-round"></i> Ganti Kata Sandi</button></div>
+  ${adm?'':'<p class="muted" style="margin:12px 0 0;font-size:.88em">Nama lengkap hanya dapat diubah oleh Administrator.</p>'}</div>
+  <input type="file" id="fFoto" class="hidden" accept="image/jpeg,image/png,image/webp">`; icons();
+}
+function afterProfile(user){ S.boot.user=Object.assign({},S.boot.user,user); applyShell(); if(S.tab==='profil') renderProfil(); }
+async function saveProfile(p,msg){
+  busy(true);
+  try{ const d=await api('updateProfile',p); afterProfile(d.user); busy(false); toast(msg,'ok'); return true; }
+  catch(e){ busy(false); toast(e.message,'err'); return false; }
+}
+$('#v-profil').addEventListener('click',async e=>{
+  const b=e.target.closest('[data-pf]'); if(!b) return; const a=b.dataset.pf;
+  if(a==='pw') openPw(false);
+  else if(a==='foto') $('#fFoto').click();
+  else if(a==='rmfoto'){ if(await popup('ask','Hapus foto profil Anda?',{yes:'Ya, Hapus',no:'Batal'})) await saveProfile({foto:''},'Foto profil dihapus'); }
+  else if(a==='nama') openNameForm();
+});
+$('#v-profil').addEventListener('change',async e=>{
+  if(e.target.id!=='fFoto') return; const f=e.target.files[0]; e.target.value=''; if(!f) return;
+  try{ const d=await fotoFromFile(f); await saveProfile({foto:d},'Foto profil diperbarui'); }catch(err){ toast(err.message,'err'); }
+});
+function fotoFromFile(file){
+  return new Promise((res,rej)=>{
+    if(!/^image\/(jpeg|png|webp)$/.test(file.type)) return rej(new Error('Format foto harus JPG, PNG, atau WebP'));
+    if(file.size>8*1024*1024) return rej(new Error('Ukuran file foto maksimal 8 MB'));
+    const url=URL.createObjectURL(file), img=new Image();
+    img.onerror=()=>{ URL.revokeObjectURL(url); rej(new Error('Foto tidak dapat dibaca')); };
+    img.onload=()=>{
+      URL.revokeObjectURL(url);
+      const n=Math.min(img.naturalWidth,img.naturalHeight); if(!n) return rej(new Error('Foto tidak valid'));
+      const c=document.createElement('canvas'); c.width=c.height=192; const x=c.getContext('2d');
+      x.fillStyle='#fff'; x.fillRect(0,0,192,192);
+      x.drawImage(img,(img.naturalWidth-n)/2,(img.naturalHeight-n)/2,n,n,0,0,192,192);
+      for(const q of [.85,.75,.65,.55,.45,.35]){ const d=c.toDataURL('image/jpeg',q); if(d.length<=28000) return res(d); }
+      rej(new Error('Foto terlalu kompleks. Pilih foto lain.'));
+    };
+    img.src=url;
+  });
+}
+function openNameForm(){
+  openModal(`<form id="nmForm" style="display:grid;gap:10px" novalidate><h3 style="margin:0">Ubah Nama Lengkap</h3><label class="lbl">Nama lengkap<input type="text" id="nmIn" maxlength="100" value="${esc(S.boot.user.nama)}"></label><div class="bar" style="margin:0"><button class="btn" type="submit">Simpan</button><button class="btn sec" type="button" data-mc>Batal</button></div><p id="nmErr" style="margin:0;font-size:13px;color:var(--err);min-height:1.2em"></p></form>`);
+  $('#nmForm').onsubmit=async e=>{
+    e.preventDefault(); const v=$('#nmIn').value.replace(/\s+/g,' ').trim();
+    if(v.length<3){ $('#nmErr').textContent='Nama lengkap minimal 3 karakter'; return; }
+    busy(true);
+    try{ const d=await api('updateProfile',{nama:v}); closeModal(); afterProfile(d.user); busy(false); toast('Nama lengkap diperbarui','ok'); }
+    catch(err){ busy(false); $('#nmErr').textContent=err.message; }
+  };
+}
+
 function renderSoon(){
   const R=ROUTES[S.route], name=R.c[R.c.length-1], tab=SOON[S.route];
   $('#v-soon').innerHTML=`<div class="pnl soon"><i data-lucide="construction"></i><h2>${esc(name)}</h2><p>${tab?`Halaman pengelolaan ${esc(name)} termasuk modul manajemen data dan belum dikerjakan. Untuk sementara ubah data ini langsung di tab “${tab}” pada Google Sheets.`:'Fitur ini belum tersedia pada tahap ini.'}</p><a class="btn" href="#dashboard" style="text-decoration:none;display:inline-block">Kembali ke Dashboard</a></div>`; icons();
@@ -1003,21 +1078,220 @@ $('#btnSavePen').onclick=async()=>{
   busy(false); renderPen(); updateSaveButtons();
 };
 
-/* ---------- pengguna (admin) ---------- */
-async function renderUsers(){
-  let rows=[];
-  try{ rows=await api('listUsers',{}); }catch(e){ toast(e.message,'err'); return; }
-  let h='<thead><tr><th>NIP</th><th>Nama</th><th>Role</th><th>Aktif</th><th>Kata sandi</th><th></th></tr></thead><tbody>';
-  rows.forEach(u=>{ h+=`<tr><td>${esc(u.nip)||'<span class="muted">(kosong - tidak bisa login)</span>'}</td><td>${esc(u.nama)}</td><td>${esc(u.role)}</td><td>${esc(u.aktif)}</td><td>${u.sudahGanti?'sudah diganti':'bawaan'}</td><td>${u.nip&&/^\d+$/.test(String(u.nip).replace(/\D/g,''))?`<button class="btn sec" data-reset="${esc(u.nip)}">Reset</button>`:''}</td></tr>`; });
-  $('#gridUser').innerHTML=h+'</tbody>';
+/* ---------- data pengguna (admin) ---------- */
+const U={rows:[],role:'',stat:'',ctl:null,opt:null};
+const UROLES=['admin','kepsek','wali_kelas','guru'];
+function resetUsers(){ U.rows=[]; U.ctl=null; U.opt=null; U.role=''; U.stat=''; const h=$('#usrDT'); if(h) h.innerHTML=''; }
+const userSelf=r=>!!S.boot&&r.id===S.boot.user.id;
+function uAct(r){
+  if(!r.bisaLogin) return '<span class="muted">Tanpa username/NIP. Lengkapi di Google Sheets.</span>';
+  const id=esc(r.id), self=userSelf(r);
+  return `<div class="rowact"><button type="button" class="btn sec sm" data-ua="detail" data-id="${id}">Detail</button><button type="button" class="btn sec sm" data-ua="edit" data-id="${id}">Edit</button>`+
+   (self?'':`<button type="button" class="btn sec sm" data-ua="toggle" data-id="${id}">${r.aktif?'Nonaktifkan':'Aktifkan'}</button><button type="button" class="btn sec sm" data-ua="reset" data-id="${id}">Reset</button><button type="button" class="btn dg sm" data-ua="del" data-id="${id}">Hapus</button>`)+'</div>';
 }
-$('#gridUser').addEventListener('click',async e=>{
-  const b=e.target.closest('[data-reset]'); if(!b) return;
-  if(!(await popup('ask','Reset kata sandi NIP '+b.dataset.reset+' ke kata sandi bawaan?',{yes:'Ya, Reset',no:'Batal'}))) return;
-  busy(true);
-  try{ await api('resetPassword',{nip:b.dataset.reset}); toast('Kata sandi direset','ok'); }catch(err){ toast(err.message,'err'); }
-  busy(false); renderUsers();
+const UCOLS=[{h:'No',k:'no'},{h:'Nama Lengkap',k:'nama'},{h:'Username',k:'username'},{h:'NIP',k:'nip'},{h:'Role',k:'roleLabel'},
+  {h:'Status',k:'statusLabel',html:r=>bdg(r.aktif?'g':'r',r.statusLabel)},{h:'Login Terakhir',k:'login'},{h:'Aksi',k:'aksi',nx:1,html:uAct}];
+const uFilt=()=>U.rows.filter(r=>(!U.role||r.role===U.role)&&(!U.stat||(U.stat==='aktif')===r.aktif))
+  .map((r,i)=>Object.assign({},r,{no:i+1,statusLabel:r.aktif?'Aktif':'Nonaktif',login:r.loginTerakhir?fmtWaktu(r.loginTerakhir):'-'}));
+async function renderUsers(){
+  let rows; try{ rows=await api('listUsers',{}); }catch(e){ toast(e.message,'err'); return; }
+  U.rows=rows;
+  if(!U.opt){ U.opt={title:'Data Pengguna',cols:UCOLS,rows:uFilt(),empty:'Belum ada pengguna.'}; U.ctl=DT($('#usrDT'),U.opt); }
+  else{ U.opt.rows=uFilt(); U.ctl.redraw(); }
+}
+$('#uFRole').onchange=e=>{ U.role=e.target.value; if(U.opt){ U.opt.rows=uFilt(); U.ctl.redraw(); } };
+$('#uFStat').onchange=e=>{ U.stat=e.target.value; if(U.opt){ U.opt.rows=uFilt(); U.ctl.redraw(); } };
+$('#uAdd').onclick=()=>userForm(null);
+$('#uImp').onclick=()=>$('#uFile').click();
+$('#uFile').onchange=e=>{ const f=e.target.files[0]; e.target.value=''; if(f) importFile(f); };
+$('#uTpl').onclick=async()=>{
+  const blob=new Blob(['\ufeffNama Lengkap,Username,Password,Role,NIP,Status\r\n'],{type:'text/csv'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='template-import-pengguna.csv'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+  popup('info','Isi kolom Role dengan: Administrator, Kepala Sekolah, Wali Kelas, atau Guru Pembimbing. Status: Aktif atau Nonaktif (kosong = Aktif). Kolom NIP wajib selain untuk Administrator dan harus berformat Teks. Simpan sebagai .xlsx atau .csv lalu klik Import Excel.',{title:'Template Import'});
+};
+$('#usrDT').addEventListener('click',async e=>{
+  const b=e.target.closest('[data-ua]'); if(!b) return;
+  const id=b.dataset.id, a=b.dataset.ua, r=U.rows.find(x=>x.id===id); if(!r) return;
+  if(a==='detail') return userDetail(id);
+  if(a==='edit') return userForm(r);
+  if(a==='toggle'){
+    const to=!r.aktif;
+    if(!(await popup('ask',`${to?'Aktifkan':'Nonaktifkan'} akun ${r.nama} (${r.username||r.nip})?${to?'':' Pengguna tidak akan bisa login.'}`,{yes:to?'Ya, Aktifkan':'Ya, Nonaktifkan',no:'Batal'}))) return;
+    return userOp(()=>api('setUserActive',{id,aktif:to?'ya':'tidak'}),`Akun ${to?'diaktifkan':'dinonaktifkan'}`);
+  }
+  if(a==='del'){
+    if(!(await popup('warn',`Hapus akun ${r.nama} (${r.username||r.nip}) secara permanen? Tindakan ini tidak dapat dibatalkan.`,{yes:'Ya, Hapus',no:'Batal'}))) return;
+    return userOp(()=>api('deleteUser',{id}),'Pengguna dihapus');
+  }
+  if(a==='reset'){
+    if(!(await popup('ask',`Buat kata sandi sementara baru untuk ${r.nama}? Kata sandi lama langsung tidak berlaku.`,{yes:'Ya, Reset',no:'Batal'}))) return;
+    busy(true);
+    try{ const d=await api('resetPassword',{id}); busy(false); renderUsers(); showTempPw(r,d.password); }
+    catch(err){ busy(false); toast(err.message,'err'); }
+  }
 });
+async function userOp(fn,msg){
+  busy(true);
+  try{ await fn(); busy(false); toast(msg,'ok'); }catch(err){ busy(false); toast(err.message,'err'); }
+  renderUsers();
+}
+function showTempPw(r,pw){
+  openModal(`<h3 style="margin:0 0 8px">Kata Sandi Sementara</h3><p class="muted" style="margin:0 0 10px;font-size:.9em">Untuk <b>${esc(r.nama)}</b>. Kata sandi ini hanya ditampilkan sekali. Pengguna wajib menggantinya saat login.</p><div style="font:700 1.3em ui-monospace,Menlo,monospace;padding:12px;background:var(--bg,#f1f5f9);border-radius:8px;text-align:center;user-select:all" id="tmpPw">${esc(pw)}</div><div class="bar" style="margin:12px 0 0"><button class="btn" type="button" id="tmpCopy">Salin</button><button class="btn sec" type="button" data-mc>Tutup</button></div>`);
+  $('#tmpCopy').onclick=async()=>{ try{ await navigator.clipboard.writeText(pw); snack('Kata sandi disalin'); }catch(e){ snack('Gagal menyalin; salin manual'); } };
+}
+async function userDetail(id){
+  busy(true); let u;
+  try{ u=await api('getUser',{id}); }catch(e){ busy(false); toast(e.message,'err'); return; }
+  busy(false);
+  const sandi=u.tanpaSandi?'Belum ada (tidak bisa login, lakukan Reset)':(u.wajibGanti?'Menunggu diganti pengguna saat login':'Sudah diatur pengguna');
+  openModal(`<h3 style="margin:0 0 14px"><i data-lucide="user-round"></i> Detail Pengguna</h3><div class="prof" style="margin-bottom:16px"><span class="av">${avHTML(u)}</span><dl><dt>Nama Lengkap</dt><dd>${esc(u.nama)}</dd><dt>Username</dt><dd>${esc(u.username||'-')}</dd><dt>NIP</dt><dd>${esc(u.nip||'-')}</dd><dt>Role</dt><dd>${esc(u.roleLabel)}</dd><dt>Status</dt><dd>${u.aktif?bdg('g','Aktif'):bdg('r','Nonaktif')}</dd><dt>Login Terakhir</dt><dd>${esc(u.loginTerakhir?fmtWaktu(u.loginTerakhir):'Belum pernah')}</dd><dt>Kata Sandi</dt><dd>${esc(sandi)}</dd></dl></div><div class="bar" style="margin:0"><button class="btn sec" type="button" data-mc>Tutup</button></div>`,1);
+}
+function ufCheck(d,edit){
+  if(d.nama.length<3) return 'Nama lengkap minimal 3 karakter';
+  if(!/^[a-z0-9][a-z0-9._\-]{2,29}$/.test(d.username)) return 'Username 3-30 karakter: huruf kecil, angka, titik, garis bawah, atau tanda hubung';
+  if(!d.nip&&d.role!=='admin') return 'NIP wajib diisi untuk role ini';
+  if(d.nip&&!/^[0-9]{8,25}$/.test(d.nip.replace(/[\s.\-]/g,''))) return 'NIP harus 8-25 digit angka';
+  if(d.password!==undefined&&(!edit||d.password!=='')){
+    if(d.password.length<8) return 'Kata sandi minimal 8 karakter';
+    if(!/[A-Za-z]/.test(d.password)||!/[0-9]/.test(d.password)) return 'Kata sandi harus memuat huruf dan angka';
+  }
+  return '';
+}
+function userForm(u){
+  const edit=!!u, self=edit&&userSelf(u);
+  openModal(`<form id="ufForm" novalidate><h3 style="margin:0 0 12px"><i data-lucide="${edit?'user-cog':'user-plus'}"></i> ${edit?'Edit':'Tambah'} Pengguna</h3><div class="fgrid">
+    <label class="lbl full">Nama Lengkap<input type="text" id="ufNama" maxlength="100" value="${esc(u?u.nama:'')}"></label>
+    <label class="lbl">Username<input type="text" id="ufUser" maxlength="30" autocomplete="off" autocapitalize="none" spellcheck="false" value="${esc(u?u.username:'')}" ${self?'disabled':''}></label>
+    <label class="lbl">NIP <small>(wajib kecuali Administrator)</small><input type="text" id="ufNip" inputmode="numeric" maxlength="30" autocomplete="off" value="${esc(u?u.nip:'')}"></label>
+    <label class="lbl">Role<select id="ufRole" ${self?'disabled':''}>${UROLES.map(r=>`<option value="${r}">${ROLE_LABEL[r]}</option>`).join('')}</select></label>
+    <label class="lbl">Status<select id="ufAktif" ${self?'disabled':''}><option value="ya">Aktif</option><option value="tidak">Nonaktif</option></select></label>
+    ${self?'':`<label class="lbl full">${edit?'Kata sandi baru <small>(kosongkan jika tidak diganti)</small>':'Kata sandi awal'}<input type="password" id="ufPw" autocomplete="new-password"></label>`}
+  </div><p class="muted" style="font-size:.85em;margin:10px 0">${self?'Untuk mengganti kata sandi Anda sendiri, gunakan menu Profil.':'Kata sandi minimal 8 karakter dan memuat huruf dan angka. Pengguna wajib menggantinya saat login pertama.'}</p>
+  <div class="bar" style="margin:0"><button class="btn" type="submit">Simpan</button><button class="btn sec" type="button" data-mc>Batal</button></div><p id="ufErr" style="margin:8px 0 0;font-size:13px;color:var(--err);min-height:1.2em"></p></form>`,1);
+  if(u){ $('#ufRole').value=u.role; $('#ufAktif').value=u.aktif?'ya':'tidak'; }
+  $('#ufForm').onsubmit=async e=>{
+    e.preventDefault();
+    const d={nama:$('#ufNama').value.replace(/\s+/g,' ').trim(),username:(u&&self?u.username:$('#ufUser').value.trim().toLowerCase()),nip:$('#ufNip').value.trim(),
+      role:self?u.role:$('#ufRole').value,aktif:self?(u.aktif?'ya':'tidak'):$('#ufAktif').value};
+    if($('#ufPw')) d.password=$('#ufPw').value;
+    if(edit) d.id=u.id;
+    const bad=ufCheck(d,edit); if(bad){ $('#ufErr').textContent=bad; return; }
+    busy(true);
+    try{
+      await api(edit?'updateUser':'createUser',{data:d});
+      if(self){ const b=await api('init',{}); S.boot.user=b.user; applyShell(); }
+      busy(false); closeModal(); toast(edit?'Perubahan pengguna disimpan':'Pengguna ditambahkan','ok'); renderUsers();
+    }catch(err){ busy(false); $('#ufErr').textContent=err.message; }
+  };
+}
+
+/* ---------- import pengguna (.xlsx native tanpa pustaka luar, atau .csv) ---------- */
+function parseCSV(t){
+  t=t.replace(/^\ufeff/,''); const first=t.split(/\r?\n/,1)[0], delim=first.split(';').length>first.split(',').length?';':',';
+  const rows=[]; let row=[],cur='',q=false;
+  for(let i=0;i<t.length;i++){ const ch=t[i];
+    if(q){ if(ch==='"'){ if(t[i+1]==='"'){ cur+='"'; i++; } else q=false; } else cur+=ch; }
+    else if(ch==='"') q=true;
+    else if(ch===delim){ row.push(cur); cur=''; }
+    else if(ch==='\n'||ch==='\r'){ if(ch==='\r'&&t[i+1]==='\n') i++; row.push(cur); cur=''; rows.push(row); row=[]; }
+    else cur+=ch; }
+  if(cur!==''||row.length){ row.push(cur); rows.push(row); }
+  return rows.map(r=>r.map(c=>({v:c,num:false})));
+}
+async function inflateRaw(u8){
+  const ds=new DecompressionStream('deflate-raw'), w=ds.writable.getWriter(); w.write(u8); w.close();
+  return new Uint8Array(await new Response(ds.readable).arrayBuffer());
+}
+async function unzipXlsx(buf){
+  if(typeof DecompressionStream==='undefined') throw new Error('Browser ini belum mendukung baca .xlsx. Simpan file sebagai .csv atau perbarui browser.');
+  const u8=new Uint8Array(buf), v=new DataView(buf); let e=u8.length-22;
+  while(e>=0&&v.getUint32(e,true)!==0x06054b50) e--;
+  if(e<0) throw new Error('File .xlsx tidak valid');
+  const n=v.getUint16(e+10,true); let p=v.getUint32(e+16,true); const out={}, td=new TextDecoder();
+  for(let i=0;i<n;i++){
+    if(v.getUint32(p,true)!==0x02014b50) break;
+    const method=v.getUint16(p+10,true), cs=v.getUint32(p+20,true), nl=v.getUint16(p+28,true), el=v.getUint16(p+30,true), cl=v.getUint16(p+32,true), off=v.getUint32(p+42,true);
+    const name=td.decode(u8.subarray(p+46,p+46+nl)); p+=46+nl+el+cl;
+    if(!/^xl\/(sharedStrings\.xml|worksheets\/sheet\d+\.xml)$/.test(name)) continue;
+    const ds=off+30+v.getUint16(off+26,true)+v.getUint16(off+28,true), data=u8.subarray(ds,ds+cs);
+    out[name]=method===0?data:await inflateRaw(data);
+  }
+  return out;
+}
+const colIdx=ref=>{ const m=/^([A-Z]+)/.exec(ref||''); let n=0; for(const ch of (m?m[1]:'A')) n=n*26+ch.charCodeAt(0)-64; return n-1; };
+async function readXlsx(buf){
+  const f=await unzipXlsx(buf), td=new TextDecoder(), dp=new DOMParser();
+  const sn=f['xl/worksheets/sheet1.xml']?'xl/worksheets/sheet1.xml':Object.keys(f).filter(k=>/worksheets\//.test(k)).sort()[0];
+  if(!sn) throw new Error('Lembar kerja tidak ditemukan di file .xlsx');
+  const ss=[];
+  if(f['xl/sharedStrings.xml']){
+    const d=dp.parseFromString(td.decode(f['xl/sharedStrings.xml']),'application/xml');
+    for(const si of d.getElementsByTagName('si')) ss.push(Array.from(si.getElementsByTagName('t')).map(t=>t.textContent).join(''));
+  }
+  const sd=dp.parseFromString(td.decode(f[sn]),'application/xml');
+  if(sd.getElementsByTagName('parsererror').length) throw new Error('Isi file .xlsx tidak dapat dibaca');
+  const out=[];
+  for(const re of sd.getElementsByTagName('row')){
+    const rn=(+re.getAttribute('r')||out.length+1)-1, arr=[];
+    for(const c of re.getElementsByTagName('c')){
+      const t=c.getAttribute('t'), ve=c.getElementsByTagName('v')[0]; let v='', num=false;
+      if(t==='s') v=ss[+(ve?ve.textContent:-1)]??'';
+      else if(t==='inlineStr') v=Array.from(c.getElementsByTagName('t')).map(x=>x.textContent).join('');
+      else if(t==='str'||t==='b'||t==='e') v=ve?ve.textContent:'';
+      else{ v=ve?ve.textContent:''; num=v!==''; }
+      arr[colIdx(c.getAttribute('r'))]={v,num};
+    }
+    out[rn]=arr;
+  }
+  return Array.from(out,r=>r?Array.from(r,c=>c||{v:'',num:false}):[]);
+}
+function toUserRecords(m){
+  const norm=s=>String(s||'').toLowerCase().replace(/[^a-z]/g,'');
+  const alias={nama:['namalengkap','nama'],username:['username','namapengguna'],password:['password','katasandi','sandi','katasandiawal'],role:['role','level','levelrole','peran'],nip:['nip'],aktif:['status','statusaktif','aktif']};
+  const hi=m.findIndex(r=>r.some(c=>norm(c.v)==='username'));
+  if(hi<0) throw new Error('Baris judul tidak ditemukan. Gunakan kolom: Nama Lengkap, Username, Password, Role, NIP, Status.');
+  const idx={}; m[hi].forEach((c,i)=>{ const n=norm(c.v); for(const k in alias) if(alias[k].includes(n)&&idx[k]===undefined) idx[k]=i; });
+  const miss=['nama','username','password','role'].filter(k=>idx[k]===undefined);
+  if(miss.length) throw new Error('Kolom wajib tidak ditemukan: '+miss.join(', '));
+  const rows=[], pre=[];
+  for(let i=hi+1;i<m.length;i++){
+    const r=m[i]||[]; if(!r.some(c=>c&&String(c.v).trim()!=='')) continue;
+    const g=k=>idx[k]===undefined?'':String((r[idx[k]]||{v:''}).v).trim();
+    const nc=idx.nip!==undefined?r[idx.nip]:null;
+    if(nc&&nc.num&&(/e/i.test(nc.v)||nc.v.replace(/\D/g,'').length>=16)) pre.push({baris:i+1,pesan:'NIP terbaca sebagai angka dan bisa rusak. Ubah format kolom NIP menjadi Teks.'});
+    rows.push({baris:i+1,nama:g('nama'),username:g('username'),password:g('password'),role:g('role'),nip:g('nip'),aktif:g('aktif')});
+  }
+  return {rows,pre};
+}
+async function importFile(file){
+  if(file.size>2*1024*1024) return toast('Ukuran file maksimal 2 MB','err');
+  const nm=file.name.toLowerCase();
+  busy(true);
+  try{
+    let m;
+    if(nm.endsWith('.xlsx')) m=await readXlsx(await file.arrayBuffer());
+    else if(nm.endsWith('.csv')) m=parseCSV(await file.text());
+    else throw new Error('Format file harus .xlsx atau .csv. File .xls lama tidak didukung; simpan ulang sebagai .xlsx.');
+    const {rows,pre}=toUserRecords(m);
+    if(!rows.length) throw new Error('Tidak ada baris data pada file');
+    if(rows.length>500) throw new Error('Maksimal 500 baris per import');
+    let errs=pre.slice(), total=0;
+    const d=await api('importUsers',{dryRun:true,rows});
+    if(!d.ok){ errs=errs.concat(d.errors); total+=Math.max(0,d.jumlahError-d.errors.length); }
+    busy(false);
+    if(errs.length){
+      const seen={}; errs=errs.filter(x=>seen[x.baris]?false:(seen[x.baris]=true)); total+=errs.length;
+      errs.sort((a,b)=>a.baris-b.baris);
+      await popup('err',`${total} baris bermasalah, tidak ada data yang disimpan. `+errs.slice(0,8).map(x=>`Baris ${x.baris}: ${x.pesan}`).join(' | ')+(total>8?` | ...dan ${total-8} lainnya`:''),{title:'Import dibatalkan'});
+      return;
+    }
+    if(!(await popup('ask',`${rows.length} pengguna valid dan siap diimpor. Semua wajib mengganti kata sandi saat login pertama. Lanjutkan?`,{yes:'Ya, Impor',no:'Batal'}))) return;
+    busy(true); let saved=0;
+    try{ for(let i=0;i<rows.length;i+=25){ const r=await api('importUsers',{dryRun:false,rows:rows.slice(i,i+25)}); if(!r.ok) throw new Error('Baris '+r.errors[0].baris+': '+r.errors[0].pesan); saved+=r.saved; } }
+    catch(err){ busy(false); await renderUsers(); toast(`Import terhenti setelah ${saved} pengguna tersimpan. ${err.message}`,'err'); return; }
+    busy(false); toast(`${saved} pengguna berhasil diimpor`,'ok'); renderUsers();
+  }catch(err){ busy(false); toast(err.message,'err'); }
+}
 
 /* ---------- rapor ---------- */
 function renderRaporSelect(){
