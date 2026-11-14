@@ -295,8 +295,9 @@ header.top .ttl h1{flex:none;min-width:0}
 .dd{position:relative}
 .ddm{display:none;position:absolute;right:0;top:calc(100% + 8px);min-width:230px;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 30px rgba(18,48,79,.18);padding:6px;z-index:30;color:var(--ink)}
 .ddm.open{display:block}.ddm.wide{width:340px;max-width:calc(100vw - 24px)}
-header.top .ddm a,header.top .ddm button.it{display:flex;gap:10px;align-items:center;width:100%;padding:9px 10px;border:0;background:none;color:var(--ink);border-radius:8px;text-decoration:none;font:inherit;font-size:14px;cursor:pointer;text-align:left}
-header.top .ddm a:hover,header.top .ddm button.it:hover{background:#eaf1f8}
+.ddm a,.ddm button.it{display:flex;gap:10px;align-items:center;width:100%;padding:9px 10px;border:0;background:none;color:var(--ink);border-radius:8px;text-decoration:none;font:inherit;font-size:13.5px;cursor:pointer;text-align:left;white-space:nowrap}
+.ddm a:hover,.ddm button.it:hover{background:#eaf1f8;color:var(--brand)}
+body.dark .ddm a:hover,body.dark .ddm button.it:hover{background:#223246;color:#8ec5ff}
 .ddh{font-weight:700;font-size:13px;padding:8px 10px 4px;color:var(--navy)}
 .ddm .opt{padding:2px 10px 8px;font-size:13px;color:var(--muted)}
 .seg{display:flex;gap:4px;margin-top:4px}
@@ -511,12 +512,29 @@ table.grid tr.dirty:hover td{background:#f9ecbc}
       <div class="tpbox" id="tpBox"></div>
       <div class="bar">
         <button class="btn" id="btnSaveNilai" disabled><i data-lucide="save"></i> Simpan perubahan</button>
+        <div class="dd">
+          <button type="button" class="btn sec sm" data-dd="mTplNilai" aria-expanded="false" aria-haspopup="true" title="Unduh Blangko / Template Nilai Excel (.xlsx)"><i data-lucide="download"></i> Template Excel <i data-lucide="chevron-down"></i></button>
+          <div class="ddm" id="mTplNilai">
+            <div class="ddh">Unduh Blangko Nilai (.xlsx)</div>
+            <button type="button" class="it" id="btnTplNilaiKelas" data-close><i data-lucide="file-spreadsheet"></i> Blangko Kelas Ini (Per Kelas)</button>
+            <button type="button" class="it" id="btnTplNilaiSemua" data-close><i data-lucide="layers"></i> Blangko Semua Kelas</button>
+          </div>
+        </div>
+        <div class="dd">
+          <button type="button" class="btn sec sm" data-dd="mImpNilai" aria-expanded="false" aria-haspopup="true" title="Import Nilai PKL dari Excel (.xlsx)"><i data-lucide="upload"></i> Import Nilai Excel <i data-lucide="chevron-down"></i></button>
+          <div class="ddm" id="mImpNilai">
+            <div class="ddh">Import Nilai PKL (.xlsx)</div>
+            <button type="button" class="it" id="btnImpNilaiKelas" data-close><i data-lucide="file-up"></i> Import Nilai Kelas Ini (Per Kelas)</button>
+            <button type="button" class="it" id="btnImpNilaiSemua" data-close><i data-lucide="folder-up"></i> Import Nilai Semua Kelas</button>
+          </div>
+        </div>
+        <button type="button" class="btn sec sm" id="btnExpNilai" title="Export nilai kelas ini ke Excel (.xlsx)"><i data-lucide="file-spreadsheet"></i> Export Excel (.xlsx)</button>
         <button type="button" class="btn sec sm" id="btnTogDescN" title="Tampilkan atau sembunyikan kolom Deskripsi TP 1 s.d. TP 4"><i data-lucide="file-text"></i> Deskripsi TP</button>
         <button type="button" class="btn sec sm on" id="btnTogCatN" title="Tampilkan atau sembunyikan kolom Deskripsi Catatan"><i data-lucide="message-square-text"></i> Deskripsi Catatan</button>
-        <button type="button" class="btn sec sm" id="btnExpNilai" title="Export nilai kelas ini ke Excel (.xlsx)"><i data-lucide="file-spreadsheet"></i> Export Excel (.xlsx)</button>
         <span class="spacer"></span>
         <label for="qNilai">Cari Siswa</label>
         <input type="search" id="qNilai" placeholder="Ketik NIS, NISN, atau Nama…">
+        <input type="file" id="nilFile" class="hidden" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
       </div>
       <p class="muted" style="margin:0 0 10px;font-size:13px">Baris yang berubah ditandai kuning. Nilai TP 0–100 (kosong = belum dinilai). Nilai Akhir (NA) = rata-rata TP terisi (dibulatkan). Gunakan tombol <b>Deskripsi TP</b> / <b>Deskripsi Catatan</b> di atas atau pada baris siswa jika tabel terlalu lebar.</p>
       <div class="tablewrap"><table class="grid" id="gridNilai"></table></div>
@@ -1603,6 +1621,326 @@ $('#btnExpNilai').onclick=()=>{
   snack(expRows.length+' baris nilai diekspor ke .xlsx');
   logExp('Rekapitulasi Nilai', expRows.length, 'Excel');
 };
+
+/* ---------- Template Blangko & Import Nilai Excel (Per Kelas & Semua Kelas) ---------- */
+const NILAI_TPL_COLS = [
+  {h:'No',k:'no',c:'cnum',w:6},
+  {h:'NIS',k:'nis',w:16,txt:1},
+  {h:'NISN',k:'nisn',w:16,txt:1},
+  {h:'Nama Siswa',k:'nama',w:28,txt:1},
+  {h:'Kelas',k:'kelas',w:16,txt:1},
+  {h:'Program Keahlian',k:'program_keahlian',w:26,txt:1},
+  {h:'Nilai TP 1',k:'tp1',c:'cnum',w:13},
+  {h:'Nilai TP 2',k:'tp2',c:'cnum',w:13},
+  {h:'Nilai TP 3',k:'tp3',c:'cnum',w:13},
+  {h:'Nilai TP 4',k:'tp4',c:'cnum',w:13},
+  {h:'Sakit',k:'sakit',c:'cnum',w:10},
+  {h:'Izin',k:'izin',c:'cnum',w:10},
+  {h:'Alpa',k:'alpa',c:'cnum',w:10},
+  {h:'Catatan',k:'catatan',w:36,txt:1}
+];
+
+$('#btnTplNilaiKelas').onclick = async () => {
+  if(!S.kelas) return toast('Pilih kelas terlebih dahulu','err');
+  if(!S.cache[S.kelas]) await loadKelas();
+  const rows = rowsNow(), pr = programInfo(), kl = kelasInfo();
+  const tplRows = rows.map((r, i) => ({
+    no: i + 1,
+    nis: r.nis,
+    nisn: r.nisn || '',
+    nama: r.nama,
+    kelas: r.kelas || S.kelas,
+    program_keahlian: r.program_keahlian || pr.program_keahlian || kl.kode_program || '',
+    tp1: r.tp1 !== '' && r.tp1 != null ? r.tp1 : '',
+    tp2: r.tp2 !== '' && r.tp2 != null ? r.tp2 : '',
+    tp3: r.tp3 !== '' && r.tp3 != null ? r.tp3 : '',
+    tp4: r.tp4 !== '' && r.tp4 != null ? r.tp4 : '',
+    sakit: r.sakit || 0,
+    izin: r.izin || 0,
+    alpa: r.alpa || 0,
+    catatan: r.catatan || ''
+  }));
+  const slug = S.kelas.replace(/[^\w]+/g, '-').toLowerCase();
+  dlXlsx(`blangko-nilai-pkl-kelas-${slug}.xlsx`, NILAI_TPL_COLS, tplRows, {
+    sheetName: ('Nilai ' + S.kelas).slice(0, 31),
+    blankRows: tplRows.length ? 0 : 25
+  });
+  popup('info', `Blangko Nilai PKL untuk kelas ${S.kelas} (${tplRows.length} siswa) telah diunduh dalam format .xlsx.\n\nSilakan isi kolom Nilai TP 1 s.d. TP 4 (0–100), Sakit, Izin, Alpa (hari), dan Catatan, lalu unggah kembali melalui menu Import Nilai Excel → Import Nilai Kelas Ini.`, {title: 'Blangko Nilai Per Kelas (.xlsx)'});
+};
+
+$('#btnTplNilaiSemua').onclick = async () => {
+  busy(true, 'Menyiapkan blangko nilai semua kelas…');
+  try {
+    let allRows = [];
+    if(RK.loaded && RK.rows.length) {
+      allRows = RK.rows;
+    } else {
+      const d = await api('rekapNilai', {});
+      allRows = (d.rows || []).map(decorateRekapRow);
+      RK.rows = allRows;
+      RK.loaded = true;
+    }
+    busy(false);
+    const sorted = [...allRows].sort((a, b) => (a.kelas || '').localeCompare(b.kelas || '') || (a.nama || '').localeCompare(b.nama || ''));
+    const tplRows = sorted.map((r, i) => ({
+      no: i + 1,
+      nis: r.nis,
+      nisn: r.nisn || '',
+      nama: r.nama,
+      kelas: r.kelas || '',
+      program_keahlian: r.program_keahlian || '',
+      tp1: r.tp1 !== '' && r.tp1 != null ? r.tp1 : '',
+      tp2: r.tp2 !== '' && r.tp2 != null ? r.tp2 : '',
+      tp3: r.tp3 !== '' && r.tp3 != null ? r.tp3 : '',
+      tp4: r.tp4 !== '' && r.tp4 != null ? r.tp4 : '',
+      sakit: r.sakit || 0,
+      izin: r.izin || 0,
+      alpa: r.alpa || 0,
+      catatan: r.catatan || ''
+    }));
+    const klsCount = new Set(tplRows.map(r => r.kelas).filter(Boolean)).size;
+    dlXlsx('blangko-nilai-pkl-semua-kelas.xlsx', NILAI_TPL_COLS, tplRows, {
+      sheetName: 'Nilai Semua Kelas',
+      blankRows: tplRows.length ? 0 : 35
+    });
+    popup('info', `Blangko Nilai PKL Semua Kelas (${tplRows.length} siswa dari ${klsCount} kelas) telah diunduh dalam format .xlsx.\n\nSilakan isi kolom Nilai TP 1 s.d. TP 4 (0–100), Sakit, Izin, Alpa, dan Catatan, lalu unggah kembali melalui menu Import Nilai Excel → Import Nilai Semua Kelas.`, {title: 'Blangko Nilai Semua Kelas (.xlsx)'});
+  } catch (err) {
+    busy(false);
+    toast(err.message, 'err');
+  }
+};
+
+let nilaiImpScope = 'kelas';
+$('#btnImpNilaiKelas').onclick = () => {
+  if(penTutup()) return toast('Penilaian sedang ditutup oleh Administrator', 'err');
+  if(!S.kelas) return toast('Pilih kelas terlebih dahulu', 'err');
+  nilaiImpScope = 'kelas';
+  $('#nilFile').click();
+};
+$('#btnImpNilaiSemua').onclick = () => {
+  if(penTutup()) return toast('Penilaian sedang ditutup oleh Administrator', 'err');
+  nilaiImpScope = 'semua';
+  $('#nilFile').click();
+};
+$('#nilFile').onchange = e => {
+  const f = e.target.files[0];
+  e.target.value = '';
+  if(f) importNilaiFile(f, nilaiImpScope);
+};
+
+function parseNilaiMatrix(m) {
+  const norm = s => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const alias = {
+    nis: ['nis', 'nomorinduksiswa', 'noinduk'],
+    nama: ['namasiswa', 'nama', 'namapesertadidik'],
+    kelas: ['kelas', 'namakelas'],
+    tp1: ['nilaitp1', 'tp1', 'tujuanpembelajaran1'],
+    tp2: ['nilaitp2', 'tp2', 'tujuanpembelajaran2'],
+    tp3: ['nilaitp3', 'tp3', 'tujuanpembelajaran3'],
+    tp4: ['nilaitp4', 'tp4', 'tujuanpembelajaran4'],
+    sakit: ['sakit', 's', 'jumlahsakit'],
+    izin: ['izin', 'ijin', 'i', 'jumlahizin'],
+    alpa: ['alpa', 'alpha', 'a', 'tanpaketerangan', 'tk'],
+    catatan: ['catatan', 'deskripsicatatan', 'catatanpembimbing', 'catatanpkl']
+  };
+  let hi = -1, idx = {};
+  for(let i = 0; i < Math.min(m.length, 15); i++) {
+    const t = {};
+    (m[i] || []).forEach((c, j) => {
+      const n = norm(c && c.v);
+      for(const k in alias) if(alias[k].includes(n) && t[k] === undefined) t[k] = j;
+    });
+    if(t.nis !== undefined && (t.tp1 !== undefined || t.tp2 !== undefined || t.tp3 !== undefined || t.tp4 !== undefined)) {
+      hi = i; idx = t; break;
+    }
+  }
+  if(hi < 0) throw new Error('Baris judul kolom tidak ditemukan. Pastikan terdapat kolom NIS dan Nilai TP 1 s.d. Nilai TP 4 (gunakan Template Excel).');
+  const rows = [], errs = [];
+  for(let i = hi + 1; i < m.length; i++) {
+    const r = m[i] || [];
+    if(!r.some(c => c && String(c.v).trim() !== '')) continue;
+    const g = k => idx[k] === undefined ? '' : String((r[idx[k]] || {v: ''}).v).replace(/^[\u200B-\u200D\uFEFF']+/,'').trim();
+    const nis = g('nis');
+    if(!nis) continue;
+    const nc = r[idx.nis];
+    if(nc && nc.num && (/e/i.test(nc.v) || nc.v.replace(/\D/g, '').length >= 16)) {
+      errs.push({baris: i + 1, pesan: 'NIS terbaca sebagai format eksponensial. Gunakan Template Excel (.xlsx) yang berformat Teks (@).'});
+      continue;
+    }
+    const rec = {baris: i + 1, nis, nama: g('nama'), kelas: g('kelas'), catatan: g('catatan').slice(0, 500)};
+    let rowBad = false;
+    ['tp1', 'tp2', 'tp3', 'tp4'].forEach((k, idxTp) => {
+      const raw = g(k).replace(',', '.');
+      if(raw === '' || raw === '-') { rec[k] = ''; return; }
+      const n = Number(raw);
+      if(!isFinite(n) || n < 0 || n > 100) {
+        errs.push({baris: i + 1, pesan: `Nilai TP ${idxTp + 1} (NIS ${nis}) harus berupa angka 0–100`});
+        rowBad = true;
+      } else {
+        rec[k] = Math.round(n);
+      }
+    });
+    ['sakit', 'izin', 'alpa'].forEach(k => {
+      const raw = g(k).replace(',', '.');
+      if(raw === '' || raw === '-') { rec[k] = 0; return; }
+      const n = Number(raw);
+      if(!isFinite(n) || n < 0 || n > 366) {
+        errs.push({baris: i + 1, pesan: `Kehadiran ${k} (NIS ${nis}) harus berupa angka 0–366 hari`});
+        rowBad = true;
+      } else {
+        rec[k] = Math.round(n);
+      }
+    });
+    if(!rowBad) rows.push(rec);
+  }
+  return {rows, errs};
+}
+
+async function importNilaiFile(file, scope) {
+  if(penTutup()) return toast('Penilaian sedang ditutup oleh Administrator', 'err');
+  busy(true, 'Memeriksa file Excel nilai PKL…');
+  try {
+    const m = await fileMatrix(file);
+    const {rows, errs} = parseNilaiMatrix(m);
+    if(!rows.length && !errs.length) throw new Error('Tidak ada baris data nilai siswa yang ditemukan pada file.');
+    if(scope === 'kelas') {
+      if(!S.cache[S.kelas]) await loadKelas();
+      const klsRows = rowsNow();
+      const byNis = {};
+      klsRows.forEach(s => { byNis[String(s.nis).trim()] = s; });
+      const validRows = [];
+      const seen = new Set();
+      rows.forEach(r => {
+        if(seen.has(r.nis)) {
+          errs.push({baris: r.baris, pesan: `NIS ${r.nis} tertulis ganda di dalam file`});
+          return;
+        }
+        seen.add(r.nis);
+        const target = byNis[r.nis];
+        if(!target) {
+          errs.push({baris: r.baris, pesan: `Siswa dengan NIS ${r.nis}${r.nama ? ' (' + r.nama + ')' : ''} tidak terdaftar pada kelas ${S.kelas}. Jika ingin mengimpor lintas kelas, pilih Import Nilai Semua Kelas.`});
+          return;
+        }
+        validRows.push(Object.assign({}, r, {kelas: S.kelas}));
+      });
+      busy(false);
+      if(errs.length) {
+        await showErrList(errs, errs.length);
+        return;
+      }
+      if(!(await popup('ask', `${validRows.length} data nilai siswa untuk kelas ${S.kelas} valid dan siap diimpor.\n\nSimpan perubahan nilai ke database sekarang?`, {yes: 'Ya, Impor & Simpan', no: 'Batal'}))) return;
+      busy(true, `Menyimpan nilai kelas ${S.kelas}…`);
+      const payloadRows = validRows.map(r => ({
+        baris: r.baris, nis: r.nis, kelas: S.kelas,
+        tp1: r.tp1, tp2: r.tp2, tp3: r.tp3, tp4: r.tp4,
+        catatan: r.catatan, sakit: r.sakit, izin: r.izin, alpa: r.alpa
+      }));
+      try {
+        const res = await api('importNilai', {dryRun: false, kelas: S.kelas, rows: payloadRows});
+        if(res && res.ok === false && res.errors && res.errors.length) {
+          busy(false); await showErrList(res.errors, res.jumlahError || res.errors.length); return;
+        }
+      } catch (eImp) {
+        if(/Aksi tidak dikenal/i.test(eImp.message || '')) {
+          for(let i = 0; i < payloadRows.length; i += 100) {
+            await api('saveNilai', {kelas: S.kelas, rows: payloadRows.slice(i, i + 100)});
+          }
+        } else throw eImp;
+      }
+      validRows.forEach(r => {
+        const t = byNis[r.nis];
+        if(t) {
+          Object.assign(t, {tp1: r.tp1, tp2: r.tp2, tp3: r.tp3, tp4: r.tp4, catatan: r.catatan, sakit: r.sakit, izin: r.izin, alpa: r.alpa});
+          t._o = snap(t);
+        }
+      });
+      RK.loaded = false; S.dash = null;
+      busy(false);
+      renderNilai(); updateSaveButtons();
+      toast(`${validRows.length} nilai siswa kelas ${S.kelas} berhasil diimpor dan disimpan`, 'ok');
+    } else {
+      let allSiswa = [];
+      if(RK.loaded && RK.rows.length) {
+        allSiswa = RK.rows;
+      } else {
+        const d = await api('rekapNilai', {});
+        allSiswa = (d.rows || []).map(decorateRekapRow);
+        RK.rows = allSiswa;
+        RK.loaded = true;
+      }
+      const byNis = {};
+      allSiswa.forEach(s => { byNis[String(s.nis).trim()] = s; });
+      const byKelas = {};
+      const seen = new Set();
+      let totalValid = 0;
+      rows.forEach(r => {
+        if(seen.has(r.nis)) {
+          errs.push({baris: r.baris, pesan: `NIS ${r.nis} tertulis ganda di dalam file`});
+          return;
+        }
+        seen.add(r.nis);
+        const target = byNis[r.nis];
+        if(!target) {
+          errs.push({baris: r.baris, pesan: `Siswa dengan NIS ${r.nis}${r.nama ? ' (' + r.nama + ')' : ''} tidak ditemukan di database atau di luar hak akses Anda`});
+          return;
+        }
+        const kls = target.kelas;
+        if(r.kelas && r.kelas.toLowerCase() !== kls.toLowerCase()) {
+          errs.push({baris: r.baris, pesan: `NIS ${r.nis} (${target.nama}) terdaftar di kelas ${kls}, bukan ${r.kelas}`});
+          return;
+        }
+        (byKelas[kls] = byKelas[kls] || []).push({
+          nis: r.nis, kelas: kls,
+          tp1: r.tp1, tp2: r.tp2, tp3: r.tp3, tp4: r.tp4,
+          catatan: r.catatan, sakit: r.sakit, izin: r.izin, alpa: r.alpa
+        });
+        totalValid++;
+      });
+      busy(false);
+      if(errs.length) {
+        await showErrList(errs, errs.length);
+        return;
+      }
+      const klsNames = Object.keys(byKelas).sort();
+      if(!(await popup('ask', `${totalValid} data nilai siswa dari ${klsNames.length} kelas (${klsNames.join(', ')}) valid dan siap diimpor.\n\nSimpan seluruh nilai ke database sekarang?`, {yes: 'Ya, Impor Semua Kelas', no: 'Batal'}))) return;
+      busy(true, `Menyimpan ${totalValid} nilai siswa pada ${klsNames.length} kelas…`);
+      let savedCount = 0;
+      const allPayload = [];
+      klsNames.forEach(kls => { byKelas[kls].forEach(item => allPayload.push(item)); });
+      try {
+        for(let i = 0; i < allPayload.length; i += 250) {
+          const chunk = allPayload.slice(i, i + 250);
+          const res = await api('importNilai', {dryRun: false, kelas: '', rows: chunk});
+          if(res && res.ok === false && res.errors && res.errors.length) {
+            busy(false); await showErrList(res.errors, res.jumlahError || res.errors.length); return;
+          }
+          savedCount += chunk.length;
+        }
+        klsNames.forEach(kls => { delete S.cache[kls]; });
+      } catch (eImp) {
+        if(/Aksi tidak dikenal/i.test(eImp.message || '')) {
+          savedCount = 0;
+          for(const kls of klsNames) {
+            const list = byKelas[kls];
+            for(let i = 0; i < list.length; i += 100) {
+              const chunk = list.slice(i, i + 100);
+              await api('saveNilai', {kelas: kls, rows: chunk});
+              savedCount += chunk.length;
+            }
+            delete S.cache[kls];
+          }
+        } else throw eImp;
+      }
+      RK.loaded = false; S.dash = null;
+      busy(false);
+      if(S.kelas) await loadKelas();
+      toast(`${savedCount} nilai siswa dari ${klsNames.length} kelas berhasil diimpor dan disimpan`, 'ok');
+    }
+  } catch (err) {
+    busy(false);
+    toast(err.message, 'err');
+  }
+}
 
 $('#gridNilai').addEventListener('click',e=>{
   const b=e.target.closest('[data-na-act]'); if(!b) return;
@@ -2991,7 +3329,7 @@ async function ctPrint(rows,label){
 /* ====== ADMINISTRASI: Pengaturan, Backup dan Restore, Log Aktivitas ====== */
 const ADM={set:null,bk:{h:null,ctl:null},lg:{q:{page:1,size:10},seq:0,data:null,t:null}};
 function resetAdm(){ ADM.set=null; ADM.bk={h:null,ctl:null}; ADM.lg={q:{page:1,size:10},seq:0,data:null,t:null}; const h=$('#v-adm'); if(h) h.innerHTML=''; }
-const LOG_EXP=['Data Pengguna','Data Sekolah','Data Program','Data Kelas','Data Tujuan Pembelajaran','Data Kriteria Skor & Deskripsi','Data Siswa','Data Penempatan PKL','Cetak Nilai PKL','Riwayat Backup'];
+const LOG_EXP=['Data Pengguna','Data Sekolah','Data Program','Data Kelas','Data Tujuan Pembelajaran','Data Kriteria Skor & Deskripsi','Data Siswa','Data Penempatan PKL','Nilai PKL','Blangko Nilai PKL','Cetak Nilai PKL','Riwayat Backup'];
 function expModul(t){ t=String(t||''); if(/^Rekapitulasi/i.test(t)) return 'Rekapitulasi Nilai'; return LOG_EXP.includes(t)?t:null; }
 /** Ekspor terjadi di browser; server mencatat laporan dari aplikasi ini (ditandai pada keterangan log). */
 function logExp(title,n,fmt){ const m=expModul(title); if(!m||!S.token) return; api('logExport',{modul:m,jumlah:n,format:fmt}).catch(()=>{}); }
