@@ -283,6 +283,11 @@ body.dark .ddm{background:#16212f}body.dark header.top button.pf:hover{backgroun
 .nav .sub{display:none;flex-direction:column;gap:2px;margin:2px 0 4px 20px;padding-left:10px;border-left:1px solid rgba(255,255,255,.16)}
 .nav .sub.open{display:flex}.nav .sub .mi{padding:8px 10px;font-weight:500}
 body.collapsed .nav .sub,body.collapsed .nav .chev{display:none!important}
+.sfoot{padding:10px;border-top:1px solid rgba(255,255,255,.12);flex:none}
+.btn-out{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:10px 12px;border:0;border-radius:8px;background:#d64545;color:#fff;font:inherit;font-weight:700;font-size:.93em;cursor:pointer;transition:background .15s}
+.btn-out:hover{background:#b93636}
+.btn-out:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.btn-out svg{width:18px;height:18px}
 body.collapsed .sbrand{padding:12px;justify-content:center}
 @media(max-width:900px){body.collapsed .nav .sub.open{display:flex!important}body.collapsed .nav .chev{display:block!important}}
 header.top .ttl{min-width:0;display:flex;flex-direction:column;line-height:1.25}
@@ -309,7 +314,8 @@ header.top button.pf:hover{background:#eaf1f8}
 .pf .who{display:flex;flex-direction:column;text-align:left;line-height:1.2}.pf .who small{color:var(--muted);font-size:11.5px}
 .pf svg{width:16px;height:16px}
 .av{width:36px;height:36px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:700;font-size:.9em;flex:none}
-@media(max-width:900px){.chip{display:none}.crumb{max-width:46vw}}
+header.top .ttl .chip{align-self:flex-start;margin-top:3px;padding:3px 10px;font-size:11.5px;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+@media(max-width:900px){.crumb{max-width:46vw}}
 @media(max-width:640px){#btnFull{display:none}header.top{gap:6px;padding:0 8px}.pf svg{display:none}}
 .hero{display:flex;gap:20px;align-items:center;background:linear-gradient(120deg,#0a3f86,#0b5db0 55%,#2b8de3);color:#fff;border-radius:14px;padding:24px 26px;margin-bottom:16px;box-shadow:0 8px 24px rgba(11,93,176,.28)}
 .hero .hi{width:76px;height:76px;border-radius:20px;background:rgba(255,255,255,.16);display:grid;place-items:center;flex:none}
@@ -479,13 +485,13 @@ table.grid tr.dirty:hover td{background:#f9ecbc}
 <aside id="side" aria-label="Navigasi utama">
   <div class="sbrand"><img data-local-src="logo-rapor.png" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='30' fill='%2314304f'/><rect x='18' y='14' width='28' height='36' rx='4' fill='%23ffffff'/><path d='M24 24h16M24 32h16M24 40h10' stroke='%230b5db0' stroke-width='3.5' stroke-linecap='round'/><circle cx='42' cy='42' r='8' fill='%232e9e5b'/><path d='M38.5 42l2.3 2.5 4.7-5' stroke='%23ffffff' stroke-width='2.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>" alt="Logo e-Rapor PKL SMK" width="38" height="38"><span class="lt"><b>e-Rapor PKL SMK</b><small id="sbSchool">Sistem Informasi PKL</small></span></div>
   <nav class="nav" id="nav"></nav>
+  <div class="sfoot"><button type="button" class="btn-out" id="btnLogoutSide" title="Keluar"><i data-lucide="log-out"></i><span class="lt">Keluar</span></button></div>
 </aside>
 <div id="scrim"></div>
 <div class="mainwrap">
   <header class="top">
     <button class="ib" id="btnMenu" aria-label="Buka atau tutup menu"><i data-lucide="menu"></i></button>
-    <div class="ttl"><h1 id="appTitle">e-Rapor PKL SMK</h1><nav class="crumb" id="crumb" aria-label="Breadcrumb"></nav></div>
-    <span class="chip" id="hdPeriod" title="Tahun Pelajaran dan Semester aktif"></span>
+    <div class="ttl"><h1 id="appTitle">e-Rapor PKL SMK</h1><span class="chip" id="hdPeriod" title="Tahun Ajaran dan Semester aktif"></span></div>
     <span class="spacer"></span>
     <button class="ib" id="btnFull" title="Layar penuh" aria-label="Layar penuh"><i data-lucide="maximize"></i></button>
     <div class="dd"><button class="ib" data-dd="mTheme" aria-expanded="false" aria-haspopup="true" title="Pengaturan tampilan" aria-label="Pengaturan tampilan"><i data-lucide="palette"></i></button>
@@ -1017,7 +1023,8 @@ $('#loginForm').onsubmit=async e=>{
     busy(false); await start();
   }catch(err){ busy(false); $('#loginMsg').textContent=err.message; $('#inPw').classList.add('bad'); }
 };
-$('#btnLogout').onclick=async()=>{ if(await popup('ask','Apakah Anda yakin ingin keluar dari aplikasi?',{yes:'Ya, Keluar',no:'Batal'})) logout(''); };
+const doLogout=async()=>{ if(await popup('ask','Apakah Anda yakin ingin keluar dari aplikasi?',{yes:'Ya, Keluar',no:'Batal'})) logout(''); };
+$('#btnLogout').onclick=doLogout; $('#btnLogoutSide').onclick=doLogout;
 
 /* ---------- ganti kata sandi ---------- */
 function openPw(forced){
@@ -1051,7 +1058,7 @@ async function start(){
   if(b.user.wajibGanti){ $('#login').classList.add('hidden'); $('#app').classList.add('hidden'); openPw(true); return; }
   $('#login').classList.add('hidden'); $('#app').classList.remove('hidden');
   applyShell();
-  try{ localStorage.setItem('rapor_school',JSON.stringify({n:b.sekolah.nama_sekolah||'',l:b.sekolah.logo_url||b.sekolah.logo||''})); }catch(e){}
+  try{ localStorage.setItem('rapor_school',JSON.stringify({n:b.sekolah.nama_sekolah||'',l:b.sekolah.logo_url||b.sekolah.logo||'',ta:b.sekolah.tahun_ajaran||'',sm:b.sekolah.semester||''})); }catch(e){}
   icons();
   buildNav();
   $('#dlGuru').innerHTML = (b.guru||[]).map(g=>`<option value="${esc(g)}">`).join('');
@@ -1154,8 +1161,7 @@ function markNav(){
 }
 function drawCrumb(){
   const c=ROUTES[S.route].c, home=homeRoute();
-  $('#crumb').innerHTML=`<a href="#${home}">Beranda</a>`+c.map((x,i)=>'<i data-lucide="chevron-right"></i>'+(i===c.length-1?`<b aria-current="page">${esc(x)}</b>`:`<span>${esc(x)}</span>`)).join('');
-  document.title=c[c.length-1]+' · e-Rapor PKL SMK'; icons();
+    document.title=c[c.length-1]+' · e-Rapor PKL SMK'; icons();
 }
 function routeNow(){
   if(!S.boot) return;
@@ -1170,7 +1176,7 @@ function routeNow(){
 window.addEventListener('hashchange',routeNow);
 function applyShell(){
   const b=S.boot, sk=b.sekolah;
-  $('#hdPeriod').textContent='TP '+(sk.tahun_ajaran||S.ta||'-')+' · Semester '+(sk.semester||S.sem||'-');
+  $('#hdPeriod').textContent='Tahun Ajaran '+(sk.tahun_ajaran||S.ta||'-')+' · Semester '+(sk.semester||S.sem||'-');
   $('#sbSchool').textContent=sk.nama_sekolah||'Sistem Informasi PKL';
   $('#whoName').textContent=b.user.nama; $('#whoRole').textContent=ROLE_LABEL[b.user.role]||b.user.role;
   $('#avatar').innerHTML=avHTML(b.user);
@@ -2750,7 +2756,7 @@ async function afterRefChange(){
     Object.keys(S.cache).forEach(k=>{ if(!names.has(k)) delete S.cache[k]; });
     S.kelas=names.has(keep)?keep:(b.kelas[0]?b.kelas[0].nama_kelas:null); $('#selKelas').value=S.kelas||'';
     $('#dlGuru').innerHTML=(b.guru||[]).map(g=>`<option value="${esc(g)}">`).join('');
-    try{ localStorage.setItem('rapor_school',JSON.stringify({n:b.sekolah.nama_sekolah||'',l:b.sekolah.logo_url||b.sekolah.logo||''})); }catch(e){}
+    try{ localStorage.setItem('rapor_school',JSON.stringify({n:b.sekolah.nama_sekolah||'',l:b.sekolah.logo_url||b.sekolah.logo||'',ta:b.sekolah.tahun_ajaran||'',sm:b.sekolah.semester||''})); }catch(e){}
     RK.loaded=false; applyShell(); S.dash=null; S.dashErr=null; loadDash();
   }catch(e){ /* penyegaran latar belakang; data sudah tersimpan */ }
 }
@@ -3579,9 +3585,11 @@ function loginBrand(){
 }
 (function(){
   const d=new Date(), y=d.getFullYear(), m=d.getMonth()+1, t=m>=7?y:y-1;
-  $('#selTa').innerHTML=[t-1,t,t+1].map(v=>`<option${v===t?' selected':''}>${v}/${v+1}</option>`).join('');
+  let sc={}; try{ sc=JSON.parse(localStorage.getItem('rapor_school')||'{}')||{}; }catch(e){}
+  const taAktif=/^\d{4}\/\d{4}$/.test(sc.ta||'')?sc.ta:(t+'/'+(t+1));
+  $('#selTa').innerHTML=`<option selected>${taAktif}</option>`;
   $('#selSem').value=ssGet('rapor_sem')||(m>=7?'Ganjil':'Genap');
-  if(ssGet('rapor_ta')) $('#selTa').value=ssGet('rapor_ta');
+  if(/^(Ganjil|Genap)$/.test(sc.sm||'')) $('#selSem').value=sc.sm;
   S.ta=$('#selTa').value; S.sem=$('#selSem').value;
 })();
 $('#btnGoLogin').onclick=()=>$('#inNip').focus();
