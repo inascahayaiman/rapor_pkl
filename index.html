@@ -42,7 +42,9 @@ table.grid td.n{text-align:center;color:var(--muted)}
 table.grid tr.dirty td{background:var(--dirty)}
 table.grid input[type=number]{width:62px;text-align:center}
 table.grid input.s{width:50px}
-table.grid input.cat{width:340px}
+table.grid input.cat{width:260px}
+.dcell{max-width:320px;min-width:220px;white-space:normal!important;font-size:12.5px;line-height:1.35;color:var(--ink)}
+.dcell small{display:block;color:var(--muted)}
 table.grid input.w{width:200px}table.grid input.w2{width:260px}
 .na{font-weight:700;text-align:center;min-width:40px}
 .invalid{border-color:var(--err)!important;background:#fdecea!important}
@@ -413,10 +415,32 @@ table.dt td{white-space:normal;padding:8px 10px;vertical-align:top}table.dt th{p
     <section id="v-nilai" class="card hidden">
       <div class="tpbox" id="tpBox"></div>
       <div class="bar">
-        <button class="btn" id="btnSaveNilai" disabled>Simpan perubahan</button>
-        <span class="muted">Baris yang berubah ditandai kuning. Nilai 0–100, kosong = belum dinilai.</span>
+        <button class="btn" id="btnSaveNilai" disabled><i data-lucide="save"></i> Simpan perubahan</button>
+        <a href="#rekap" class="btn sec" style="text-decoration:none;display:inline-flex;gap:6px;align-items:center"><i data-lucide="clipboard-list"></i> Lihat Rekapitulasi Nilai</a>
+        <span class="spacer"></span>
+        <label for="qNilai">Cari Siswa</label>
+        <input type="search" id="qNilai" placeholder="Ketik NIS, NISN, atau Nama…">
       </div>
+      <p class="muted" style="margin:0 0 10px;font-size:13px">Baris yang berubah ditandai kuning. Nilai TP berupa bilangan bulat 0–100 (kosong = belum dinilai). Nilai Akhir (NA) = rata-rata TP yang terisi (dibulatkan). Kehadiran (Sakit/Izin/Alpa) dalam hari (0–366).</p>
       <div class="tablewrap"><table class="grid" id="gridNilai"></table></div>
+    </section>
+
+    <section id="v-rekap" class="hidden">
+      <div class="pnl rdt">
+        <div class="ph">
+          <h3><i data-lucide="clipboard-list"></i>Rekapitulasi Nilai PKL</h3>
+          <button type="button" class="btn sec sm" id="rkRefresh"><i data-lucide="refresh-cw"></i>Muat ulang</button>
+        </div>
+        <div class="tpbox" id="rkSummary">Memuat ringkasan rekapitulasi…</div>
+        <div class="ubar">
+          <a href="#nilai" class="btn sec" style="text-decoration:none;display:inline-flex;gap:6px;align-items:center"><i data-lucide="pencil-line"></i> Ke Input Nilai</a>
+          <span class="spacer"></span>
+          <label class="lbl" style="display:flex;align-items:center;gap:6px">Program <select id="rkFProg"><option value="">Semua Program</option></select></label>
+          <label class="lbl" style="display:flex;align-items:center;gap:6px">Kelas <select id="rkFKelas"><option value="">Semua Kelas</option></select></label>
+          <label class="lbl" style="display:flex;align-items:center;gap:6px">Status Penilaian <select id="rkFStat"><option value="">Semua Status</option><option value="Lengkap">Lengkap</option><option value="Dalam Proses">Dalam Proses</option><option value="Belum Dinilai">Belum Dinilai</option></select></label>
+        </div>
+        <div id="rkDT"><div class="muted" style="padding:14px">Memuat data rekapitulasi nilai…</div></div>
+      </div>
     </section>
 
     <section id="v-rapor" class="hidden">
@@ -538,7 +562,7 @@ function showLogin(msg){
   $('#loginMsg').textContent = msg||''; loginBrand(); icons();
 }
 function logout(msg){
-  resetUsers(); resetRef(); S.token=null; S.boot=null; S.dash=null; S.dashErr=null; ssSet('rapor_token',null); S.cache={};
+  resetUsers(); resetRef(); resetRekap(); S.token=null; S.boot=null; S.dash=null; S.dashErr=null; ssSet('rapor_token',null); S.cache={};
   $('#inPw').value=''; showLogin(msg);
 }
 $('#loginForm').onsubmit=async e=>{
@@ -646,6 +670,7 @@ const ROUTES={
   'penempatan-grid':{v:'penempatan',c:['Data Referensi','Data Penempatan (Grid Kelas)'],admin:1},
   'ref-pengguna':{v:'pengguna',c:['Data Referensi','Data Pengguna'],admin:1},
   nilai:{v:'nilai',c:['Input Nilai PKL']},
+  rekap:{v:'rekap',c:['Rekapitulasi Nilai PKL']},
   rapor:{v:'rapor',c:['Cetak Nilai PKL']},
   pengaturan:{v:'soon',c:['Pengaturan'],admin:1},
   backup:{v:'soon',c:['Backup dan Restore'],admin:1},
@@ -658,7 +683,7 @@ const MENU=[
     {r:'ref-sekolah',t:'Data Sekolah',i:'school'},{r:'ref-program',t:'Data Program',i:'layers'},{r:'ref-kelas',t:'Data Kelas',i:'presentation'},
     {r:'ref-tp',t:'Data Tujuan Pembelajaran',i:'target'},{r:'ref-kriteria',t:'Data Kriteria',i:'list-checks'},{r:'ref-siswa',t:'Data Siswa',i:'graduation-cap'},
     {r:'ref-penempatan',t:'Data Penempatan',i:'map-pin'},{r:'ref-pengguna',t:'Data Pengguna',i:'users-round'}]},
-  {r:'nilai',t:'Input Nilai PKL',i:'pencil-line'},{r:'rapor',t:'Cetak Nilai PKL',i:'printer'},
+  {r:'nilai',t:'Input Nilai PKL',i:'pencil-line'},{r:'rekap',t:'Rekapitulasi Nilai',i:'clipboard-list'},{r:'rapor',t:'Cetak Nilai PKL',i:'printer'},
   {r:'pengaturan',t:'Pengaturan',i:'settings'},{r:'backup',t:'Backup dan Restore',i:'database-backup'},{r:'log',t:'Log Aktivitas',i:'scroll-text'}
 ];
 const KELAS_VIEWS=['nilai','rapor','penempatan'];
@@ -713,7 +738,7 @@ function applyShell(){
 }
 
 function renderAll(){
-  ['dashboard','profil','nilai','rapor','penempatan','pengguna','ref','soon'].forEach(t=>$('#v-'+t).classList.toggle('hidden',S.tab!==t));
+  ['dashboard','profil','nilai','rekap','rapor','penempatan','pengguna','ref','soon'].forEach(t=>$('#v-'+t).classList.toggle('hidden',S.tab!==t));
   $('#barKelas').classList.toggle('hidden',!KELAS_VIEWS.includes(S.tab));
   if(!S.boot) return;
   if(S.tab==='ref') renderRef();
@@ -721,6 +746,7 @@ function renderAll(){
   if(S.tab==='profil') renderProfil();
   if(S.tab==='soon') renderSoon();
   if(S.tab==='pengguna') renderUsers();
+  if(S.tab==='rekap') renderRekap();
   if(S.kelas){
     if(S.tab==='nilai') renderNilai();
     if(S.tab==='rapor') renderRaporSelect();
@@ -813,7 +839,8 @@ const GUIDE_APP=[
  ['Dashboard','Pantau jumlah pengguna, siswa, DUDI, status PKL, dan progres penilaian. Klik kartu statistik untuk membuka halaman terkait.'],
  ['Buka / Tutup Penilaian','Gunakan tombol pada panel Status Pelaksanaan PKL. Saat ditutup, guru tidak dapat menyimpan nilai; Administrator tetap dapat.'],
  ['Data Penempatan','Pilih kelas, isi DuDi, alamat, instruktur, guru pembimbing, dan tanggal PKL, lalu simpan perubahan.'],
- ['Input Nilai PKL','Pilih kelas, isi nilai TP1–TP4, kehadiran, dan catatan, lalu simpan. Baris yang berubah ditandai kuning.'],
+ ['Input Nilai PKL','Pilih kelas, isi nilai TP1–TP4, kehadiran, dan catatan, lalu simpan. Nilai Akhir dan Deskripsi terhitung otomatis sesuai referensi TP dan Kriteria.'],
+ ['Rekapitulasi Nilai','Pantau rekapitulasi nilai TP1–TP4, Nilai Akhir, Deskripsi, Catatan, dan Kehadiran dengan fitur pencarian, filter Kelas/Program/Status Penilaian, paginasi, serta Export Excel, PDF, dan Print.'],
  ['Cetak Nilai PKL','Pilih siswa untuk pratinjau, lalu cetak per siswa atau satu kelas. Di jendela cetak pilih Simpan sebagai PDF (A4, tanpa header dan footer).'],
  ['Data Pengguna','Tambah, lihat, ubah, aktifkan/nonaktifkan, dan hapus pengguna (Administrator, Kepala Sekolah, Wali Kelas, Guru Pembimbing); reset kata sandi; import dan export Excel.'],
  ['Data Referensi','Menu Data Sekolah, Data Program, Data Kelas, Data Tujuan Pembelajaran, Data Kriteria, Data Siswa, dan Data Penempatan dikelola langsung di aplikasi (tambah, detail, ubah, hapus, import, dan export Excel).'],
@@ -1001,56 +1028,254 @@ function nilaiNA(r){
 function deskripsi(skor, teks){
   if(skor===''||skor==null) return '';
   const k=[...S.boot.kriteria].map(x=>({min:+x.nilai_min,aw:x.awalan,ak:x.akhiran})).sort((a,b)=>b.min-a.min).find(x=>skor>=x.min);
-  return k? `${k.aw} ${teks}${k.ak}` : '';
+  return k? `${k.aw} ${teks}${k.ak?' '+String(k.ak).replace(/^\s+/,''):''}`.trim() : '';
+}
+function tpByKelas(namaKelas){
+  const kl=(S.boot.kelas||[]).find(k=>k.nama_kelas===namaKelas);
+  if(!kl) return [];
+  return (S.boot.tp||[]).filter(t=>t.kode_program===kl.kode_program).sort((a,b)=>a.no_tp-b.no_tp);
+}
+function progByKelas(namaKelas){
+  const kl=(S.boot.kelas||[]).find(k=>k.nama_kelas===namaKelas);
+  if(!kl) return {};
+  return (S.boot.program||[]).find(p=>p.kode_program===kl.kode_program)||{kode_program:kl.kode_program,program_keahlian:''};
+}
+function deskripsiSiswa(r,tps){
+  const list=tps||tpByKelas(r.kelas);
+  const parts=[];
+  list.forEach(t=>{
+    const sc=r['tp'+t.no_tp];
+    if(sc!==''&&sc!==null&&sc!==undefined){
+      const d=deskripsi(+sc,t.teks_tp);
+      if(d) parts.push(`TP${t.no_tp}: ${d}`);
+    }
+  });
+  return parts.join('; ');
+}
+function statusNilaiSiswa(r,tps){
+  const list=tps||tpByKelas(r.kelas);
+  const reqNos=list.length?list.map(t=>t.no_tp):[1,2,3,4];
+  const filled=reqNos.filter(n=>r['tp'+n]!==''&&r['tp'+n]!==null&&r['tp'+n]!==undefined);
+  if(list.length&&filled.length>=list.length) return 'Lengkap';
+  const anyFilled=[1,2,3,4].some(n=>r['tp'+n]!==''&&r['tp'+n]!==null&&r['tp'+n]!==undefined);
+  return anyFilled?'Dalam Proses':'Belum Dinilai';
+}
+function fmtKehadiran(r){
+  return `S: ${Number(r.sakit||0)} · I: ${Number(r.izin||0)} · A: ${Number(r.alpa||0)}`;
 }
 
 /* ---------- nilai: tampilan ---------- */
 function renderNilai(){
-  const tps=tpList();
-  $('#tpBox').innerHTML = `<b>${esc(programInfo().program_keahlian||'')}</b> — `+tps.map(t=>`<b>TP${t.no_tp}</b> ${esc(t.teks_tp)}`).join(' · ');
-  const rows=rowsNow();
-  let h=`<thead><tr><th>No</th><th>Nama</th><th>NIS</th><th>TP1</th><th>TP2</th><th>TP3</th><th>TP4</th><th>NA</th><th>Sakit</th><th>Izin</th><th>Alpa</th><th>Catatan</th></tr></thead><tbody>`;
+  const kl=kelasInfo()||{}, tps=tpList(), pr=programInfo();
+  const tpMap={}; tps.forEach(t=>{ tpMap[t.no_tp]=t.teks_tp; });
+  $('#tpBox').innerHTML = `<div><b>Kelas:</b> ${esc(S.kelas||'-')} &nbsp;·&nbsp; <b>Program Keahlian:</b> ${esc(pr.program_keahlian||kl.kode_program||'-')}${pr.konsentrasi_keahlian?' ('+esc(pr.konsentrasi_keahlian)+')':''}</div>`+
+    `<div style="margin-top:4px">`+(tps.length?tps.map(t=>`<b>TP${t.no_tp}:</b> ${esc(t.teks_tp)}`).join(' &nbsp;·&nbsp; '):'<span class="muted">Belum ada referensi Tujuan Pembelajaran untuk program ini.</span>')+`</div>`;
+  const rows=rowsNow(), q=($('#qNilai')?$('#qNilai').value:'').trim().toLowerCase();
+  const tutup=penTutup(), dis=tutup?' disabled':'';
+  let h=`<thead><tr><th>No</th><th>NIS</th><th>NISN</th><th>Nama Siswa</th><th>Kelas</th><th>Program Keahlian</th>`+
+    [1,2,3,4].map(n=>`<th title="${esc(tpMap[n]||'Tujuan Pembelajaran '+n)}">TP ${n}</th>`).join('')+
+    `<th>Nilai Akhir</th><th>Deskripsi</th><th>Catatan</th><th colspan="3" style="text-align:center">Kehadiran (Hari)<br><small>Sakit · Izin · Alpa</small></th></tr></thead><tbody>`;
+  let shown=0;
   rows.forEach((r,i)=>{
-    h+=`<tr data-i="${i}"><td class="n">${i+1}</td><td>${esc(r.nama)}</td><td class="muted">${esc(r.nis)}</td>`;
-    ['tp1','tp2','tp3','tp4'].forEach(f=>h+=`<td><input type="number" min="0" max="100" step="1" data-f="${f}" value="${esc(r[f])}"></td>`);
+    if(q && ![r.nis,r.nisn,r.nama,r.kelas].some(v=>String(v||'').toLowerCase().includes(q))) return;
+    shown++;
+    const progName=r.program_keahlian||pr.program_keahlian||kl.kode_program||'';
+    const dText=deskripsiSiswa(r,tps);
+    h+=`<tr data-i="${i}" data-nis="${esc(r.nis)}"><td class="n">${shown}</td>`+
+      `<td class="muted">${esc(r.nis)}</td><td class="muted">${esc(r.nisn||'-')}</td>`+
+      `<td><b>${esc(r.nama)}</b></td><td>${esc(r.kelas)}</td><td>${esc(progName)}</td>`;
+    ['tp1','tp2','tp3','tp4'].forEach((f,idx)=>{
+      const no=idx+1, ttl=tpMap[no]?`TP${no}: ${tpMap[no]}`:`TP ${no}`;
+      h+=`<td><input type="number" min="0" max="100" step="1" title="${esc(ttl)}" data-f="${f}" value="${esc(r[f])}"${dis}></td>`;
+    });
     h+=`<td class="na" data-na>${esc(nilaiNA(r))}</td>`;
-    ['sakit','izin','alpa'].forEach(f=>h+=`<td><input class="s" type="number" min="0" max="366" step="1" data-f="${f}" value="${esc(r[f])}"></td>`);
-    h+=`<td><input class="cat" type="text" maxlength="500" data-f="catatan" value="${esc(r.catatan)}"></td></tr>`;
+    h+=`<td class="dcell" data-desc>${dText?esc(dText):'<small>Belum ada nilai TP</small>'}</td>`;
+    h+=`<td><input class="cat" type="text" maxlength="500" placeholder="Catatan pembimbing…" data-f="catatan" value="${esc(r.catatan)}"${dis}></td>`;
+    ['sakit','izin','alpa'].forEach(f=>{
+      const lbl=f==='sakit'?'Sakit':(f==='izin'?'Izin':'Alpa (Tanpa Keterangan)');
+      h+=`<td><input class="s" type="number" min="0" max="366" step="1" title="${lbl} (hari)" data-f="${f}" value="${esc(r[f])}"${dis}></td>`;
+    });
+    h+=`</tr>`;
   });
+  if(!shown){
+    h+=`<tr><td colspan="15" class="muted" style="text-align:center;padding:18px">${rows.length?'Tidak ada siswa yang cocok dengan pencarian.':'Belum ada siswa pada kelas ini.'}</td></tr>`;
+  }
   $('#gridNilai').innerHTML=h+'</tbody>';
-  rows.forEach((r,i)=>markDirty($('#gridNilai tbody').children[i], r));
+  Array.from($('#gridNilai tbody').querySelectorAll('tr[data-i]')).forEach(tr=>{
+    markDirty(tr, rows[+tr.dataset.i]);
+  });
+  icons();
 }
-function markDirty(tr,r){ tr.classList.toggle('dirty', snap(r)!==r._o); }
+function markDirty(tr,r){ if(tr&&r) tr.classList.toggle('dirty', snap(r)!==r._o); }
+
+$('#qNilai').addEventListener('input',()=>{ if(S.tab==='nilai') renderNilai(); });
 
 $('#gridNilai').addEventListener('input',e=>{
   const inp=e.target, tr=inp.closest('tr'); if(!tr||!inp.dataset.f) return;
   const r=rowsNow()[+tr.dataset.i], f=inp.dataset.f;
+  if(!r) return;
   if(f==='catatan'){ r[f]=inp.value; }
   else{
     const raw=inp.value.trim(); const max=f.startsWith('tp')?100:366;
-    const bad = raw!=='' && (isNaN(+raw) || +raw<0 || +raw>max);
+    const isInt=/^\d+$/.test(raw);
+    const bad = raw!=='' && (!isInt || +raw<0 || +raw>max);
     inp.classList.toggle('invalid',bad);
-    if(!bad) r[f] = raw===''? (f.startsWith('tp')?'':0) : Math.round(+raw);
-    else r._bad=true;
+    if(!bad){
+      r[f] = raw===''? (f.startsWith('tp')?'':0) : Math.round(+raw);
+      delete r._bad;
+    }else r._bad=true;
   }
   tr.querySelector('[data-na]').textContent=nilaiNA(r);
+  const dCell=tr.querySelector('[data-desc]');
+  if(dCell){
+    const dText=deskripsiSiswa(r,tpList());
+    dCell.innerHTML=dText?esc(dText):'<small>Belum ada nilai TP</small>';
+  }
   markDirty(tr,r); updateSaveButtons();
 });
 
 $('#btnSaveNilai').onclick=async()=>{
-  if($('#gridNilai .invalid')){ toast('Perbaiki nilai yang berwarna merah dulu','err'); return; }
+  if($('#gridNilai .invalid')){ toast('Perbaiki nilai yang berwarna merah terlebih dahulu (TP: bilangan bulat 0–100, Kehadiran: 0–366 hari)','err'); return; }
   const d=dirtyRows(); if(!d.length) return;
   busy(true);
   try{
     for(let i=0;i<d.length;i+=100){
-      const chunk=d.slice(i,i+100).map(r=>({nis:r.nis,tp1:r.tp1,tp2:r.tp2,tp3:r.tp3,tp4:r.tp4,catatan:r.catatan,sakit:r.sakit,izin:r.izin,alpa:r.alpa}));
-      await api('saveNilai',{rows:chunk});
+      const chunk=d.slice(i,i+100).map(r=>({nis:r.nis,kelas:r.kelas,tp1:r.tp1,tp2:r.tp2,tp3:r.tp3,tp4:r.tp4,catatan:r.catatan,sakit:r.sakit,izin:r.izin,alpa:r.alpa}));
+      await api('saveNilai',{kelas:S.kelas,rows:chunk});
       d.slice(i,i+100).forEach(r=>r._o=snap(r));
     }
-    toast(`${d.length} baris tersimpan`,'ok');
+    RK.loaded=false; S.dash=null;
+    toast(`${d.length} baris nilai berhasil disimpan permanen`,'ok');
   }catch(e){ toast(e.message,'err'); }
   busy(false); renderNilai(); updateSaveButtons();
 };
+
+/* ---------- rekapitulasi nilai ---------- */
+const RK={rows:[],prog:'',kelas:'',stat:'',ctl:null,opt:null,loaded:false};
+function resetRekap(){ RK.rows=[]; RK.prog=''; RK.kelas=''; RK.stat=''; RK.ctl=null; RK.opt=null; RK.loaded=false; }
+const RK_COLS=[
+  {h:'No',k:'no'},
+  {h:'NIS',k:'nis'},
+  {h:'NISN',k:'nisn'},
+  {h:'Nama Siswa',k:'nama',html:r=>`<b>${esc(r.nama)}</b>`},
+  {h:'Kelas',k:'kelas'},
+  {h:'Program Keahlian',k:'program_keahlian'},
+  {h:'Nilai TP 1',k:'tp1',html:r=>r.tp1!==''?esc(r.tp1):'<span class="muted">-</span>'},
+  {h:'Nilai TP 2',k:'tp2',html:r=>r.tp2!==''?esc(r.tp2):'<span class="muted">-</span>'},
+  {h:'Nilai TP 3',k:'tp3',html:r=>r.tp3!==''?esc(r.tp3):'<span class="muted">-</span>'},
+  {h:'Nilai TP 4',k:'tp4',html:r=>r.tp4!==''?esc(r.tp4):'<span class="muted">-</span>'},
+  {h:'Nilai Akhir',k:'na',html:r=>`<b class="na">${r.na!==''?esc(r.na):'-'}</b>`},
+  {h:'Deskripsi',k:'deskripsi',html:r=>r.deskripsi?`<div class="dcell">${esc(r.deskripsi)}</div>`:'<span class="muted">-</span>'},
+  {h:'Catatan',k:'catatan',html:r=>r.catatan?esc(r.catatan):'<span class="muted">-</span>'},
+  {h:'Kehadiran',k:'kehadiran'},
+  {h:'Status',k:'status',html:r=>bdg(r.status==='Lengkap'?'g':(r.status==='Dalam Proses'?'y':'n'),r.status)},
+  {h:'Aksi',k:'aksi',nx:1,html:r=>`<div class="rowact"><button type="button" class="btn sec sm" data-rka="detail" data-nis="${esc(r.nis)}">Detail</button><button type="button" class="btn sec sm" data-rka="edit" data-nis="${esc(r.nis)}" data-kelas="${esc(r.kelas)}">Edit Nilai</button></div>`}
+];
+
+function decorateRekapRow(r){
+  const tps=tpByKelas(r.kelas), pr=progByKelas(r.kelas);
+  const na=nilaiNA(r), desc=deskripsiSiswa(r,tps), st=statusNilaiSiswa(r,tps);
+  return Object.assign({},r,{
+    kode_program:r.kode_program||pr.kode_program||'',
+    program_keahlian:r.program_keahlian||pr.program_keahlian||r.kode_program||'',
+    na:na,
+    deskripsi:desc,
+    kehadiran:fmtKehadiran(r),
+    status:st
+  });
+}
+
+function rkFilteredRows(){
+  return RK.rows.filter(r=>
+    (!RK.prog || r.kode_program.toLowerCase()===RK.prog.toLowerCase()) &&
+    (!RK.kelas || r.kelas===RK.kelas) &&
+    (!RK.stat || r.status===RK.stat)
+  ).map((r,i)=>Object.assign({},r,{no:i+1}));
+}
+
+function updateRekapSummary(rows){
+  const total=rows.length;
+  const lengkap=rows.filter(r=>r.status==='Lengkap').length;
+  const proses=rows.filter(r=>r.status==='Dalam Proses').length;
+  const belum=rows.filter(r=>r.status==='Belum Dinilai').length;
+  const nas=rows.filter(r=>r.na!=='').map(r=>Number(r.na));
+  const avg=nas.length?(nas.reduce((a,b)=>a+b,0)/nas.length).toFixed(1):'-';
+  const sk=S.boot&&S.boot.sekolah||{};
+  $('#rkSummary').innerHTML=`<b>Periode Aktif:</b> TP ${esc(sk.tahun_ajaran||'-')} · Semester ${esc(sk.semester||'-')} &nbsp;|&nbsp; `+
+    `<b>Total Siswa:</b> ${total} &nbsp;·&nbsp; <b>Lengkap:</b> ${lengkap} &nbsp;·&nbsp; <b>Dalam Proses:</b> ${proses} &nbsp;·&nbsp; <b>Belum Dinilai:</b> ${belum} &nbsp;·&nbsp; <b>Rata-rata NA:</b> ${avg}`;
+}
+
+async function renderRekap(force){
+  icons();
+  if(!RK.loaded||force){
+    busy(true);
+    try{
+      const d=await api('rekapNilai',{});
+      RK.rows=(d.rows||[]).map(decorateRekapRow);
+      RK.loaded=true;
+    }catch(e){
+      busy(false);
+      $('#rkDT').innerHTML=`<div class="muted" style="padding:14px">Gagal memuat rekapitulasi nilai: ${esc(e.message)}</div>`;
+      return;
+    }
+    busy(false);
+  }else{
+    RK.rows=RK.rows.map(decorateRekapRow);
+  }
+  const progs=S.boot.program||[], kls=(S.boot.kelas||[]).filter(k=>!RK.prog||k.kode_program.toLowerCase()===RK.prog.toLowerCase());
+  $('#rkFProg').innerHTML=`<option value="">Semua Program</option>`+progs.map(p=>`<option value="${esc(p.kode_program)}"${RK.prog===p.kode_program?' selected':''}>${esc(p.kode_program)} — ${esc(p.program_keahlian)}</option>`).join('');
+  if(RK.kelas && !kls.some(k=>k.nama_kelas===RK.kelas)) RK.kelas='';
+  $('#rkFKelas').innerHTML=`<option value="">Semua Kelas</option>`+kls.map(k=>`<option value="${esc(k.nama_kelas)}"${RK.kelas===k.nama_kelas?' selected':''}>${esc(k.nama_kelas)}</option>`).join('');
+  $('#rkFStat').value=RK.stat;
+  const fRows=rkFilteredRows();
+  updateRekapSummary(fRows);
+  const sk=S.boot.sekolah||{};
+  const ttl=`Rekapitulasi Nilai PKL - TP ${sk.tahun_ajaran||''} ${sk.semester||''}${RK.kelas?' - Kelas '+RK.kelas:''}`.trim();
+  if(!RK.opt){
+    RK.opt={title:ttl,cols:RK_COLS,rows:fRows,empty:'Belum ada data nilai siswa.'};
+    RK.ctl=DT($('#rkDT'),RK.opt);
+  }else{
+    RK.opt.title=ttl;
+    RK.opt.rows=fRows;
+    RK.ctl.redraw();
+  }
+}
+
+$('#rkRefresh').onclick=()=>renderRekap(true);
+$('#rkFProg').onchange=e=>{ RK.prog=e.target.value; renderRekap(false); };
+$('#rkFKelas').onchange=e=>{ RK.kelas=e.target.value; renderRekap(false); };
+$('#rkFStat').onchange=e=>{ RK.stat=e.target.value; renderRekap(false); };
+$('#rkDT').addEventListener('click',async e=>{
+  const b=e.target.closest('[data-rka]'); if(!b) return;
+  const nis=b.dataset.nis, act=b.dataset.rka;
+  const r=RK.rows.find(x=>x.nis===nis); if(!r) return;
+  if(act==='detail'){
+    const tps=tpByKelas(r.kelas);
+    const tpDetail=tps.map(t=>{
+      const sc=r['tp'+t.no_tp];
+      return `<tr><td><b>TP ${t.no_tp}</b> — ${esc(t.teks_tp)}</td><td style="text-align:center"><b>${sc!==''?esc(sc):'-'}</b></td><td>${esc(sc!==''?deskripsi(+sc,t.teks_tp):'-')}</td></tr>`;
+    }).join('');
+    openModal(`<h3 style="margin:0 0 12px"><i data-lucide="clipboard-check"></i> Detail Nilai PKL Siswa</h3>
+    <div class="prof" style="margin-bottom:12px"><span class="av">${esc((r.nama||'?').charAt(0).toUpperCase())}</span>
+    <dl>
+      <dt>Nama Siswa</dt><dd>${esc(r.nama)}</dd>
+      <dt>NIS / NISN</dt><dd>${esc(r.nis)} / ${esc(r.nisn||'-')}</dd>
+      <dt>Kelas / Program</dt><dd>${esc(r.kelas)} / ${esc(r.program_keahlian||'-')}</dd>
+      <dt>Tempat PKL (DUDI)</dt><dd>${esc(r.nama_dudi||'Belum ditempatkan')}</dd>
+      <dt>Guru Pembimbing</dt><dd>${esc(r.guru_pembimbing||'-')}</dd>
+      <dt>Nilai Akhir (NA)</dt><dd><b style="font-size:1.15em">${r.na!==''?esc(r.na):'-'}</b> &nbsp; ${bdg(r.status==='Lengkap'?'g':(r.status==='Dalam Proses'?'y':'n'),r.status)}</dd>
+      <dt>Kehadiran</dt><dd>Sakit: ${r.sakit||0} hari · Izin: ${r.izin||0} hari · Alpa: ${r.alpa||0} hari</dd>
+      <dt>Catatan</dt><dd>${esc(r.catatan||'-')}</dd>
+    </dl></div>
+    <div class="tablewrap" style="max-height:38vh;margin-bottom:12px"><table class="grid dt"><thead><tr><th>Tujuan Pembelajaran</th><th>Nilai</th><th>Deskripsi Capaian</th></tr></thead><tbody>${tpDetail||'<tr><td colspan="3" class="muted">Belum ada TP pada program ini.</td></tr>'}</tbody></table></div>
+    <div class="bar" style="margin:0"><button class="btn" type="button" id="rkGoEdit"><i data-lucide="pencil-line"></i> Edit di Input Nilai</button><button class="btn sec" type="button" data-mc>Tutup</button></div>`,1);
+    $('#rkGoEdit').onclick=()=>{ closeModal(); S.kelas=r.kelas; $('#selKelas').value=r.kelas; location.hash='nilai'; };
+    return;
+  }
+  if(act==='edit'){
+    S.kelas=r.kelas; $('#selKelas').value=r.kelas; location.hash='nilai';
+  }
+});
 
 /* ---------- penempatan (admin) ---------- */
 function renderPen(){
@@ -1535,7 +1760,7 @@ async function afterRefChange(){
     S.kelas=names.has(keep)?keep:(b.kelas[0]?b.kelas[0].nama_kelas:null); $('#selKelas').value=S.kelas||'';
     $('#dlGuru').innerHTML=(b.guru||[]).map(g=>`<option value="${esc(g)}">`).join('');
     try{ localStorage.setItem('rapor_school',JSON.stringify({n:b.sekolah.nama_sekolah||'',l:b.sekolah.logo_url||b.sekolah.logo||''})); }catch(e){}
-    applyShell(); S.dash=null; S.dashErr=null; loadDash();
+    RK.loaded=false; applyShell(); S.dash=null; S.dashErr=null; loadDash();
   }catch(e){ /* penyegaran latar belakang; data sudah tersimpan */ }
 }
 function showErrList(errs,total){
