@@ -878,7 +878,7 @@ document.addEventListener('fullscreenchange',()=>{ $('#btnFull').innerHTML='<i d
 
 /* ---------- tabel data: cari, jumlah baris, halaman, copy/excel/pdf/print ---------- */
 const plain=(cols,rows)=>rows.map(r=>cols.map(c=>String(r[c.k]??'')));
-function tableHTML(cols,rows){ return '<table border="1"><thead><tr>'+cols.map(c=>`<th>${esc(c.h)}</th>`).join('')+'</tr></thead><tbody>'+plain(cols,rows).map(r=>'<tr>'+r.map(v=>`<td${/^\d{8,}$/.test(v)?' style="mso-number-format:\'\\@\'"':''}>${esc(v)}</td>`).join('')+'</tr>').join('')+'</tbody></table>'; }
+function tableHTML(cols,rows){ return '<table border="1"><thead><tr>'+cols.map(c=>`<th>${esc(c.h)}</th>`).join('')+'</tr></thead><tbody>'+plain(cols,rows).map(r=>'<tr>'+r.map(v=>`<td${/^\d{8,}$|^[=+\-@\t\r]/.test(v)?' style="mso-number-format:\'\\@\'"':''}>${esc(v)}</td>`).join('')+'</tr>').join('')+'</tbody></table>'; }
 function DT(host,o){
   const st={q:'',n:10,p:1}, ec=()=>o.cols.filter(c=>!c.nx), vc=()=>o.cols.filter(c=>!(typeof c.hide==='function'?c.hide():c.hide));
   host.innerHTML=`<div class="dt-bar"><label>Tampilkan <select data-n><option>5</option><option selected>10</option><option>25</option><option>50</option><option>100</option></select> data</label>
