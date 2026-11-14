@@ -324,6 +324,17 @@ table.dt td{white-space:normal;padding:8px 10px;vertical-align:top}table.dt th{p
 .lbl small{font-weight:400;color:var(--muted)}
 .rowact{display:flex;gap:4px;flex-wrap:wrap}.rowact .btn{padding:4px 8px;font-size:.82em}
 .ubar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px}.ubar select{padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:inherit}
+/* ===== Data Referensi ===== */
+.lbl textarea{font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:inherit;width:100%;box-sizing:border-box;resize:vertical;min-height:96px}
+.lbl .rq{color:var(--err)}
+.lbl input:disabled,.lbl select:disabled,.lbl textarea:disabled{opacity:.7;cursor:not-allowed}
+.sgh{margin:12px 0 0;font-size:.95em;color:var(--navy);border-bottom:1px solid var(--line);padding-bottom:4px;grid-column:1/-1;display:flex;gap:8px;align-items:center}
+.sgh:first-child{margin-top:0}
+.rhint{font-size:.85em;color:var(--muted);margin:0 0 14px}
+.fgrid .full{grid-column:1/-1}
+.cnum{text-align:center}
+.rdt .tablewrap{max-height:62vh}
+.skact{position:sticky;bottom:0;background:var(--card);padding:12px 0 2px;margin-top:14px;border-top:1px solid var(--line);display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 </style>
 </head>
 <body>
@@ -442,6 +453,7 @@ table.dt td{white-space:normal;padding:8px 10px;vertical-align:top}table.dt th{p
         <label class="lbl" style="display:flex;align-items:center;gap:6px">Status <select id="uFStat"><option value="">Semua</option><option value="aktif">Aktif</option><option value="nonaktif">Nonaktif</option></select></label></div>
       <div id="usrDT"></div><input type="file" id="uFile" class="hidden" accept=".xlsx,.csv,text/csv">
     </div></section>
+    <section id="v-ref" class="hidden"></section>
   </main>
   <footer class="foot">© e-Rapor PKL SMK · Sistem Informasi Pengelolaan Praktik Kerja Lapangan</footer>
 </div></div></div>
@@ -526,7 +538,7 @@ function showLogin(msg){
   $('#loginMsg').textContent = msg||''; loginBrand(); icons();
 }
 function logout(msg){
-  resetUsers(); S.token=null; S.boot=null; S.dash=null; S.dashErr=null; ssSet('rapor_token',null); S.cache={};
+  resetUsers(); resetRef(); S.token=null; S.boot=null; S.dash=null; S.dashErr=null; ssSet('rapor_token',null); S.cache={};
   $('#inPw').value=''; showLogin(msg);
 }
 $('#loginForm').onsubmit=async e=>{
@@ -624,10 +636,10 @@ const ROUTES={
   dashboard:{v:'dashboard',c:['Dashboard'],admin:1},
   profil:{v:'profil',c:['Profil']},
   pengguna:{v:'pengguna',c:['Data Pengguna'],admin:1},
-  'ref-sekolah':{v:'soon',c:['Data Referensi','Data Sekolah'],admin:1},
-  'ref-program':{v:'soon',c:['Data Referensi','Data Program'],admin:1},
-  'ref-kelas':{v:'soon',c:['Data Referensi','Data Kelas'],admin:1},
-  'ref-tp':{v:'soon',c:['Data Referensi','Data Tujuan Pembelajaran'],admin:1},
+  'ref-sekolah':{v:'ref',c:['Data Referensi','Data Sekolah'],admin:1},
+  'ref-program':{v:'ref',c:['Data Referensi','Data Program'],admin:1},
+  'ref-kelas':{v:'ref',c:['Data Referensi','Data Kelas'],admin:1},
+  'ref-tp':{v:'ref',c:['Data Referensi','Data Tujuan Pembelajaran'],admin:1},
   'ref-kriteria':{v:'soon',c:['Data Referensi','Data Kriteria'],admin:1},
   'ref-siswa':{v:'soon',c:['Data Referensi','Data Siswa'],admin:1},
   'ref-penempatan':{v:'penempatan',c:['Data Referensi','Data Penempatan'],admin:1},
@@ -638,7 +650,7 @@ const ROUTES={
   backup:{v:'soon',c:['Backup dan Restore'],admin:1},
   log:{v:'soon',c:['Log Aktivitas'],admin:1}
 };
-const SOON={'ref-sekolah':'Sekolah','ref-program':'Program','ref-kelas':'Kelas','ref-tp':'TP','ref-kriteria':'Kriteria','ref-siswa':'Siswa'};
+const SOON={'ref-kriteria':'Kriteria','ref-siswa':'Siswa'};
 const MENU=[
   {r:'dashboard',t:'Dashboard',i:'layout-dashboard'},{r:'profil',t:'Profil',i:'user-round'},{r:'pengguna',t:'Data Pengguna',i:'users'},
   {g:'ref',t:'Data Referensi',i:'database',sub:[
@@ -700,9 +712,10 @@ function applyShell(){
 }
 
 function renderAll(){
-  ['dashboard','profil','nilai','rapor','penempatan','pengguna','soon'].forEach(t=>$('#v-'+t).classList.toggle('hidden',S.tab!==t));
+  ['dashboard','profil','nilai','rapor','penempatan','pengguna','ref','soon'].forEach(t=>$('#v-'+t).classList.toggle('hidden',S.tab!==t));
   $('#barKelas').classList.toggle('hidden',!KELAS_VIEWS.includes(S.tab));
   if(!S.boot) return;
+  if(S.tab==='ref') renderRef();
   if(S.tab==='dashboard') renderDash();
   if(S.tab==='profil') renderProfil();
   if(S.tab==='soon') renderSoon();
@@ -802,7 +815,7 @@ const GUIDE_APP=[
  ['Input Nilai PKL','Pilih kelas, isi nilai TP1–TP4, kehadiran, dan catatan, lalu simpan. Baris yang berubah ditandai kuning.'],
  ['Cetak Nilai PKL','Pilih siswa untuk pratinjau, lalu cetak per siswa atau satu kelas. Di jendela cetak pilih Simpan sebagai PDF (A4, tanpa header dan footer).'],
  ['Data Pengguna','Tambah, lihat, ubah, aktifkan/nonaktifkan, dan hapus pengguna (Administrator, Kepala Sekolah, Wali Kelas, Guru Pembimbing); reset kata sandi; import dan export Excel.'],
- ['Data Referensi lain','Sekolah, Program, Kelas, TP, Kriteria, dan Siswa sementara diubah langsung di Google Sheets.'],
+ ['Data Referensi','Menu Data Sekolah, Data Program, Data Kelas, dan Data Tujuan Pembelajaran dikelola di aplikasi (tambah, ubah, hapus, import, export Excel). Kriteria dan Siswa sementara diubah langsung di Google Sheets.'],
  ['Keluar','Buka menu profil di kanan atas, lalu pilih Keluar.']];
 function infoData(){
   const num=a=>a.map((r,i)=>({no:i+1,a:r[0],b:r[1]}));
@@ -1292,6 +1305,354 @@ async function importFile(file){
     busy(false); toast(`${saved} pengguna berhasil diimpor`,'ok'); renderUsers();
   }catch(err){ busy(false); toast(err.message,'err'); }
 }
+
+/* ---------- Data Referensi: Sekolah, Program, Kelas, Tujuan Pembelajaran ---------- */
+/*PURE-START*/
+const NAME_RE=/^[\p{L}\p{M}][\p{L}\p{M}\s.,'’()\-]*$/u;
+const nz=v=>String(v??'').replace(/\s+/g,' ').trim();
+const normH=s=>String(s||'').toLowerCase().replace(/[^a-z0-9]/g,'');
+const SEL_KINDS=['sem','prog','notp'];
+const SK_FIELDS=[
+ {g:'Identitas Sekolah',k:'nama_sekolah',label:'Nama Sekolah',req:1,min:3,max:150,full:1},
+ {k:'npsn',label:'NPSN',digits:[8,8],ph:'8 digit',txtnum:1},
+ {k:'nss',label:'NSS',digits:[6,15],txtnum:1},
+ {g:'Alamat',k:'jalan',label:'Jalan',max:150,full:1},
+ {k:'desa',label:'Desa / Kelurahan',max:80,alias:['desa','kelurahan']},
+ {k:'kecamatan',label:'Kecamatan',max:80},
+ {k:'kabupaten',label:'Kabupaten / Kota',max:80,alias:['kabupaten','kota']},
+ {k:'provinsi',label:'Provinsi',max:80},
+ {k:'kode_pos',label:'Kode Pos',digits:[5,5],ph:'5 digit',txtnum:1},
+ {g:'Kontak',k:'telepon',label:'Telepon',re:/^[0-9+()\s.\-]{5,25}$/,msg:'Telepon tidak valid (5-25 karakter: angka, +, (), spasi, titik, tanda hubung)'},
+ {k:'email',label:'Email',max:100,re:/^[^\s@]+@[^\s@]+\.[^\s@]+$/,msg:'Email tidak valid'},
+ {k:'website',label:'Website',max:150,re:/^(https?:\/\/)?([a-z0-9\-]+\.)+[a-z]{2,}(\/\S*)?$/i,msg:'Website tidak valid, mis. https://smkn2.sch.id',full:1},
+ {g:'Kepala Sekolah',k:'kepala_sekolah',label:'Kepala Sekolah',req:1,min:3,max:100,re:NAME_RE,msg:'Kepala Sekolah hanya boleh berisi huruf, spasi, titik, koma, apostrof, tanda hubung, dan tanda kurung'},
+ {k:'nip_kepsek',label:'NIP Kepala Sekolah',req:1,digits:[8,25],txtnum:1,alias:['nipkepalasekolah','nipkepsek']},
+ {g:'Periode dan Rapor',k:'tahun_ajaran',label:'Tahun Ajaran',req:1,ph:'2026/2027',fn:v=>{const m=/^(\d{4})\s*\/\s*(\d{4})$/.exec(v);return (!m||+m[2]!==+m[1]+1)?'Tahun Ajaran harus berformat 2026/2027 (tahun berurutan)':'';}},
+ {k:'semester',label:'Semester',req:1,kind:'sem',fn:v=>/^(ganjil|genap)$/i.test(v)?'':'Semester harus Ganjil atau Genap'},
+ {k:'fase',label:'Fase',req:1,max:20,ph:'mis. F',list:['E','F']},
+ {k:'tempat_ttd',label:'Tempat Tanda Tangan',req:1,min:2,max:60,ph:'mis. Purbalingga'},
+ {k:'tanggal_rapor',label:'Tanggal Rapor',req:1,kind:'date'}
+];
+const RF_FIELDS={
+ program:[
+  {k:'kode_program',label:'Kode Program',req:1,max:20,re:/^[A-Za-z0-9][A-Za-z0-9._\-]*$/,msg:'Kode Program hanya huruf, angka, titik, garis bawah, atau tanda hubung (tanpa spasi)',alias:['kode'],ph:'mis. TJKT'},
+  {k:'program_keahlian',label:'Program Keahlian',req:1,min:3,max:150,full:1},
+  {k:'konsentrasi_keahlian',label:'Konsentrasi Keahlian',req:1,min:3,max:150,full:1}],
+ kelas:[
+  {k:'nama_kelas',label:'Nama Kelas',req:1,min:2,max:30,re:/^[A-Za-z0-9][A-Za-z0-9 .\-\/]*$/,msg:'Nama Kelas hanya huruf, angka, spasi, titik, garis miring, atau tanda hubung',ph:'mis. XII TJKT 1'},
+  {k:'kode_program',label:'Kode Program',req:1,kind:'prog'},
+  {k:'wali_kelas',label:'Wali Kelas',req:1,min:3,max:100,re:NAME_RE,msg:'Wali Kelas hanya boleh berisi huruf, spasi, titik, koma, apostrof, tanda hubung, dan tanda kurung',kind:'wali',full:1},
+  {k:'nip_wali',label:'NIP Wali Kelas',req:1,digits:[8,25],txtnum:1,alias:['nipwali','nipwalikelas'],full:1}],
+ tp:[
+  {k:'kode_program',label:'Kode Program',req:1,kind:'prog'},
+  {k:'no_tp',label:'Nomor TP',req:1,int:[1,4],kind:'notp',alias:['notp','nomortp','nomor']},
+  {k:'teks_tp',label:'Tujuan Pembelajaran',req:1,min:5,max:500,kind:'area',full:1,alias:['tekstp','tekstujuanpembelajaran','tujuanpembelajaran']}]
+};
+function chkFields(fields,d){
+  for(const f of fields){
+    const v=nz(d[f.k]);
+    if(!v){ if(f.req) return [f.k,f.label+(SEL_KINDS.includes(f.kind)||f.kind==='date'?' wajib dipilih':' wajib diisi')]; continue; }
+    if(f.digits){
+      if(!/^[0-9\s.\-]+$/.test(v)) return [f.k,f.label+' hanya boleh berisi angka'];
+      const n=v.replace(/\D/g,'').length;
+      if(n<f.digits[0]||n>f.digits[1]) return [f.k,f.label+' harus '+(f.digits[0]===f.digits[1]?f.digits[0]:f.digits[0]+'-'+f.digits[1])+' digit'];
+      continue;
+    }
+    if(f.int){ const n=Number(v); if(!Number.isInteger(n)||n<f.int[0]||n>f.int[1]) return [f.k,f.label+' harus bilangan bulat '+f.int[0]+'-'+f.int[1]]; continue; }
+    if((f.min&&v.length<f.min)||(f.max&&v.length>f.max)) return [f.k,f.min?`${f.label} harus ${f.min}-${f.max} karakter`:`${f.label} maksimal ${f.max} karakter`];
+    if(f.re&&!f.re.test(v)) return [f.k,f.msg||f.label+' tidak valid'];
+    if(f.fn){ const m=f.fn(v); if(m) return [f.k,m]; }
+  }
+  return null;
+}
+function aliasMap(fields){
+  const al={};
+  fields.forEach(f=>[f.k.replace(/_/g,''),normH(f.label)].concat(f.alias||[]).forEach(a=>{ if(!(a in al)) al[a]=f.k; }));
+  return al;
+}
+const bigNum=c=>c&&c.num&&(/e/i.test(c.v)||String(c.v).replace(/\D/g,'').length>=16);
+/* Matriks sel -> baris data. Judul kolom dicari otomatis (urutan kolom bebas). */
+function matrixToRecords(m,fields){
+  const al=aliasMap(fields), need=fields.filter(f=>f.req);
+  let hi=-1, idx={};
+  for(let i=0;i<Math.min(m.length,15);i++){
+    const t={}; (m[i]||[]).forEach((c,j)=>{ const k=al[normH(c&&c.v)]; if(k&&t[k]===undefined) t[k]=j; });
+    if(need.every(f=>t[f.k]!==undefined)){ hi=i; idx=t; break; }
+  }
+  if(hi<0) throw new Error('Baris judul tidak ditemukan. Kolom wajib: '+need.map(f=>f.label).join(', ')+'.');
+  const rows=[], pre=[];
+  for(let i=hi+1;i<m.length;i++){
+    const r=m[i]||[]; if(!r.some(c=>c&&String(c.v).trim()!=='')) continue;
+    const rec={baris:i+1};
+    fields.forEach(f=>{
+      const c=idx[f.k]===undefined?null:r[idx[f.k]];
+      rec[f.k]=c?String(c.v).trim():'';
+      if(f.txtnum&&bigNum(c)) pre.push({baris:i+1,pesan:f.label+' terbaca sebagai angka dan bisa rusak. Ubah format kolom menjadi Teks.'});
+    });
+    rows.push(rec);
+  }
+  return {rows,pre};
+}
+const serialToISO=n=>new Date(Math.round((n-25569)*864e5)).toISOString().slice(0,10);
+/* Data sekolah dari Excel: format mendatar (judul di baris atas) atau menurun (kolom Field | Isi). */
+function sekolahFromMatrix(m,fields){
+  const al=aliasMap(fields), out={};
+  const put=(k,c)=>{
+    const f=fields.find(x=>x.k===k); let v=String(c.v).trim();
+    if(f.txtnum&&bigNum(c)) throw new Error(f.label+' terbaca sebagai angka dan bisa rusak. Ubah format sel menjadi Teks.');
+    if(k==='tanggal_rapor'&&c.num&&+c.v>20000&&+c.v<80000) v=serialToISO(+c.v);
+    if(v!=='') out[k]=v;
+  };
+  for(let i=0;i<Math.min(m.length,15);i++){
+    const t={}; (m[i]||[]).forEach((c,j)=>{ const k=al[normH(c&&c.v)]; if(k&&t[k]===undefined) t[k]=j; });
+    if(Object.keys(t).length>=3){
+      let r=null; for(let q=i+1;q<m.length;q++){ if((m[q]||[]).some(c=>c&&String(c.v).trim()!=='')){ r=m[q]; break; } }
+      if(!r) throw new Error('Tidak ada baris data di bawah judul kolom');
+      Object.keys(t).forEach(k=>{ if(r[t[k]]) put(k,r[t[k]]); });
+      break;
+    }
+  }
+  if(!Object.keys(out).length){
+    m.forEach(r=>{ const k=r&&r[0]?al[normH(r[0].v)]:null; if(k&&r[1]) put(k,r[1]); });
+  }
+  if(!Object.keys(out).length) throw new Error('Data sekolah tidak ditemukan. Gunakan template: kolom Field dan Isi, atau judul kolom di baris pertama.');
+  return {data:out,n:Object.keys(out).length};
+}
+function txtToISO(s){
+  s=String(s||'').trim(); if(/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  const m=/^(\d{1,2}) ([A-Za-z]+) (\d{4})$/.exec(s); if(!m) return '';
+  const i=BULAN.findIndex(b=>b.toLowerCase()===m[2].toLowerCase()); if(i<0) return '';
+  return `${m[3]}-${String(i+1).padStart(2,'0')}-${m[1].padStart(2,'0')}`;
+}
+/*PURE-END*/
+
+const RS={};
+function resetRef(){ Object.keys(RS).forEach(k=>delete RS[k]); S.sk=null; }
+const progOpt=(st,all)=>(all?[['','Semua']]:[]).concat(st.meta.programs.map(p=>[p.kode_program,p.kode_program+' — '+p.program_keahlian]));
+const RF={
+ program:{title:'Data Program',icon:'layers',noun:'Program',fields:RF_FIELDS.program,empty:'Belum ada program. Klik Tambah Program atau Import Excel.',
+  keyOf:r=>({kode_program:r.kode_program}),
+  hint:e=>e?'Mengubah Kode Program otomatis memperbarui Data Kelas dan Data TP yang memakainya.':'Kode Program dipakai sebagai penghubung ke Data Kelas dan Data Tujuan Pembelajaran.',
+  map:r=>Object.assign({id:r.kode_program},r),
+  cols:[{h:'No',k:'no'},{h:'Kode Program',k:'kode_program'},{h:'Program Keahlian',k:'program_keahlian'},{h:'Konsentrasi Keahlian',k:'konsentrasi_keahlian'},{h:'Jumlah Kelas',k:'jmlKelas'},{h:'Jumlah TP',k:'jmlTp'},{h:'Aksi',k:'aksi',nx:1,html:r=>rowBtns(r)}],
+  filters:[{id:'pakai',label:'Penggunaan',opts:()=>[['','Semua'],['ya','Dipakai'],['tidak','Belum dipakai']],test:(r,v)=>(v==='ya')===(r.jmlKelas+r.jmlTp>0)}],
+  delMsg:r=>`Hapus program ${r.kode_program} (${r.program_keahlian})? Tindakan ini tidak dapat dibatalkan.`},
+ kelas:{title:'Data Kelas',icon:'presentation',noun:'Kelas',fields:RF_FIELDS.kelas,empty:'Belum ada kelas. Klik Tambah Kelas atau Import Excel.',
+  keyOf:r=>({nama_kelas:r.nama_kelas}),
+  hint:e=>e?'Mengubah Nama Kelas otomatis memperbarui kelas pada Data Siswa.':'Kode Program harus sudah ada di Data Program. Pilih Wali Kelas dari daftar akun Wali Kelas atau ketik manual.',
+  map:r=>Object.assign({id:r.nama_kelas},r),
+  cols:[{h:'No',k:'no'},{h:'Nama Kelas',k:'nama_kelas'},{h:'Kode Program',k:'kode_program'},{h:'Program Keahlian',k:'program_keahlian'},{h:'Wali Kelas',k:'wali_kelas'},{h:'NIP Wali Kelas',k:'nip_wali'},{h:'Jumlah Siswa',k:'jmlSiswa'},{h:'Aksi',k:'aksi',nx:1,html:r=>rowBtns(r)}],
+  filters:[{id:'prog',label:'Program',opts:st=>progOpt(st,1).map(o=>o[0]?[o[0],o[0]]:o),test:(r,v)=>r.kode_program.toLowerCase()===v.toLowerCase()}],
+  delMsg:r=>`Hapus kelas ${r.nama_kelas}? Tindakan ini tidak dapat dibatalkan.`},
+ tp:{title:'Data Tujuan Pembelajaran',icon:'target',noun:'TP',fields:RF_FIELDS.tp,empty:'Belum ada Tujuan Pembelajaran. Klik Tambah TP atau Import Excel.',lock:['kode_program','no_tp'],
+  keyOf:r=>({kode_program:r.kode_program,no_tp:r.no_tp}),
+  hint:e=>e?'Kode Program dan Nomor TP tidak dapat diubah. Untuk memindahkan TP, hapus lalu tambahkan baru.':'Nomor TP 1-4 sesuai kolom nilai TP1-TP4 pada Input Nilai PKL. Satu program hanya boleh punya satu TP per nomor.',
+  map:r=>Object.assign({id:r.kode_program+'|'+r.no_tp},r),
+  cols:[{h:'No',k:'no'},{h:'Kode Program',k:'kode_program'},{h:'Program Keahlian',k:'program_keahlian'},{h:'Nomor TP',k:'no_tp'},{h:'Tujuan Pembelajaran',k:'teks_tp'},{h:'Aksi',k:'aksi',nx:1,html:r=>rowBtns(r)}],
+  filters:[{id:'prog',label:'Program',opts:st=>progOpt(st,1).map(o=>o[0]?[o[0],o[0]]:o),test:(r,v)=>r.kode_program.toLowerCase()===v.toLowerCase()},
+           {id:'no',label:'Nomor TP',opts:()=>[['','Semua'],['1','TP1'],['2','TP2'],['3','TP3'],['4','TP4']],test:(r,v)=>String(r.no_tp)===v}],
+  delMsg:r=>`Hapus TP${r.no_tp} program ${r.kode_program}? Deskripsi nilai pada rapor yang memakai TP ini akan hilang.`}
+};
+function rowBtns(r){ const id=esc(r.id); return `<div class="rowact"><button type="button" class="btn sec sm" data-ra="edit" data-id="${id}">Edit</button><button type="button" class="btn dg sm" data-ra="del" data-id="${id}">Hapus</button></div>`; }
+
+function dlBlob(name,type,content){
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([content],{type})); a.download=name;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+async function fileMatrix(file){
+  if(file.size>2*1024*1024) throw new Error('Ukuran file maksimal 2 MB');
+  const nm=file.name.toLowerCase();
+  if(nm.endsWith('.xlsx')) return readXlsx(await file.arrayBuffer());
+  if(nm.endsWith('.csv')) return parseCSV(await file.text());
+  throw new Error('Format file harus .xlsx atau .csv. File .xls lama tidak didukung; simpan ulang sebagai .xlsx.');
+}
+async function afterRefChange(){
+  try{
+    const b=await api('init',{}), keep=S.kelas;
+    Object.assign(S.boot,{sekolah:b.sekolah,program:b.program,tp:b.tp,kriteria:b.kriteria,kelas:b.kelas,guru:b.guru});
+    const names=new Set(b.kelas.map(k=>k.nama_kelas));
+    $('#selKelas').innerHTML=b.kelas.map(k=>`<option>${esc(k.nama_kelas)}</option>`).join('');
+    Object.keys(S.cache).forEach(k=>{ if(!names.has(k)) delete S.cache[k]; });
+    S.kelas=names.has(keep)?keep:(b.kelas[0]?b.kelas[0].nama_kelas:null); $('#selKelas').value=S.kelas||'';
+    $('#dlGuru').innerHTML=(b.guru||[]).map(g=>`<option value="${esc(g)}">`).join('');
+    try{ localStorage.setItem('rapor_school',JSON.stringify({n:b.sekolah.nama_sekolah||'',l:b.sekolah.logo_url||b.sekolah.logo||''})); }catch(e){}
+    applyShell(); S.dash=null; S.dashErr=null; loadDash();
+  }catch(e){ /* penyegaran latar belakang; data sudah tersimpan */ }
+}
+function showErrList(errs,total){
+  const seen={}; errs=errs.filter(x=>seen[x.baris]?false:(seen[x.baris]=true)).sort((a,b)=>a.baris-b.baris);
+  const n=Math.max(total,errs.length);
+  return popup('err',`${n} baris bermasalah, tidak ada data yang disimpan. `+errs.slice(0,8).map(x=>`Baris ${x.baris}: ${x.pesan}`).join(' | ')+(n>8?` | ...dan ${n-8} lainnya`:''),{title:'Import dibatalkan'});
+}
+
+/* --- halaman daftar (Program, Kelas, TP) --- */
+function renderRef(){
+  const t=S.route.slice(4), host=$('#v-ref');
+  if(t==='sekolah') return renderSekolah(host);
+  const cfg=RF[t], st=RS[t]=RS[t]||{};
+  st.rows=[]; st.opt=null; st.ctl=null; st.fv={}; st.meta={programs:[],wali:[]};
+  host.innerHTML=`<div class="pnl rdt"><h3 style="margin-bottom:14px"><i data-lucide="${cfg.icon}"></i>${esc(cfg.title)}</h3>
+  <div class="ubar"><button type="button" class="btn" id="rAdd"><i data-lucide="plus"></i> Tambah ${esc(cfg.noun)}</button><button type="button" class="btn sec" id="rImp"><i data-lucide="upload"></i> Import Excel</button><button type="button" class="btn sec" id="rTpl"><i data-lucide="download"></i> Template Import</button><span class="spacer"></span><span data-filters style="display:contents"></span></div>
+  <div id="refDT"><div class="muted" style="padding:14px">Memuat data…</div></div><input type="file" id="rFile" class="hidden" accept=".xlsx,.csv,text/csv"></div>`;
+  icons(); return loadRef(t);
+}
+async function loadRef(t){
+  const st=RS[t], cfg=RF[t]; let d;
+  try{ d=await api('refList',{type:t}); }catch(e){ if(S.route==='ref-'+t){ const h=$('#refDT'); if(h) h.innerHTML=`<div class="muted" style="padding:14px">Data tidak dapat dimuat: ${esc(e.message)} <button type="button" class="btn sm" id="rRetry">Coba lagi</button></div>`; } return; }
+  if(S.route!=='ref-'+t||!$('#refDT')) return;
+  st.meta={programs:d.programs||[],wali:d.wali||[]}; st.rows=d.rows.map(cfg.map);
+  $('#v-ref [data-filters]').innerHTML=cfg.filters.map(f=>`<label class="lbl" style="display:flex;align-items:center;gap:6px">${esc(f.label)} <select data-rf="${f.id}">${f.opts(st).map(o=>`<option value="${esc(o[0])}"${(st.fv[f.id]||'')===o[0]?' selected':''}>${esc(o[1])}</option>`).join('')}</select></label>`).join('');
+  if(!st.opt){ st.opt={title:cfg.title,cols:cfg.cols,rows:refRows(t),empty:cfg.empty}; st.ctl=DT($('#refDT'),st.opt); }
+  else{ st.opt.rows=refRows(t); st.ctl.redraw(); }
+}
+function refRows(t){
+  const st=RS[t], cfg=RF[t];
+  return st.rows.filter(r=>cfg.filters.every(f=>!st.fv[f.id]||f.test(r,st.fv[f.id]))).map((r,i)=>Object.assign({},r,{no:i+1}));
+}
+function refTemplate(t){
+  const cfg=RF[t];
+  dlBlob(`template-import-${t}.csv`,'text/csv','﻿'+cfg.fields.map(f=>f.label).join(',')+'\r\n');
+  const extra={program:'Kode Program berisi huruf/angka tanpa spasi. Data dengan Kode Program yang sudah ada akan diperbarui.',kelas:'Kode Program harus sudah ada di Data Program. Kolom NIP Wali Kelas wajib berformat Teks.',tp:'Kode Program harus sudah ada di Data Program. Nomor TP 1 sampai 4. Data dengan Kode Program dan Nomor TP yang sama akan diperbarui.'}[t];
+  popup('info','Isi data mulai baris ke-2, simpan sebagai .xlsx atau .csv, lalu klik Import Excel. '+extra+' Tip: hasil Export Excel pada tabel juga dapat diimpor kembali.',{title:'Template Import'});
+}
+async function refImport(t,file){
+  const cfg=RF[t]; busy(true);
+  try{
+    const {rows,pre}=matrixToRecords(await fileMatrix(file),cfg.fields);
+    if(!rows.length) throw new Error('Tidak ada baris data pada file');
+    if(rows.length>500) throw new Error('Maksimal 500 baris per import');
+    let errs=pre.slice(), total=0;
+    const d=await api('refImport',{type:t,dryRun:true,rows});
+    if(!d.ok){ errs=errs.concat(d.errors); total+=Math.max(0,d.jumlahError-d.errors.length); }
+    busy(false);
+    if(errs.length){ await showErrList(errs,total+errs.length); return; }
+    if(!(await popup('ask',`${rows.length} baris valid: ${d.baru} data baru dan ${d.ubah} data diperbarui (kunci yang sudah ada tidak digandakan). Lanjutkan?`,{yes:'Ya, Impor',no:'Batal'}))) return;
+    busy(true);
+    const r=await api('refImport',{type:t,dryRun:false,rows});
+    if(!r.ok) throw new Error('Baris '+r.errors[0].baris+': '+r.errors[0].pesan);
+    busy(false); toast(`${r.saved} baris diimpor (${r.baru} baru, ${r.ubah} diperbarui)`,'ok');
+    if(S.route==='ref-'+t) await loadRef(t); afterRefChange();
+  }catch(err){ busy(false); toast(err.message,'err'); }
+}
+function refForm(t,r){
+  const cfg=RF[t], st=RS[t], edit=!!r, m=st.meta;
+  const inp=f=>{
+    const id='rf_'+f.k, dis=edit&&(cfg.lock||[]).includes(f.k)?' disabled':'';
+    if(f.kind==='prog') return `<select id="${id}"${dis}><option value="">— Pilih program —</option>${progOpt(st).map(o=>`<option value="${esc(o[0])}">${esc(o[1])}</option>`).join('')}</select>`;
+    if(f.kind==='notp') return `<select id="${id}"${dis}><option value="">— Pilih —</option>${[1,2,3,4].map(n=>`<option value="${n}">TP${n}</option>`).join('')}</select>`;
+    if(f.kind==='area') return `<textarea id="${id}" maxlength="${f.max}"${dis}>${esc(r?r[f.k]:'')}</textarea>`;
+    return `<input type="text" id="${id}" maxlength="${f.max||30}"${f.kind==='wali'?' list="dlWaliM"':''}${f.digits?' inputmode="numeric"':''} autocomplete="off" placeholder="${esc(f.ph||'')}" value="${esc(r?r[f.k]:'')}"${dis}>`;
+  };
+  openModal(`<form id="rfForm" novalidate><h3 style="margin:0 0 6px"><i data-lucide="${edit?'pencil':'plus'}"></i> ${edit?'Edit':'Tambah'} ${esc(cfg.noun)}</h3><p class="muted" style="margin:0 0 12px;font-size:.88em">${esc(cfg.hint(edit))}</p>
+  <div class="fgrid">${cfg.fields.map(f=>`<label class="lbl${f.full?' full':''}">${esc(f.label)}${f.req?' <span class="rq">*</span>':''}${inp(f)}</label>`).join('')}</div>
+  <datalist id="dlWaliM">${m.wali.map(w=>`<option value="${esc(w.nama)}">`).join('')}</datalist>
+  <div class="bar" style="margin:14px 0 0"><button class="btn" type="submit">Simpan</button><button class="btn sec" type="button" data-mc>Batal</button></div><p id="rfErr" style="margin:8px 0 0;font-size:13px;color:var(--err);min-height:1.2em"></p></form>`,1);
+  if(r) cfg.fields.forEach(f=>{ if(f.kind==='prog'||f.kind==='notp'){ const el=$('#rf_'+f.k); el.value=String(r[f.k]); if(el.value!==String(r[f.k])){ const o=[...el.options].find(x=>x.value.toLowerCase()===String(r[f.k]).toLowerCase()); if(o) el.value=o.value; } } });
+  const wl=$('#rf_wali_kelas'); if(wl) wl.onchange=()=>{ const w=m.wali.find(x=>x.nama.toLowerCase()===wl.value.trim().toLowerCase()), n=$('#rf_nip_wali'); if(w&&n&&!n.value.trim()) n.value=w.nip; };
+  $('#rfForm').onsubmit=async e=>{
+    e.preventDefault(); document.querySelectorAll('#rfForm .invalid').forEach(x=>x.classList.remove('invalid'));
+    const d={}; cfg.fields.forEach(f=>d[f.k]=$('#rf_'+f.k).value);
+    const bad=chkFields(cfg.fields,d);
+    if(bad){ $('#rf_'+bad[0]).classList.add('invalid'); $('#rf_'+bad[0]).focus(); $('#rfErr').textContent=bad[1]; return; }
+    busy(true);
+    try{
+      const res=await api('refSave',{type:t,data:d,orig:edit?cfg.keyOf(r):null}); busy(false); closeModal();
+      const ex=[res.kelasDiperbarui?res.kelasDiperbarui+' kelas':'',res.tpDiperbarui?res.tpDiperbarui+' TP':'',res.siswaDiperbarui?res.siswaDiperbarui+' siswa':''].filter(Boolean).join(', ');
+      toast((edit?cfg.noun+' diperbarui':cfg.noun+' ditambahkan')+(ex?'. Data terkait ikut diperbarui: '+ex+'.':'.'),'ok');
+      if(S.route==='ref-'+t) await loadRef(t); afterRefChange();
+    }catch(err){ busy(false); $('#rfErr').textContent=err.message; }
+  };
+}
+async function refDelete(t,r){
+  const cfg=RF[t];
+  if(!(await popup('warn',cfg.delMsg(r),{yes:'Ya, Hapus',no:'Batal'}))) return;
+  busy(true);
+  try{ await api('refDelete',{type:t,orig:cfg.keyOf(r)}); busy(false); toast(cfg.noun+' dihapus','ok'); if(S.route==='ref-'+t) await loadRef(t); afterRefChange(); }
+  catch(err){ busy(false); toast(err.message,'err'); }
+}
+
+/* --- halaman Data Sekolah (satu data, tersimpan sebagai baris key/value di tab Sekolah) --- */
+async function renderSekolah(host){
+  host.innerHTML='<div class="pnl muted">Memuat data sekolah…</div>';
+  let d; try{ d=await api('getSekolah',{}); }
+  catch(e){ if(S.route==='ref-sekolah') host.innerHTML=`<div class="pnl"><p style="margin-top:0">Data sekolah tidak dapat dimuat: ${esc(e.message)}</p><button type="button" class="btn" data-ska="reload">Coba lagi</button></div>`; return; }
+  if(S.route!=='ref-sekolah') return;
+  S.sk=d.fields; drawSekolah(host);
+}
+function skInput(f,v){
+  const id='sk_'+f.k, a=`id="${id}" data-skf="${f.k}"`;
+  if(f.kind==='sem') return `<select ${a}><option value="">— Pilih semester —</option><option>Ganjil</option><option>Genap</option></select>`;
+  if(f.kind==='date') return `<input type="date" ${a} value="${esc(txtToISO(v))}">${v&&!txtToISO(v)?`<small>Nilai saat ini “${esc(v)}” tidak dikenali. Pilih tanggal baru.</small>`:''}`;
+  return `<input type="text" ${a} maxlength="${f.max||(f.digits?f.digits[1]+6:30)}"${f.list?' list="dlFase"':''}${f.digits?' inputmode="numeric"':''} autocomplete="off" placeholder="${esc(f.ph||'')}" value="${esc(v)}">`;
+}
+function drawSekolah(host){
+  const v=S.sk||{};
+  host.innerHTML=`<div class="pnl"><div class="ph"><h3><i data-lucide="school"></i>Data Sekolah</h3></div>
+  <div class="ubar"><button type="button" class="btn sec" data-ska="imp"><i data-lucide="upload"></i> Import Excel</button><button type="button" class="btn sec" data-ska="tpl"><i data-lucide="download"></i> Template Import</button><button type="button" class="btn sec" data-ska="exp"><i data-lucide="file-spreadsheet"></i> Export Excel</button></div>
+  <p class="rhint">Satu data sekolah dipakai di seluruh aplikasi (kop rapor, tanda tangan, periode aktif). Isian bertanda <span class="rq" style="color:var(--err)">*</span> wajib. Kosongkan isian opsional untuk menghapusnya.</p>
+  <form id="skForm" novalidate><div class="fgrid">${SK_FIELDS.map(f=>(f.g?`<h4 class="sgh">${esc(f.g)}</h4>`:'')+`<label class="lbl${f.full?' full':''}">${esc(f.label)}${f.req?' <span class="rq">*</span>':''}${skInput(f,v[f.k]||'')}</label>`).join('')}</div>
+  <datalist id="dlFase"><option value="E"><option value="F"></datalist>
+  <div class="skact"><button class="btn" type="submit"><i data-lucide="save"></i> Simpan</button><button class="btn sec" type="button" data-ska="reload">Batalkan perubahan</button><span id="skErr" style="font-size:13px;color:var(--err)"></span></div></form>
+  <input type="file" id="skFile" class="hidden" accept=".xlsx,.csv,text/csv"></div>`;
+  const sem=$('#sk_semester'); if(sem) sem.value=/^(ganjil|genap)$/i.test(v.semester||'')?v.semester.charAt(0).toUpperCase()+v.semester.slice(1).toLowerCase():'';
+  icons();
+}
+async function skSave(data,msg){
+  busy(true);
+  try{ const r=await api('saveSekolah',{data}); busy(false); S.sk=Object.assign({},S.sk,r.fields); toast(msg,'ok'); if(S.route==='ref-sekolah') drawSekolah($('#v-ref')); afterRefChange(); return true; }
+  catch(err){ busy(false); const e=$('#skErr'); if(e) e.textContent=err.message; toast(err.message,'err'); return false; }
+}
+function skExport(){
+  const rows=SK_FIELDS.map(f=>({f:f.label,v:(S.sk&&S.sk[f.k])||''}));
+  dlBlob('data-sekolah.xls','application/vnd.ms-excel','﻿<html><head><meta charset="utf-8"></head><body>'+tableHTML([{h:'Field',k:'f'},{h:'Isi',k:'v'}],rows)+'</body></html>');
+}
+async function skImport(file){
+  busy(true);
+  try{
+    const {data,n}=sekolahFromMatrix(await fileMatrix(file),SK_FIELDS); busy(false);
+    if(!(await popup('ask',`${n} isian ditemukan di file. Isian yang terisi akan menimpa data sekolah saat ini; isian lain tidak berubah. Lanjutkan?`,{yes:'Ya, Impor',no:'Batal'}))) return;
+    await skSave(data,'Data sekolah diimpor dan disimpan');
+  }catch(err){ busy(false); toast(err.message,'err'); }
+}
+
+/* --- penanganan klik/ubah pada halaman referensi --- */
+$('#v-ref').addEventListener('click',async e=>{
+  const t=S.route.slice(4), b=e.target.closest('button'); if(!b) return;
+  if(t==='sekolah'){
+    const a=b.dataset.ska; if(!a) return;
+    if(a==='reload') return renderSekolah($('#v-ref'));
+    if(a==='imp') return $('#skFile').click();
+    if(a==='exp') return skExport();
+    if(a==='tpl'){
+      dlBlob('template-import-sekolah.csv','text/csv','﻿Field,Isi\r\n'+SK_FIELDS.map(f=>f.label+',').join('\r\n')+'\r\n');
+      popup('info','Isi kolom Isi, simpan sebagai .xlsx atau .csv, lalu klik Import Excel. Format mendatar (judul kolom di baris pertama, data di baris kedua) juga diterima. Kolom NPSN, NSS, Kode Pos, dan NIP berformat Teks. Tanggal Rapor ditulis seperti 20 Desember 2026.',{title:'Template Import'});
+    }
+    return;
+  }
+  if(!RF[t]) return;
+  if(b.id==='rAdd') return refForm(t,null);
+  if(b.id==='rImp') return $('#rFile').click();
+  if(b.id==='rTpl') return refTemplate(t);
+  if(b.id==='rRetry') return loadRef(t);
+  const a=b.dataset.ra; if(!a) return;
+  const r=RS[t].rows.find(x=>x.id===b.dataset.id); if(!r) return;
+  if(a==='edit') refForm(t,r); else if(a==='del') refDelete(t,r);
+});
+$('#v-ref').addEventListener('change',e=>{
+  const t=S.route.slice(4);
+  if(e.target.id==='rFile'){ const f=e.target.files[0]; e.target.value=''; if(f&&RF[t]) refImport(t,f); return; }
+  if(e.target.id==='skFile'){ const f=e.target.files[0]; e.target.value=''; if(f) skImport(f); return; }
+  const k=e.target.dataset&&e.target.dataset.rf;
+  if(k&&RS[t]){ RS[t].fv[k]=e.target.value; RS[t].opt.rows=refRows(t); RS[t].ctl.redraw(); }
+});
+$('#v-ref').addEventListener('submit',async e=>{
+  if(e.target.id!=='skForm') return; e.preventDefault();
+  document.querySelectorAll('#skForm .invalid').forEach(x=>x.classList.remove('invalid')); $('#skErr').textContent='';
+  const d={}; SK_FIELDS.forEach(f=>d[f.k]=$('#sk_'+f.k).value);
+  const bad=chkFields(SK_FIELDS,d);
+  if(bad){ const el=$('#sk_'+bad[0]); el.classList.add('invalid'); el.focus(); $('#skErr').textContent=bad[1]; toast(bad[1],'err'); return; }
+  await skSave(d,'Data sekolah disimpan');
+});
 
 /* ---------- rapor ---------- */
 function renderRaporSelect(){
