@@ -60,23 +60,30 @@ table.grid input.w{width:200px}table.grid input.w2{width:260px}
 #busy{position:fixed;inset:0;background:rgba(255,255,255,.6);display:flex;align-items:center;justify-content:center;z-index:40;font-weight:600;color:var(--brand)}
 
 /* ---------- Lembar rapor ---------- */
-.sheet{background:#fff;width:210mm;min-height:297mm;margin:0 auto;padding:14mm 16mm;color:#000;font:12pt/1.35 Arial,Helvetica,sans-serif;box-shadow:0 1px 6px rgba(0,0,0,.15)}
-.sheet h2,.sheet h3{text-align:center;margin:0;font-size:13pt;letter-spacing:.3px}
-.sheet .sub{text-align:center;margin:2px 0 12px}
-.sheet table.id{width:100%;border-collapse:collapse;margin-bottom:10px}
-.sheet table.id td{padding:1.5px 0;vertical-align:top}
+.sheet{--pw:210mm;--ph:297mm;--mt:14mm;--mr:16mm;--mb:14mm;--ml:16mm;--aw:178mm;--k:1;background:#fff;width:var(--pw);min-height:var(--ph);padding:var(--mt) var(--mr) var(--mb) var(--ml);margin:0 auto;color:#000;font:calc(12pt*var(--k))/1.35 Arial,Helvetica,sans-serif;box-shadow:0 1px 6px rgba(0,0,0,.15);display:flex;flex-direction:column}
+.sheet h2,.sheet h3{text-align:center;margin:0;font-size:calc(13pt*var(--k));letter-spacing:.3px}
+.sheet .sub{text-align:center;margin:4px 0 calc(10px*var(--k))}
+.sheet table.id{width:100%;border-collapse:collapse;margin-bottom:calc(8px*var(--k))}
+.sheet table.id td{padding:1.5px 0;vertical-align:top;overflow-wrap:anywhere}
 .sheet table.id td.l{width:36%}.sheet table.id td.c{width:3%}
-.sheet table.tp{width:100%;border-collapse:collapse;margin:6px 0 10px}
-.sheet table.tp th,.sheet table.tp td{border:1px solid #000;padding:4px 6px;vertical-align:top}
+.sheet table.tp{width:100%;border-collapse:collapse;margin:6px 0 calc(8px*var(--k));table-layout:fixed}
+.sheet table.tp th,.sheet table.tp td{border:1px solid #000;padding:calc(4px*var(--k)) 6px;vertical-align:top;overflow-wrap:anywhere}
 .sheet table.tp th{text-align:center;background:#eee}
 .sheet table.tp td.c{text-align:center}
-.sheet .box{border:1px solid #000;padding:6px 8px;min-height:20mm;margin-bottom:10px}
-.sheet table.att{border-collapse:collapse;margin-bottom:12px}
+.sheet table.tp tr{break-inside:avoid;page-break-inside:avoid}
+.sheet table.tp tfoot td{font-weight:700;background:#f4f4f4}
+.sheet table.tp thead{display:table-header-group}
+.sheet .box{border:1px solid #000;padding:6px 8px;min-height:calc(20mm*var(--k));margin-bottom:calc(8px*var(--k));overflow-wrap:anywhere;white-space:pre-wrap;break-inside:avoid}
+.sheet table.att{border-collapse:collapse;margin-bottom:calc(10px*var(--k));break-inside:avoid}
 .sheet table.att td{padding:1px 10px 1px 0}
+.sheet .ttd,.sheet .blk,.sheet .end{break-inside:avoid;page-break-inside:avoid}
 .sheet .sign{display:flex;justify-content:space-between;margin-top:10px;text-align:center}
 .sheet .sign>div{width:44%}
-.sheet .gap{height:20mm}
+.sheet .gap{height:calc(20mm*var(--k))}
 .sheet .kepsek{text-align:center;margin-top:8px}
+.sheet .pgno{margin-top:auto;padding-top:calc(6px*var(--k));text-align:center;font-size:.8em;color:#333}
+.sheet.msr{display:block;width:100%;min-height:0;padding:0;margin:0;box-shadow:none}
+#ctMeasure{position:absolute;left:-10000px;top:0;visibility:hidden;pointer-events:none;column-gap:0;column-fill:auto;overflow:visible}
 #printRoot{display:none}
 
 /* ===== Tema e-Rapor PKL ===== */
@@ -222,9 +229,37 @@ main{width:100%;flex:1}.foot{padding:12px 16px;text-align:center;font-size:12.5p
   body{background:#fff}
   body>*:not(#printRoot){display:none!important}
   #printRoot{display:block!important}
-  .sheet{box-shadow:none;margin:0;page-break-after:always;break-after:page;height:297mm;overflow:hidden}
+  .sheet{box-shadow:none;margin:0;width:auto;padding:0;height:calc(var(--ph) - var(--mt) - var(--mb) - 3mm);min-height:0;overflow:hidden;break-inside:avoid;page-break-after:always;break-after:page}
   .sheet:last-child{page-break-after:auto;break-after:auto}
 }
+
+/* ===== Modul Cetak Nilai PKL ===== */
+.ctgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.ctgrid .lbl input[type=checkbox]{width:auto}
+.ctchk{display:flex;align-items:center;gap:8px;font-weight:600;font-size:13px;color:var(--muted);padding-top:22px}
+.ctchk input{width:18px;height:18px}
+.cterr{color:var(--err);font-size:.88em;margin:8px 0 0;min-height:1.2em}
+.cthint{color:var(--muted);font-size:.86em;margin:8px 0 0}
+.ctact{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.ctact .lbl{min-width:220px;flex:1;max-width:340px}
+.ctbtns{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.ctbtns .btn{display:inline-flex;gap:6px;align-items:center}
+.cttbl{overflow:auto;border:1px solid var(--line);border-radius:8px;max-height:52vh;margin-top:12px}
+table.ctl{border-collapse:collapse;width:100%;font-size:.93em}
+table.ctl th,table.ctl td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:middle}
+table.ctl th{position:sticky;top:0;background:#eaf1f8;z-index:1;font-size:.86em;white-space:nowrap}
+table.ctl td.n,table.ctl th.n{text-align:center;width:44px}
+table.ctl tr.cur td{background:#e7f1fc}
+table.ctl tr.pick{cursor:pointer}
+table.ctl input[type=checkbox]{width:17px;height:17px}
+body.dark table.ctl th{background:#1d2b3d}body.dark table.ctl tr.cur td{background:#1a2f47}
+.ctpv{background:#e9edf2;border:1px solid var(--line);border-radius:8px;padding:14px;overflow:hidden;margin-top:10px}
+body.dark .ctpv{background:#0b121b}
+.ctpv .wrap{margin:0 auto;position:relative}
+.ctpv .scale{transform-origin:top left}
+.ctpv .sheet{margin:0}
+.ctnote{background:#fff6d6;border:1px solid #ecd68a;color:#6b5200;border-radius:8px;padding:8px 12px;font-size:.88em;margin-top:10px}
+body.dark .ctnote{background:#3a3213;border-color:#6b5a1d;color:#f0dc9a}
 /* ===== Dashboard Administrator ===== */
 body{font-size:var(--fs,15px)}
 body.dark{--bg:#0e1621;--card:#16212f;--ink:#e5ecf4;--muted:#93a4b7;--line:#283547;--dirty:#4a4220;--brand:#3b8eea;--brand-2:#5aa3f0;--navy:#cfe0f5}
@@ -449,19 +484,48 @@ table.dt td{white-space:normal;padding:8px 10px;vertical-align:top}table.dt th{p
     </section>
 
     <section id="v-rapor" class="hidden">
-      <div class="card">
-        <div class="bar">
-          <label for="selSiswa">Siswa</label>
-          <select id="selSiswa" style="min-width:260px"></select>
-          <button class="btn sec" id="btnPrev">‹</button>
-          <button class="btn sec" id="btnNext">›</button>
-          <span class="spacer"></span>
-          <button class="btn" id="btnPrint1">Cetak / PDF siswa ini</button>
-          <button class="btn sec" id="btnPrintAll">Cetak satu kelas</button>
+      <div class="pnl" id="ctA">
+        <div class="ph"><h3><i data-lucide="sliders-horizontal"></i>A. Pengaturan Hasil Cetak</h3><button type="button" class="btn sec sm" id="ctReset"><i data-lucide="rotate-ccw"></i>Kembalikan Default</button></div>
+        <div class="ctgrid">
+          <label class="lbl">Ukuran Kertas<select id="ctPaper"></select></label>
+          <label class="lbl">Margin Kiri (mm)<input type="number" id="ctMl" min="0" max="50" step="0.5" inputmode="decimal"></label>
+          <label class="lbl">Margin Kanan (mm)<input type="number" id="ctMr" min="0" max="50" step="0.5" inputmode="decimal"></label>
+          <label class="lbl">Margin Atas (mm)<input type="number" id="ctMt" min="0" max="50" step="0.5" inputmode="decimal"></label>
+          <label class="lbl">Margin Bawah (mm)<input type="number" id="ctMb" min="0" max="50" step="0.5" inputmode="decimal"></label>
+          <label class="lbl">Halaman Pertama<input type="number" id="ctFirst" min="1" max="9999" step="1" inputmode="numeric"></label>
+          <label class="ctchk"><input type="checkbox" id="ctNum">Cetak nomor halaman</label>
         </div>
-        <p class="muted" style="margin:0;font-size:13px">Di jendela cetak pilih “Simpan sebagai PDF”. Ukuran A4, matikan opsi “Header dan footer”.</p>
+        <p class="cterr" id="ctErr" role="alert"></p>
+        <p class="cthint" id="ctInfo"></p>
+        <p class="cthint">Pengaturan tersimpan di browser ini. Di jendela cetak browser: Margin = <b>Default</b>, Skala = <b>100%</b>, matikan <b>Header dan footer</b>, lalu pilih Simpan sebagai PDF atau printer.</p>
       </div>
-      <div style="overflow:auto"><div id="preview"></div></div>
+
+      <div class="pnl" id="ctB">
+        <div class="ph"><h3><i data-lucide="printer"></i>B. Pilih Kelas dan Proses Pencetakan</h3></div>
+        <div class="ctact">
+          <label class="lbl">Pilih Kelas<select id="ctKelas"></select></label>
+          <button type="button" class="btn" id="ctGen"><i data-lucide="file-search"></i>Generate Laporan</button>
+        </div>
+        <p class="cthint" id="ctStamp">Pilih kelas lalu klik Generate Laporan untuk mengambil nilai terbaru dari database.</p>
+        <div class="ctbtns">
+          <button type="button" class="btn" id="ctAll" disabled><i data-lucide="printer"></i>Cetak Kelas Ini (semua siswa)</button>
+          <button type="button" class="btn sec" id="ctSel" disabled><i data-lucide="list-checks"></i>Cetak Siswa yang Dipilih<span id="ctSelN"></span></button>
+        </div>
+        <div id="ctList"></div>
+      </div>
+
+      <div class="pnl" id="ctC">
+        <div class="ph"><h3><i data-lucide="eye"></i>C. Preview Sebelum Cetak</h3></div>
+        <div class="bar" style="margin-bottom:0">
+          <button type="button" class="btn sec sm" id="ctPrev" aria-label="Siswa sebelumnya">‹ Sebelumnya</button>
+          <select id="ctSiswa" style="min-width:240px;flex:1;max-width:420px" aria-label="Pilih siswa untuk preview"></select>
+          <button type="button" class="btn sec sm" id="ctNext" aria-label="Siswa berikutnya">Berikutnya ›</button>
+          <span class="spacer"></span>
+          <button type="button" class="btn" id="ctOne" disabled><i data-lucide="printer"></i>Cetak Siswa Ini</button>
+        </div>
+        <div id="ctPvInfo" class="cthint"></div>
+        <div id="ctPvBox" class="ctpv"><p class="muted" style="margin:0">Klik Generate Laporan untuk menampilkan preview.</p></div>
+      </div>
     </section>
 
     <section id="v-penempatan" class="card hidden">
@@ -499,6 +563,7 @@ table.dt td{white-space:normal;padding:8px 10px;vertical-align:top}table.dt th{p
 
 <div id="mdl" class="modal hidden"></div>
 <div id="printRoot"></div>
+<div id="ctMeasure" aria-hidden="true"></div>
 <div id="toast" class="hidden" role="status"></div>
 <div id="busy" class="hidden">Memuat…</div>
 <div id="pop" class="pop hidden"><div class="pbox" role="dialog" aria-modal="true"><div class="pic" id="popI"></div><h3 id="popT"></h3><p id="popM"></p><div class="pbtn" id="popB"></div></div></div>
@@ -567,7 +632,7 @@ function showLogin(msg){
   $('#loginMsg').textContent = msg||''; loginBrand(); icons();
 }
 function logout(msg){
-  resetUsers(); resetRef(); resetRekap(); S.token=null; S.boot=null; S.dash=null; S.dashErr=null; ssSet('rapor_token',null); S.cache={};
+  resetUsers(); resetRef(); resetRekap(); resetCetak(); S.token=null; S.boot=null; S.dash=null; S.dashErr=null; ssSet('rapor_token',null); S.cache={};
   $('#inPw').value=''; showLogin(msg);
 }
 $('#loginForm').onsubmit=async e=>{
@@ -691,7 +756,7 @@ const MENU=[
   {r:'nilai',t:'Input Nilai PKL',i:'pencil-line'},{r:'rekap',t:'Rekapitulasi Nilai',i:'clipboard-list'},{r:'rapor',t:'Cetak Nilai PKL',i:'printer'},
   {r:'pengaturan',t:'Pengaturan',i:'settings'},{r:'backup',t:'Backup dan Restore',i:'database-backup'},{r:'log',t:'Log Aktivitas',i:'scroll-text'}
 ];
-const KELAS_VIEWS=['nilai','rapor','penempatan'];
+const KELAS_VIEWS=['nilai','penempatan'];
 const homeRoute=()=>{ const r=S.boot&&S.boot.user.role; return r==='admin'?'dashboard':(r==='guru'?'nilai':'profil'); };
 function canRoute(r){ const ro=ROUTES[r], role=S.boot.user.role; if(!ro) return false; if(r==='profil') return true; if(ro.admin) return role==='admin'; return role==='admin'||role==='guru'; }
 function buildNav(){
@@ -752,9 +817,9 @@ function renderAll(){
   if(S.tab==='soon') renderSoon();
   if(S.tab==='pengguna') renderUsers();
   if(S.tab==='rekap') renderRekap();
+  if(S.tab==='rapor') renderCetak();
   if(S.kelas){
     if(S.tab==='nilai') renderNilai();
-    if(S.tab==='rapor') renderRaporSelect();
     if(S.tab==='penempatan') renderPen();
   }
   updateSaveButtons();
@@ -831,7 +896,7 @@ function DT(host,o){
       const blob=new Blob(['\ufeff<html><head><meta charset="utf-8"></head><body>'+tableHTML(ec(),f)+'</body></html>'],{type:'application/vnd.ms-excel'});
       const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=o.title.replace(/[^\w]+/g,'-')+'.xls'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),1000);
     }else{
-      $('#printRoot').innerHTML=`<div class="ptab"><h2>${esc(o.title)}</h2>${tableHTML(ec(),f)}</div>`; window.print();
+      ctCleanup(); $('#printRoot').innerHTML=`<div class="ptab"><h2>${esc(o.title)}</h2>${tableHTML(ec(),f)}</div>`; window.print();
     }
   };
   draw(); icons();
@@ -846,7 +911,7 @@ const GUIDE_APP=[
  ['Data Penempatan','Pilih kelas, isi DuDi, alamat, instruktur, guru pembimbing, dan tanggal PKL, lalu simpan perubahan.'],
  ['Input Nilai PKL','Pilih kelas, isi nilai TP1–TP4, kehadiran, dan catatan, lalu simpan. Nilai Akhir dan Deskripsi terhitung otomatis sesuai referensi TP dan Kriteria.'],
  ['Rekapitulasi Nilai','Pantau rekapitulasi nilai TP1–TP4, Nilai Akhir, Deskripsi, Catatan, dan Kehadiran dengan fitur pencarian, filter Kelas/Program/Status Penilaian, paginasi, serta Export Excel, PDF, dan Print.'],
- ['Cetak Nilai PKL','Pilih siswa untuk pratinjau, lalu cetak per siswa atau satu kelas. Di jendela cetak pilih Simpan sebagai PDF (A4, tanpa header dan footer).'],
+ ['Cetak Nilai PKL','Atur ukuran kertas dan margin, pilih kelas, klik Generate Laporan (nilai diambil dari database), lihat preview, lalu cetak satu siswa, siswa terpilih, atau seluruh kelas. Di jendela cetak: Margin Default, Skala 100%, matikan Header dan footer.'],
  ['Data Pengguna','Tambah, lihat, ubah, aktifkan/nonaktifkan, dan hapus pengguna (Administrator, Kepala Sekolah, Wali Kelas, Guru Pembimbing); reset kata sandi; import dan export Excel.'],
  ['Data Referensi','Menu Data Sekolah, Data Program, Data Kelas, Data Tujuan Pembelajaran, Data Kriteria, Data Siswa, dan Data Penempatan dikelola langsung di aplikasi (tambah, detail, ubah, hapus, import, dan export Excel).'],
  ['Keluar','Buka menu profil di kanan atas, lalu pilih Keluar.']];
@@ -2083,30 +2148,85 @@ $('#v-ref').addEventListener('submit',async e=>{
   await skSave(d,'Data sekolah disimpan');
 });
 
-/* ---------- rapor ---------- */
-function renderRaporSelect(){
-  const rows=rowsNow(), sel=$('#selSiswa'), keep=sel.value;
-  sel.innerHTML=rows.map((r,i)=>`<option value="${esc(r.nis)}">${i+1}. ${esc(r.nama)}</option>`).join('');
-  if(keep && rows.some(r=>r.nis===keep)) sel.value=keep;
-  renderPreview();
+/* ---------- cetak nilai PKL ---------- */
+const PAPER={
+  A4:{n:'A4 (210 × 297 mm)',w:210,h:297},
+  F4:{n:'F4 / Folio (215 × 330 mm)',w:215,h:330},
+  Letter:{n:'Letter (216 × 279 mm)',w:216,h:279},
+  Legal:{n:'Legal (216 × 356 mm)',w:216,h:356}
+};
+const CT_DEF={paper:'A4',mt:14,mr:16,mb:14,ml:16,first:1,num:true};
+const CT_MARGINS=[['mt','#ctMt','Margin Atas'],['mr','#ctMr','Margin Kanan'],['mb','#ctMb','Margin Bawah'],['ml','#ctMl','Margin Kiri']];
+const MM_PX=96/25.4;
+function ctNorm(o){
+  o=o||{}; const v={};
+  v.paper=PAPER[o.paper]?o.paper:CT_DEF.paper;
+  CT_MARGINS.forEach(([k])=>{ const n=Number(o[k]); v[k]=(o[k]!==''&&o[k]!=null&&isFinite(n)&&n>=0&&n<=50)?Math.round(n*10)/10:CT_DEF[k]; });
+  const f=Number(o.first); v.first=(Number.isInteger(f)&&f>=1&&f<=9999)?f:CT_DEF.first;
+  v.num=o.num!==false;
+  return v;
 }
-function renderPreview(){
-  const r=rowsNow().find(x=>x.nis===$('#selSiswa').value);
-  $('#preview').innerHTML = r? raporHTML(r) : '<p class="muted">Tidak ada siswa.</p>';
-}
-$('#selSiswa').onchange=renderPreview;
-$('#btnPrev').onclick=()=>step(-1); $('#btnNext').onclick=()=>step(1);
-function step(d){ const s=$('#selSiswa'); const i=s.selectedIndex+d; if(i>=0&&i<s.options.length){ s.selectedIndex=i; renderPreview(); } }
+let CT=ctNorm((()=>{ try{ return JSON.parse(localStorage.getItem('rapor_print')||'{}'); }catch(e){ return {}; } })());
+let CTS={kelas:null,rows:[],at:null,sel:new Set(),cur:''};
 
-function raporHTML(r){
-  const sk=S.boot.sekolah, kl=kelasInfo(), pr=programInfo(), tps=tpList();
+function ctFill(){
+  $('#ctPaper').innerHTML=Object.keys(PAPER).map(k=>`<option value="${k}">${esc(PAPER[k].n)}</option>`).join('');
+  $('#ctPaper').value=CT.paper;
+  CT_MARGINS.forEach(([k,id])=>{ $(id).value=CT[k]; });
+  $('#ctFirst').value=CT.first; $('#ctNum').checked=CT.num;
+}
+function ctRead(){
+  const num=id=>{ const s=String($(id).value).trim().replace(',','.'); return s===''?NaN:Number(s); };
+  const v={paper:$('#ctPaper').value,first:num('#ctFirst'),num:$('#ctNum').checked};
+  CT_MARGINS.forEach(([k,id])=>{ v[k]=num(id); });
+  let err='', bad=[];
+  const p=PAPER[v.paper];
+  if(!p){ err='Ukuran kertas tidak valid'; bad.push('#ctPaper'); }
+  CT_MARGINS.forEach(([k,id,l])=>{ if(!(v[k]>=0&&v[k]<=50)){ bad.push(id); if(!err) err=l+' harus berupa angka 0–50 mm'; } });
+  if(!(Number.isInteger(v.first)&&v.first>=1&&v.first<=9999)){ bad.push('#ctFirst'); if(!err) err='Halaman Pertama harus bilangan bulat 1–9999'; }
+  let aw=0, ah=0;
+  if(!err){
+    aw=Math.round((p.w-v.ml-v.mr)*10)/10; ah=Math.round((p.h-v.mt-v.mb)*10)/10;
+    if(aw<100){ err='Margin kiri + kanan terlalu besar: lebar area cetak '+aw+' mm (minimal 100 mm)'; bad.push('#ctMl','#ctMr'); }
+    else if(ah<150){ err='Margin atas + bawah terlalu besar: tinggi area cetak '+ah+' mm (minimal 150 mm)'; bad.push('#ctMt','#ctMb'); }
+  }
+  if(!err) CT_MARGINS.forEach(([k])=>{ v[k]=Math.round(v[k]*10)/10; });
+  return {ok:!err,err,bad,v,p,aw,ah};
+}
+function ctApply(){
+  const c=ctRead();
+  document.querySelectorAll('#ctA .invalid').forEach(e=>e.classList.remove('invalid'));
+  c.bad.forEach(id=>{ const e=$(id); if(e) e.classList.add('invalid'); });
+  $('#ctErr').textContent=c.err||'';
+  if(c.ok){
+    CT=c.v; try{ localStorage.setItem('rapor_print',JSON.stringify(CT)); }catch(e){}
+    $('#ctInfo').textContent=`Area cetak: ${c.aw} × ${c.ah} mm pada kertas ${c.p.w} × ${c.p.h} mm.`;
+  } else $('#ctInfo').textContent='';
+  ctUpdateBtns(); ctPreview();
+}
+function ctUpdateBtns(){
+  const ok=ctRead().ok, n=CTS.rows.length, s=CTS.sel.size;
+  $('#ctAll').disabled=!ok||!n;
+  $('#ctSel').disabled=!ok||!s;
+  $('#ctSelN').textContent=s?` (${s})`:'';
+  $('#ctOne').disabled=!ok||!CTS.rows.some(r=>r.nis===CTS.cur);
+}
+
+/* ----- isi lembar (format rapor yang sama, dengan identitas sekolah, Nilai Akhir, dan tata letak mengikuti kertas) ----- */
+function ctVars(c,k){
+  const p=PAPER[c.paper], f=x=>+(+x).toFixed(1);
+  return `--pw:${p.w}mm;--ph:${p.h}mm;--mt:${f(c.mt)}mm;--mr:${f(c.mr)}mm;--mb:${f(c.mb)}mm;--ml:${f(c.ml)}mm;--aw:${f(p.w-c.ml-c.mr)}mm;--k:${k}`;
+}
+function raporHTML(r,o){
+  const sk=S.boot.sekolah||{}, kl=(S.boot.kelas||[]).find(k=>k.nama_kelas===r.kelas)||{}, pr=progByKelas(r.kelas), tps=tpByKelas(r.kelas);
   const na=nilaiNA(r);
-  const tpRows = tps.map((t,i)=>{
+  const tpRows = tps.length ? tps.map((t,i)=>{
     const sc=r['tp'+t.no_tp];
     return `<tr><td class="c">${i+1}</td><td>${esc(ucfirst(t.teks_tp))}</td><td class="c">${esc(sc)}</td><td>${esc(deskripsi(sc===''?'':+sc,t.teks_tp))}</td></tr>`;
-  }).join('');
+  }).join('') : '<tr><td colspan="4" class="c">Tujuan Pembelajaran belum diatur untuk program keahlian ini</td></tr>';
   const att=v=>(+v>0? v : '-');
-  return `<div class="sheet">
+  const prog=r.program_keahlian||pr.program_keahlian||'', kons=r.konsentrasi_keahlian||pr.konsentrasi_keahlian||'';
+  return `<div class="sheet${o.msr?' msr':''}" style="${ctVars(o.c,o.k)}">
   <h2>LAPORAN HASIL BELAJAR PRAKTIK KERJA LAPANGAN (PKL)</h2>
   <h3>${esc((sk.nama_sekolah||'').toUpperCase())}</h3>
   <div class="sub">${esc(sk.tahun_ajaran||'')}</div>
@@ -2114,8 +2234,8 @@ function raporHTML(r){
     <tr><td class="l">Nama Peserta Didik</td><td class="c">:</td><td>${esc(r.nama)}</td></tr>
     <tr><td class="l">NISN / NIS</td><td class="c">:</td><td>${esc(r.nisn)} / ${esc(r.nis)}</td></tr>
     <tr><td class="l">Kelas / Fase</td><td class="c">:</td><td>${esc(r.kelas)} / ${esc(sk.fase||'')}</td></tr>
-    <tr><td class="l">Program Keahlian</td><td class="c">:</td><td>${esc(pr.program_keahlian||'')}</td></tr>
-    <tr><td class="l">Konsentrasi Keahlian</td><td class="c">:</td><td>${esc(pr.konsentrasi_keahlian||'')}</td></tr>
+    <tr><td class="l">Program Keahlian</td><td class="c">:</td><td>${esc(prog)}</td></tr>
+    <tr><td class="l">Konsentrasi Keahlian</td><td class="c">:</td><td>${esc(kons)}</td></tr>
     <tr><td class="l">Nama DuDi PKL</td><td class="c">:</td><td>${esc(r.nama_dudi)}</td></tr>
     <tr><td class="l">Alamat DuDi PKL</td><td class="c">:</td><td>${esc(r.alamat_dudi)}</td></tr>
     <tr><td class="l">Tanggal PKL</td><td class="c">:</td><td>Mulai ${esc(tglID(r.tgl_mulai))} &nbsp; Selesai ${esc(tglID(r.tgl_selesai))}</td></tr>
@@ -2123,29 +2243,188 @@ function raporHTML(r){
     <tr><td class="l">Nama Instruktur</td><td class="c">:</td><td>${esc(r.instruktur)}</td></tr>
     <tr><td class="l">Nama Pembimbing</td><td class="c">:</td><td>${esc(r.guru_pembimbing)}</td></tr>
   </table>
-  <table class="tp"><thead><tr><th style="width:8%">No</th><th style="width:38%">Tujuan Pembelajaran</th><th style="width:10%">Nilai</th><th>Deskripsi</th></tr></thead><tbody>${tpRows}</tbody></table>
-  <div><b>Catatan:</b></div>
-  <div class="box">${esc(r.catatan)}</div>
-  <div><b>Kehadiran</b></div>
+  <table class="tp"><thead><tr><th style="width:8%">No</th><th style="width:38%">Tujuan Pembelajaran</th><th style="width:10%">Nilai</th><th>Deskripsi</th></tr></thead><tbody>${tpRows}</tbody>
+    <tfoot><tr><td colspan="2" style="text-align:right">Nilai Akhir</td><td class="c">${esc(na)}</td><td>${na===''?'':'Rata-rata nilai seluruh Tujuan Pembelajaran'}</td></tr></tfoot></table>
+  <div class="blk"><div><b>Catatan:</b></div>
+  <div class="box">${esc(r.catatan)}</div></div>
+  <div class="end">
+  <div class="blk"><div><b>Kehadiran</b></div>
   <table class="att">
     <tr><td>Sakit</td><td>:</td><td>${esc(att(r.sakit))}</td><td>Hari</td></tr>
     <tr><td>Ijin</td><td>:</td><td>${esc(att(r.izin))}</td><td>Hari</td></tr>
     <tr><td>Tanpa Keterangan</td><td>:</td><td>${esc(att(r.alpa))}</td><td>Hari</td></tr>
-  </table>
+  </table></div>
+  <div class="ttd">
   <div style="text-align:right">${esc(sk.tempat_ttd||'')}, ${esc(sk.tanggal_rapor||'')}</div>
   <div class="sign">
     <div>Orang Tua / Wali Peserta Didik<div class="gap"></div>(................................)</div>
-    <div>Wali Kelas<div class="gap"></div><u>${esc(kl.wali_kelas)}</u><br>NIP. ${esc(kl.nip_wali)}</div>
+    <div>Wali Kelas<div class="gap"></div><u>${esc(kl.wali_kelas||'')}</u><br>NIP. ${esc(kl.nip_wali||'')}</div>
   </div>
   <div class="kepsek">Mengetahui,<br>Kepala Sekolah<div class="gap"></div><u>${esc(sk.kepala_sekolah||'')}</u><br>NIP. ${esc(sk.nip_kepsek||'')}</div>
+  </div>
+  </div>
+  ${o.no!=null?`<div class="pgno">Halaman ${esc(o.no)}</div>`:''}
   </div>`;
 }
-function doPrint(rows){
-  $('#printRoot').innerHTML = rows.map(raporHTML).join('');
+/* Satu rapor = satu halaman. Isi diperkecil secukupnya (pencarian biner, paling kecil 45%) sampai muat di area cetak
+   kertas dan margin terpilih. Muat/tidaknya diukur dengan simulasi kolom setinggi area cetak. */
+const CT_KMIN=45;
+function ctFit(r,c,no){
+  const m=$('#ctMeasure'), p=PAPER[c.paper], aw=p.w-c.ml-c.mr, ah=p.h-c.mt-c.mb-3;
+  m.style.width=aw+'mm'; m.style.height=ah+'mm'; m.style.columnWidth=aw+'mm';
+  const one=k=>{ m.innerHTML=raporHTML(r,{c,k,no,msr:true}); return m.scrollWidth<=m.clientWidth+1; };
+  let pc=100, fits=true;
+  if(!one(1)){
+    let lo=CT_KMIN, hi=99; fits=one(lo/100);
+    if(fits){ while(lo<hi){ const mid=Math.ceil((lo+hi)/2); if(one(mid/100)) lo=mid; else hi=mid-1; } pc=lo; }
+    else pc=CT_KMIN;
+  }
+  m.innerHTML='';
+  return {html:raporHTML(r,{c,k:pc/100,no}), k:pc/100, fits, pages:1};
+}
+
+/* ----- pemuatan data dan daftar siswa ----- */
+function resetCetak(){
+  CTS={kelas:null,rows:[],at:null,sel:new Set(),cur:''};
+  ctCleanup();
+  const l=$('#ctList'); if(l) l.innerHTML='';
+  const b=$('#ctPvBox'); if(b) b.innerHTML='<p class="muted" style="margin:0">Klik Generate Laporan untuk menampilkan preview.</p>';
+  const s=$('#ctStamp'); if(s) s.textContent='Pilih kelas lalu klik Generate Laporan untuk mengambil nilai terbaru dari database.';
+  const i=$('#ctPvInfo'); if(i) i.textContent='';
+  const sl=$('#ctSiswa'); if(sl) sl.innerHTML='';
+}
+function renderCetak(){
+  const names=(S.boot.kelas||[]).map(k=>k.nama_kelas), sel=$('#ctKelas'), keep=sel.value;
+  sel.innerHTML=names.length?names.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join(''):'<option value="">(Tidak ada kelas)</option>';
+  if(names.includes(keep)) sel.value=keep;
+  $('#ctGen').disabled=!names.length;
+  ctApply(); ctDrawList();
+}
+async function ctGenerate(){
+  const kls=$('#ctKelas').value;
+  if(!kls){ toast('Tidak ada kelas yang dapat dipilih','err'); return; }
+  busy(true);
+  let rows;
+  try{ rows=await api('siswa',{kelas:kls}); }
+  catch(e){ busy(false); toast(e.message,'err'); return; }
+  busy(false);
+  CTS={kelas:kls,rows:rows,at:new Date(),sel:new Set(),cur:rows[0]?rows[0].nis:''};
+  ctDrawList(); ctUpdateBtns(); ctPreview();
+  if(!rows.length) popup('info','Belum ada siswa pada kelas '+kls+'.');
+}
+function ctStatusBadge(r){
+  const st=statusNilaiSiswa(r);
+  return bdg(st==='Lengkap'?'g':(st==='Dalam Proses'?'y':'n'),st);
+}
+function ctDrawList(){
+  const box=$('#ctList'), rows=CTS.rows;
+  const sl=$('#ctSiswa');
+  sl.innerHTML=rows.map((r,i)=>`<option value="${esc(r.nis)}">${i+1}. ${esc(r.nama)}</option>`).join('');
+  if(rows.some(r=>r.nis===CTS.cur)) sl.value=CTS.cur;
+  if(!CTS.kelas){ box.innerHTML=''; return; }
+  const lengkap=rows.filter(r=>statusNilaiSiswa(r)==='Lengkap').length;
+  $('#ctStamp').textContent=`Kelas ${CTS.kelas}: ${rows.length} siswa (${lengkap} lengkap, ${rows.length-lengkap} belum lengkap). Data diambil dari database pada ${CTS.at.toLocaleString('id-ID')}.`;
+  if(!rows.length){ box.innerHTML=''; return; }
+  const dirty=(typeof anyDirty==='function'&&anyDirty())?'<div class="ctnote">Ada perubahan pada Input Nilai yang belum disimpan. Laporan ini memakai nilai yang sudah tersimpan di database.</div>':'';
+  box.innerHTML=dirty+`<div class="cttbl"><table class="ctl"><thead><tr><th class="n"><input type="checkbox" id="ctChkAll" aria-label="Pilih semua siswa"></th><th class="n">No</th><th>Nama</th><th>NIS</th><th>DuDi</th><th class="n">Nilai Akhir</th><th>Status</th><th>Aksi</th></tr></thead><tbody>`+
+    rows.map((r,i)=>{ const na=nilaiNA(r);
+      return `<tr class="pick${r.nis===CTS.cur?' cur':''}" data-nis="${esc(r.nis)}"><td class="n"><input type="checkbox" data-pick="${esc(r.nis)}"${CTS.sel.has(r.nis)?' checked':''} aria-label="Pilih ${esc(r.nama)}"></td><td class="n">${i+1}</td><td><b>${esc(r.nama)}</b></td><td>${esc(r.nis)}</td><td>${esc(r.nama_dudi)||'<span class="muted">-</span>'}</td><td class="n">${na===''?'-':esc(na)}</td><td>${ctStatusBadge(r)}</td><td><div class="rowact"><button type="button" class="btn sec sm" data-pv="${esc(r.nis)}">Preview</button><button type="button" class="btn sm" data-p1="${esc(r.nis)}">Cetak</button></div></td></tr>`;
+    }).join('')+`</tbody></table></div>`;
+  ctSyncAll();
+}
+function ctSyncAll(){
+  const a=$('#ctChkAll'); if(!a) return;
+  const n=CTS.sel.size, t=CTS.rows.length;
+  a.checked=t>0&&n===t; a.indeterminate=n>0&&n<t;
+}
+function ctSetCur(nis,scroll){
+  if(!CTS.rows.some(r=>r.nis===nis)) return;
+  CTS.cur=nis; $('#ctSiswa').value=nis;
+  document.querySelectorAll('#ctList tr.pick').forEach(tr=>tr.classList.toggle('cur',tr.dataset.nis===nis));
+  ctUpdateBtns(); ctPreview();
+  if(scroll) $('#ctC').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+/* ----- preview ----- */
+function ctPreview(){
+  const box=$('#ctPvBox'), info=$('#ctPvInfo');
+  const r=CTS.rows.find(x=>x.nis===CTS.cur), c=ctRead();
+  if(!r){ box.innerHTML='<p class="muted" style="margin:0">'+(CTS.kelas?'Tidak ada siswa untuk dipreview.':'Klik Generate Laporan untuk menampilkan preview.')+'</p>'; info.textContent=''; return; }
+  if(!c.ok){ box.innerHTML='<p class="muted" style="margin:0">Perbaiki Pengaturan Hasil Cetak (bagian A) untuk menampilkan preview.</p>'; info.textContent=''; return; }
+  if(!box.clientWidth) return; /* tab sedang tersembunyi; digambar ulang saat dibuka */
+  const f=ctFit(r,c.v,c.v.num?c.v.first:null);
+  box.innerHTML=`<div class="wrap" id="ctWrap"><div class="scale" id="ctScale">${f.html}</div></div>`;
+  ctScaleFit(c.v);
+  const i=CTS.rows.indexOf(r)+1;
+  info.textContent=`Siswa ${i} dari ${CTS.rows.length} · ${c.p.n} · margin atas/kanan/bawah/kiri ${c.v.mt}/${c.v.mr}/${c.v.mb}/${c.v.ml} mm · 1 halaman`+
+    (f.k<1?` (isi diperkecil ke ${Math.round(f.k*100)}% agar muat)`:'')+(f.fits?'':' · PERINGATAN: isi terlalu panjang, sebagian teks dapat terpotong; persingkat catatan atau kecilkan margin');
+}
+function ctScaleFit(c){
+  const wrap=$('#ctWrap'), sc=$('#ctScale'), box=$('#ctPvBox'); if(!wrap||!sc) return;
+  const sw=PAPER[c.paper].w*MM_PX, avail=box.clientWidth-28;
+  const s=Math.max(.1,Math.min(1,avail/sw));
+  sc.style.width=sw+'px'; sc.style.transform=`scale(${s})`;
+  wrap.style.width=(sw*s)+'px'; wrap.style.height=(sc.offsetHeight*s)+'px';
+}
+let ctRz; window.addEventListener('resize',()=>{ clearTimeout(ctRz); ctRz=setTimeout(()=>{ if(S.tab==='rapor'){ const c=ctRead(); if(c.ok) ctScaleFit(c.v); } },120); });
+
+/* ----- cetak ----- */
+function ctCleanup(){ const s=document.getElementById('ctPageStyle'); if(s) s.remove(); }
+window.addEventListener('afterprint',()=>{ if(document.getElementById('ctPageStyle')){ ctCleanup(); $('#printRoot').innerHTML=''; } });
+async function ctPrint(rows,label){
+  const c=ctRead();
+  if(!c.ok){ toast(c.err,'err'); return; }
+  if(!rows.length){ popup('warn','Belum ada siswa yang dipilih untuk dicetak.'); return; }
+  busy(true);
+  await new Promise(res=>setTimeout(res,30));
+  let html='', no=c.v.first, over=0;
+  try{
+    rows.forEach(r=>{ const f=ctFit(r,c.v,c.v.num?no:null); html+=f.html; no+=f.pages; if(!f.fits) over++; });
+  }catch(e){ busy(false); toast('Gagal menyusun laporan: '+e.message,'err'); return; }
+  busy(false);
+  const inc=rows.filter(r=>statusNilaiSiswa(r)!=='Lengkap');
+  if(rows.length>1||inc.length||over){
+    let msg=`Cetak ${rows.length} laporan ${label}?\nKertas ${c.p.n}, margin atas/kanan/bawah/kiri ${c.v.mt}/${c.v.mr}/${c.v.mb}/${c.v.ml} mm.`;
+    if(inc.length){ const nm=inc.slice(0,3).map(r=>r.nama).join(', '); msg+=`\n\n${inc.length} siswa belum lengkap nilainya (${nm}${inc.length>3?' dan '+(inc.length-3)+' lainnya':''}). Bagian yang kosong dicetak kosong.`; }
+    if(over) msg+=`\n\nPERINGATAN: ${over} laporan terlalu panjang untuk satu halaman pada pengaturan ini dan dapat terpotong.`;
+    if(!(await popup('ask',msg,{yes:'Ya, Cetak',no:'Batal'}))) return;
+  }
+  ctCleanup();
+  const st=document.createElement('style'); st.id='ctPageStyle';
+  st.textContent=`@page{size:${c.p.w}mm ${c.p.h}mm;margin:${c.v.mt}mm ${c.v.mr}mm ${c.v.mb}mm ${c.v.ml}mm}`;
+  document.head.appendChild(st);
+  $('#printRoot').innerHTML=html;
   window.print();
 }
-$('#btnPrint1').onclick=()=>{ const r=rowsNow().find(x=>x.nis===$('#selSiswa').value); if(r) doPrint([r]); };
-$('#btnPrintAll').onclick=async()=>{ const rows=rowsNow(); if(rows.length && await popup('ask',`Cetak ${rows.length} rapor kelas ${S.kelas}?`,{yes:'Ya, Cetak',no:'Batal'})) doPrint(rows); };
+
+/* ----- event ----- */
+(function ctInit(){
+  ctFill();
+  $('#ctA').addEventListener('input',ctApply);
+  $('#ctA').addEventListener('change',ctApply);
+  $('#ctReset').onclick=()=>{ CT={...CT_DEF}; ctFill(); ctApply(); };
+  $('#ctKelas').onchange=()=>{ if(CTS.kelas&&CTS.kelas!==$('#ctKelas').value){ resetCetak(); ctDrawList(); ctUpdateBtns(); } };
+  $('#ctGen').onclick=ctGenerate;
+  $('#ctAll').onclick=()=>ctPrint(CTS.rows,'kelas '+CTS.kelas);
+  $('#ctSel').onclick=()=>ctPrint(CTS.rows.filter(r=>CTS.sel.has(r.nis)),'siswa terpilih');
+  $('#ctOne').onclick=()=>{ const r=CTS.rows.find(x=>x.nis===CTS.cur); if(r) ctPrint([r],'siswa'); };
+  $('#ctSiswa').onchange=e=>ctSetCur(e.target.value);
+  const step=d=>{ const i=CTS.rows.findIndex(r=>r.nis===CTS.cur)+d; if(i>=0&&i<CTS.rows.length) ctSetCur(CTS.rows[i].nis); };
+  $('#ctPrev').onclick=()=>step(-1); $('#ctNext').onclick=()=>step(1);
+  $('#ctList').addEventListener('change',e=>{
+    if(e.target.id==='ctChkAll'){ CTS.sel=e.target.checked?new Set(CTS.rows.map(r=>r.nis)):new Set(); document.querySelectorAll('#ctList [data-pick]').forEach(x=>x.checked=e.target.checked); }
+    else if(e.target.dataset.pick!==undefined){ const n=e.target.dataset.pick; e.target.checked?CTS.sel.add(n):CTS.sel.delete(n); ctSyncAll(); }
+    else return;
+    ctUpdateBtns();
+  });
+  $('#ctList').addEventListener('click',e=>{
+    const pv=e.target.closest('[data-pv]'), p1=e.target.closest('[data-p1]');
+    if(pv){ ctSetCur(pv.dataset.pv,true); return; }
+    if(p1){ const r=CTS.rows.find(x=>x.nis===p1.dataset.p1); if(r) ctPrint([r],'siswa'); return; }
+    const tr=e.target.closest('tr.pick');
+    if(tr&&!e.target.closest('input,button')) ctSetCur(tr.dataset.nis);
+  });
+})();
 
 /* ---------- boot ---------- */
 (function init(){
@@ -2171,7 +2450,7 @@ $('#btnGoLogin').onclick=()=>$('#inNip').focus();
 $('#btnEye').onclick=()=>{ const i=$('#inPw'), show=i.type==='password'; i.type=show?'text':'password';
   $('#btnEye').innerHTML='<i data-lucide="'+(show?'eye-off':'eye')+'"></i>'; icons(); };
 document.querySelectorAll('.rst').forEach(b=>b.onclick=()=>popup('info','Kata sandi hanya dapat direset oleh Administrator. Hubungi admin sekolah dengan menyebutkan NIP Anda; setelah direset, Anda akan diminta membuat kata sandi baru saat masuk.'));
-$('#btnGuide').onclick=()=>popup('info','1. Masuk dengan NIP dan kata sandi.\n2. Pilih kelas, lalu isi nilai PKL pada menu Input Nilai.\n3. Simpan perubahan.\n4. Buka menu Rapor untuk melihat dan mencetak laporan.',{title:'Panduan Aplikasi'});
+$('#btnGuide').onclick=()=>popup('info','1. Masuk dengan NIP dan kata sandi.\n2. Pilih kelas, lalu isi nilai PKL pada menu Input Nilai.\n3. Simpan perubahan.\n4. Buka menu Cetak Nilai PKL, atur kertas dan margin, klik Generate Laporan, lalu cetak.',{title:'Panduan Aplikasi'});
 $('#btnMenu').onclick=()=>{ if(innerWidth<=900) document.body.classList.toggle('open'); else { UI.col=document.body.classList.toggle('collapsed')?1:0; saveUI(); } };
 $('#scrim').onclick=()=>document.body.classList.remove('open');
 applyUI(); loginBrand(); icons();
