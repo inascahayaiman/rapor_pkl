@@ -373,6 +373,15 @@ table.dt td{white-space:normal;padding:8px 10px;vertical-align:top}table.dt th{p
 .cnum{text-align:center}
 .rdt .tablewrap{max-height:62vh}
 .skact{position:sticky;bottom:0;background:var(--card);padding:12px 0 2px;margin-top:14px;border-top:1px solid var(--line);display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.bdg{display:inline-block;padding:2px 9px;border-radius:999px;font-size:.8em;font-weight:700;background:#e8eef5;color:#1f4e78;white-space:nowrap}
+.bdg.ok{background:#dff3e6;color:#17603a}.bdg.wr{background:#fff0d1;color:#8a5200}.bdg.er{background:#fbe0de;color:#9b1c14}.bdg.in{background:#dcebfa;color:#1a4d80}
+body.dark .bdg{background:#27384c;color:#bcd3ec}body.dark .bdg.ok{background:#173a28;color:#9be0b8}body.dark .bdg.wr{background:#3a3213;color:#f0dc9a}body.dark .bdg.er{background:#4a1e1b;color:#f5b3ae}body.dark .bdg.in{background:#1c3350;color:#a9ccf0}
+.warnbox{display:flex;gap:10px;align-items:flex-start;border:1px solid #e9b33b;background:#fff6dc;color:#6b4a00;border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:.92em}.warnbox svg{flex:none;width:20px;height:20px}
+body.dark .warnbox{background:#3a3213;border-color:#6b5a1d;color:#f0dc9a}
+.lgf{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;align-items:end;margin-bottom:12px}
+.kv{width:100%;border-collapse:collapse;font-size:.92em}.kv td{padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}.kv td:first-child{color:var(--muted);width:38%}
+.lgk{max-width:380px;overflow:hidden;text-overflow:ellipsis}
+#v-adm code{font-size:.85em}
 </style>
 </head>
 <body>
@@ -547,6 +556,7 @@ table.dt td{white-space:normal;padding:8px 10px;vertical-align:top}table.dt th{p
       <div id="usrDT"></div><input type="file" id="uFile" class="hidden" accept=".xlsx,.csv,text/csv">
     </div></section>
     <section id="v-ref" class="hidden"></section>
+    <section id="v-adm" class="hidden"></section>
   </main>
   <footer class="foot">© e-Rapor PKL SMK · Sistem Informasi Pengelolaan Praktik Kerja Lapangan</footer>
 </div></div></div>
@@ -632,7 +642,8 @@ function showLogin(msg){
   $('#loginMsg').textContent = msg||''; loginBrand(); icons();
 }
 function logout(msg){
-  resetUsers(); resetRef(); resetRekap(); resetCetak(); S.token=null; S.boot=null; S.dash=null; S.dashErr=null; ssSet('rapor_token',null); S.cache={};
+  const tk=S.token; if(tk&&!msg){ try{ fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'logout',token:tk}),keepalive:true}).catch(()=>{}); }catch(e){} }
+  resetAdm(); resetUsers(); resetRef(); resetRekap(); resetCetak(); S.token=null; S.boot=null; S.dash=null; S.dashErr=null; ssSet('rapor_token',null); S.cache={};
   $('#inPw').value=''; showLogin(msg);
 }
 $('#loginForm').onsubmit=async e=>{
@@ -742,9 +753,9 @@ const ROUTES={
   nilai:{v:'nilai',c:['Input Nilai PKL']},
   rekap:{v:'rekap',c:['Rekapitulasi Nilai PKL']},
   rapor:{v:'rapor',c:['Cetak Nilai PKL']},
-  pengaturan:{v:'soon',c:['Pengaturan'],admin:1},
-  backup:{v:'soon',c:['Backup dan Restore'],admin:1},
-  log:{v:'soon',c:['Log Aktivitas'],admin:1}
+  pengaturan:{v:'adm',c:['Pengaturan'],admin:1},
+  backup:{v:'adm',c:['Backup dan Restore'],admin:1},
+  log:{v:'adm',c:['Log Aktivitas'],admin:1}
 };
 const SOON={};
 const MENU=[
@@ -808,13 +819,14 @@ function applyShell(){
 }
 
 function renderAll(){
-  ['dashboard','profil','nilai','rekap','rapor','penempatan','pengguna','ref','soon'].forEach(t=>$('#v-'+t).classList.toggle('hidden',S.tab!==t));
+  ['dashboard','profil','nilai','rekap','rapor','penempatan','pengguna','ref','soon','adm'].forEach(t=>$('#v-'+t).classList.toggle('hidden',S.tab!==t));
   $('#barKelas').classList.toggle('hidden',!KELAS_VIEWS.includes(S.tab));
   if(!S.boot) return;
   if(S.tab==='ref') renderRef();
   if(S.tab==='dashboard') renderDash();
   if(S.tab==='profil') renderProfil();
   if(S.tab==='soon') renderSoon();
+  if(S.tab==='adm') renderAdm();
   if(S.tab==='pengguna') renderUsers();
   if(S.tab==='rekap') renderRekap();
   if(S.tab==='rapor') renderCetak();
@@ -891,12 +903,12 @@ function DT(host,o){
     const f=filt(); if(!f.length){ snack('Tidak ada data untuk diproses'); return; }
     if(x.dataset.x==='copy'){
       const tsv=[ec().map(c=>c.h)].concat(plain(ec(),f)).map(r=>r.join('\t')).join('\n');
-      try{ await navigator.clipboard.writeText(tsv); snack(f.length+' baris disalin'); }catch(err){ snack('Gagal menyalin; izinkan akses clipboard'); }
+      try{ await navigator.clipboard.writeText(tsv); snack(f.length+' baris disalin'); logExp(o.title,f.length,'Salin'); }catch(err){ snack('Gagal menyalin; izinkan akses clipboard'); }
     }else if(x.dataset.x==='xls'){
       const blob=new Blob(['\ufeff<html><head><meta charset="utf-8"></head><body>'+tableHTML(ec(),f)+'</body></html>'],{type:'application/vnd.ms-excel'});
-      const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=o.title.replace(/[^\w]+/g,'-')+'.xls'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+      const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=o.title.replace(/[^\w]+/g,'-')+'.xls'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),1000); logExp(o.title,f.length,'Excel');
     }else{
-      ctCleanup(); $('#printRoot').innerHTML=`<div class="ptab"><h2>${esc(o.title)}</h2>${tableHTML(ec(),f)}</div>`; window.print();
+      ctCleanup(); $('#printRoot').innerHTML=`<div class="ptab"><h2>${esc(o.title)}</h2>${tableHTML(ec(),f)}</div>`; logExp(o.title,f.length,'PDF/Cetak'); window.print();
     }
   };
   draw(); icons();
@@ -914,6 +926,9 @@ const GUIDE_APP=[
  ['Cetak Nilai PKL','Atur ukuran kertas dan margin, pilih kelas, klik Generate Laporan (nilai diambil dari database), lihat preview, lalu cetak satu siswa, siswa terpilih, atau seluruh kelas. Di jendela cetak: Margin Default, Skala 100%, matikan Header dan footer.'],
  ['Data Pengguna','Tambah, lihat, ubah, aktifkan/nonaktifkan, dan hapus pengguna (Administrator, Kepala Sekolah, Wali Kelas, Guru Pembimbing); reset kata sandi; import dan export Excel.'],
  ['Data Referensi','Menu Data Sekolah, Data Program, Data Kelas, Data Tujuan Pembelajaran, Data Kriteria, Data Siswa, dan Data Penempatan dikelola langsung di aplikasi (tambah, detail, ubah, hapus, import, dan export Excel).'],
+ ['Pengaturan','Atur periode (tahun ajaran, semester, fase, tempat dan tanggal rapor), buka/tutup penilaian, lihat kebijakan keamanan, dan tampilan.'],
+ ['Backup dan Restore','Buat dan unduh backup, pulihkan dari file atau riwayat (dengan validasi, konfirmasi, dan salinan pengaman otomatis). Hanya Administrator yang berwenang.'],
+ ['Log Aktivitas','Telusuri aktivitas sistem dengan pencarian, filter pengguna, aktivitas, modul, dan tanggal; lihat detail dan export Excel.'],
  ['Keluar','Buka menu profil di kanan atas, lalu pilih Keluar.']];
 function infoData(){
   const num=a=>a.map((r,i)=>({no:i+1,a:r[0],b:r[1]}));
@@ -2097,6 +2112,7 @@ async function skSave(data,msg){
   catch(err){ busy(false); const e=$('#skErr'); if(e) e.textContent=err.message; toast(err.message,'err'); return false; }
 }
 function skExport(){
+  logExp('Data Sekolah',1,'Excel');
   const rows=SK_FIELDS.map(f=>({f:f.label,v:(S.sk&&S.sk[f.k])||''}));
   dlBlob('data-sekolah.xls','application/vnd.ms-excel','\ufeff<html><head><meta charset="utf-8"></head><body>'+tableHTML([{h:'Field',k:'f'},{h:'Isi',k:'v'}],rows)+'</body></html>');
 }
@@ -2394,6 +2410,7 @@ async function ctPrint(rows,label){
   st.textContent=`@page{size:${c.p.w}mm ${c.p.h}mm;margin:${c.v.mt}mm ${c.v.mr}mm ${c.v.mb}mm ${c.v.ml}mm}`;
   document.head.appendChild(st);
   $('#printRoot').innerHTML=html;
+  logExp('Cetak Nilai PKL',rows.length,'PDF/Cetak');
   window.print();
 }
 
@@ -2425,6 +2442,241 @@ async function ctPrint(rows,label){
     if(tr&&!e.target.closest('input,button')) ctSetCur(tr.dataset.nis);
   });
 })();
+
+
+/* ====== ADMINISTRASI: Pengaturan, Backup dan Restore, Log Aktivitas ====== */
+const ADM={set:null,bk:{h:null,ctl:null},lg:{q:{page:1,size:10},seq:0,data:null,t:null}};
+function resetAdm(){ ADM.set=null; ADM.bk={h:null,ctl:null}; ADM.lg={q:{page:1,size:10},seq:0,data:null,t:null}; const h=$('#v-adm'); if(h) h.innerHTML=''; }
+const LOG_EXP=['Data Pengguna','Data Sekolah','Data Program','Data Kelas','Data Tujuan Pembelajaran','Data Kriteria Skor & Deskripsi','Data Siswa','Data Penempatan PKL','Cetak Nilai PKL','Riwayat Backup'];
+function expModul(t){ t=String(t||''); if(/^Rekapitulasi/i.test(t)) return 'Rekapitulasi Nilai'; return LOG_EXP.includes(t)?t:null; }
+/** Ekspor terjadi di browser; server mencatat laporan dari aplikasi ini (ditandai pada keterangan log). */
+function logExp(title,n,fmt){ const m=expModul(title); if(!m||!S.token) return; api('logExport',{modul:m,jumlah:n,format:fmt}).catch(()=>{}); }
+const ADM_RELOAD=(r)=>`<div class="pnl"><p style="margin-top:0">Tidak dapat memuat halaman: ${esc(r)}</p><button type="button" class="btn" data-adm="reload">Coba lagi</button></div>`;
+function renderAdm(){ if(S.route==='pengaturan') admSet(); else if(S.route==='backup') admBk(); else if(S.route==='log') admLog(); }
+const WKT=s=>esc(fmtWaktu(s));
+
+/* ---------- Pengaturan ---------- */
+const PER_KEYS=['tahun_ajaran','semester','fase','tempat_ttd','tanggal_rapor'];
+async function admSet(){
+  const h=$('#v-adm'); h.innerHTML='<div class="pnl muted">Memuat pengaturan…</div>';
+  try{ ADM.set=await api('getSettings',{}); }catch(e){ if(S.route==='pengaturan') h.innerHTML=ADM_RELOAD(e.message); return; }
+  if(S.route==='pengaturan') drawSet();
+}
+function perInput(f,v){
+  const a=`id="ap_${f.k}"`;
+  if(f.kind==='sem') return `<select ${a}><option value="">— Pilih semester —</option><option${v==='Ganjil'?' selected':''}>Ganjil</option><option${v==='Genap'?' selected':''}>Genap</option></select>`;
+  if(f.kind==='date') return `<input type="date" ${a} value="${esc(txtToISO(v))}">`;
+  return `<input type="text" ${a} maxlength="${f.max||20}" autocomplete="off" placeholder="${esc(f.ph||'')}" value="${esc(v)}"${f.list?' list="dlFaseAp"':''}>`;
+}
+function drawSet(){
+  const d=ADM.set, p=d.periode, F=SK_FIELDS.filter(f=>PER_KEYS.includes(f.k)), open=d.statusPenilaian==='dibuka', k=d.keamanan, s=d.sistem;
+  const kv=a=>'<table class="kv">'+a.map(r=>`<tr><td>${esc(r[0])}</td><td>${r[1]}</td></tr>`).join('')+'</table>';
+  $('#v-adm').innerHTML=`
+  <div class="pnl"><div class="ph"><h3><i data-lucide="calendar-range"></i>Periode dan Rapor Aktif</h3></div>
+    <p class="rhint">Dipakai pada header aplikasi serta kop dan tanda tangan rapor. Identitas sekolah dikelola di <a href="#ref-sekolah">Data Sekolah</a>. Setiap perubahan dicatat di Log Aktivitas.</p>
+    <form id="admPer" novalidate><div class="fgrid">${F.map(f=>`<label class="lbl">${esc(f.label)} <span class="rq" style="color:var(--err)">*</span>${perInput(f,p[f.k]||'')}</label>`).join('')}</div>
+    <datalist id="dlFaseAp"><option value="E"><option value="F"></datalist>
+    <div class="skact"><button class="btn" type="submit"><i data-lucide="save"></i> Simpan</button><button class="btn sec" type="button" data-adm="reload">Batalkan perubahan</button><span id="admPerErr" style="font-size:13px;color:var(--err)"></span></div></form></div>
+  <div class="pnl"><div class="ph"><h3><i data-lucide="lock-keyhole"></i>Status Penilaian</h3></div>
+    <p style="margin-top:0">Saat ini penilaian <span class="bdg ${open?'ok':'wr'}">${open?'Dibuka':'Ditutup'}</span>. ${open?'Guru dapat menyimpan nilai.':'Guru tidak dapat menyimpan nilai; Administrator tetap dapat.'}</p>
+    <button type="button" class="btn${open?' sec':''}" data-adm="status" data-to="${open?'ditutup':'dibuka'}"><i data-lucide="${open?'lock':'lock-open'}"></i> ${open?'Tutup Penilaian':'Buka Penilaian'}</button></div>
+  <div class="pnl"><div class="ph"><h3><i data-lucide="shield-check"></i>Keamanan</h3></div>
+    ${kv([['Masa berlaku sesi login',k.sesiJam+' jam'],['Batas percobaan login gagal',k.maksGagal+' kali, lalu dikunci '+k.kunciMenit+' menit'],['Kata sandi','Minimal '+k.minSandi+' karakter, memuat huruf dan angka; wajib diganti saat login pertama atau setelah direset'],['Penyimpanan kata sandi','Hash bergaram ('+k.hashPutaran+' putaran), tidak disimpan sebagai teks asli'],['Backup dan restore',d.backup.berwenang?'Akun Anda berwenang':'Akun Anda tidak berwenang']])}
+    <p class="rhint" style="margin:10px 0 0">Nilai ini ditetapkan di kode server (Kode.gs) dan tidak dapat diubah dari aplikasi. Pembatasan backup/restore ke Administrator tertentu diatur lewat Script property <b>BACKUP_ADMINS</b>.</p></div>
+  <div class="pnl"><div class="ph"><h3><i data-lucide="palette"></i>Tampilan dan Cetak (peramban ini)</h3></div>
+    <div class="ubar"><span class="muted">Tema</span><div class="seg"><button type="button" data-th="light">Terang</button><button type="button" data-th="dark">Gelap</button></div>
+    <span class="muted">Ukuran teks</span><div class="seg"><button type="button" data-fs="s">Kecil</button><button type="button" data-fs="m">Sedang</button><button type="button" data-fs="l">Besar</button></div></div>
+    <div class="ubar"><button type="button" class="btn sec" data-adm="reset-ui"><i data-lucide="rotate-ccw"></i> Kembalikan tampilan bawaan</button><button type="button" class="btn sec" data-adm="reset-cetak"><i data-lucide="printer"></i> Kembalikan pengaturan cetak bawaan</button></div>
+    <p class="rhint" style="margin:0">Preferensi ini tersimpan di peramban masing-masing pengguna dan tidak mengubah data server.</p></div>
+  <div class="pnl"><div class="ph"><h3><i data-lucide="info"></i>Informasi Sistem</h3></div>
+    ${kv([['Sekolah',esc(d.sekolah||'-')],['Versi aplikasi',esc(s.versi)],['Spreadsheet basis data',esc(s.spreadsheet)],['Zona waktu',esc(s.zona)],['Backup manual terakhir',d.backup.terakhir?WKT(d.backup.terakhir):'<span class="muted">Belum pernah</span>'],['Jumlah catatan log',esc(d.log.total)]])}
+    <div class="ubar" style="margin:12px 0 0"><a class="btn sec" href="#backup" style="text-decoration:none"><i data-lucide="database-backup"></i> Backup dan Restore</a><a class="btn sec" href="#log" style="text-decoration:none"><i data-lucide="scroll-text"></i> Log Aktivitas</a></div></div>`;
+  markUI(); icons();
+}
+async function admSavePer(){
+  const F=SK_FIELDS.filter(f=>PER_KEYS.includes(f.k)), d={}, er=$('#admPerErr'); er.textContent='';
+  document.querySelectorAll('#admPer .invalid').forEach(x=>x.classList.remove('invalid'));
+  F.forEach(f=>d[f.k]=$('#ap_'+f.k).value);
+  const bad=chkFields(F,d); if(bad){ const el=$('#ap_'+bad[0]); el.classList.add('invalid'); el.focus(); er.textContent=bad[1]; return toast(bad[1],'err'); }
+  busy(true);
+  try{ await api('saveSekolah',{data:d}); busy(false); toast('Pengaturan periode disimpan','ok'); afterRefChange(); admSet(); }
+  catch(e){ busy(false); er.textContent=e.message; toast(e.message,'err'); }
+}
+async function admStatus(to){
+  const msg=to==='ditutup'?'Tutup penilaian? Guru tidak akan dapat menyimpan nilai sampai dibuka kembali.':'Buka penilaian? Guru dapat kembali menyimpan nilai.';
+  if(!(await popup('ask',msg,{yes:to==='ditutup'?'Ya, Tutup':'Ya, Buka',no:'Batal'}))) return;
+  busy(true);
+  try{ await api('setPenilaian',{status:to}); busy(false); toast('Penilaian '+(to==='ditutup'?'ditutup':'dibuka'),'ok'); afterRefChange(); admSet(); }
+  catch(e){ busy(false); toast(e.message,'err'); }
+}
+
+/* ---------- Backup dan Restore ---------- */
+const bkName=id=>'backup-erapor-pkl-'+id+'.json';
+async function admBk(){
+  const h=$('#v-adm'); h.innerHTML='<div class="pnl muted">Memuat…</div>';
+  try{ ADM.bk.h=await api('backupList',{}); }catch(e){ if(S.route==='backup') h.innerHTML=ADM_RELOAD(e.message); return; }
+  if(S.route==='backup') drawBk();
+}
+function drawBk(){
+  const d=ADM.bk.h, h=$('#v-adm');
+  if(!d.allowed){ h.innerHTML='<div class="pnl"><div class="ph"><h3><i data-lucide="shield-x"></i>Akses dibatasi</h3></div><p style="margin:0">Akun Anda bukan Administrator yang berwenang mengelola backup dan restore. Hubungi Administrator utama.</p></div>'; icons(); return; }
+  const cur=Object.keys(d.current||{});
+  h.innerHTML=`
+  <div class="warnbox" role="alert"><i data-lucide="triangle-alert"></i><div><b>Perhatian.</b> Restore <b>mengganti seluruh data</b> aplikasi (sekolah, program, kelas, TP, kriteria, siswa, penempatan, nilai, dan pengguna) dengan isi file backup. Sebelum restore berjalan, sistem otomatis menyimpan salinan pengaman kondisi saat ini. File backup memuat data pengguna termasuk <b>hash kata sandi</b>: simpan di tempat aman dan jangan dibagikan.</div></div>
+  <div class="pnl"><div class="ph"><h3><i data-lucide="database-backup"></i>Backup Database</h3></div>
+    <p class="rhint">Membuat salinan seluruh data. File (.json) langsung diunduh dan satu salinan disimpan di sistem (maksimal ${esc(d.keep)} salinan terbaru; riwayat tetap utuh). Log Aktivitas tidak ikut di-restore sehingga jejak audit tidak tertimpa.</p>
+    <div class="tablewrap" style="max-height:none;margin-bottom:12px"><table class="grid dt"><thead><tr>${cur.map(k=>`<th>${esc(k)}</th>`).join('')}</tr></thead><tbody><tr>${cur.map(k=>`<td class="cnum">${esc(d.current[k])}</td>`).join('')}</tr></tbody></table></div>
+    <button type="button" class="btn" data-adm="bk-create"><i data-lucide="download"></i> Backup Database dan Unduh File</button></div>
+  <div class="pnl"><div class="ph"><h3><i data-lucide="database-zap"></i>Restore Database</h3></div>
+    <p class="rhint">Pilih file backup (.json) yang dibuat oleh aplikasi ini. File divalidasi (keaslian, struktur, kelengkapan, dan akun Administrator) sebelum Anda diminta konfirmasi. Tidak ada data yang diubah pada tahap pemeriksaan.</p>
+    <button type="button" class="btn sec" data-adm="bk-pick"><i data-lucide="upload"></i> Pilih File Backup…</button>
+    <input type="file" id="bkFile" class="hidden" accept=".json,application/json"></div>
+  <div class="pnl"><div class="ph"><h3><i data-lucide="history"></i>Riwayat Backup</h3></div><div id="bkDT"></div></div>`;
+  const rows=d.rows.map((r,i)=>Object.assign({no:i+1},r));
+  const ok=r=>r.tersimpan==='ya'&&r.status==='Berhasil'&&r.jenis!=='Restore';
+  ADM.bk.ctl=DT($('#bkDT'),{title:'Riwayat Backup',empty:'Belum ada riwayat backup.',rows,cols:[
+    {h:'Waktu',k:'waktu',html:r=>WKT(r.waktu)},{h:'Jenis',k:'jenis'},{h:'Oleh',k:'oleh'},{h:'Ukuran (KB)',k:'ukuran_kb',c:'cnum'},{h:'Baris',k:'total_baris',c:'cnum'},
+    {h:'Tanda',k:'tanda',html:r=>`<code>${esc(r.tanda)}</code>`},{h:'Status',k:'status',html:r=>`<span class="bdg ${r.status==='Berhasil'?'ok':'er'}">${esc(r.status)}</span>`},
+    {h:'Salinan',k:'tersimpan',html:r=>r.tersimpan==='ya'?'Tersimpan':'Dilepas'},
+    {h:'Aksi',k:'id',nx:1,html:r=>ok(r)?`<div class="rowact"><button type="button" class="btn sec" data-bk="dl" data-id="${esc(r.id)}"><i data-lucide="download"></i> Unduh</button><button type="button" class="btn sec" data-bk="rs" data-id="${esc(r.id)}"><i data-lucide="database-zap"></i> Restore</button></div>`:'<span class="muted">—</span>'}]});
+  icons();
+}
+async function bkCreate(){
+  if(!(await popup('ask','Buat backup seluruh data sekarang? File akan langsung diunduh. File ini memuat hash kata sandi pengguna, simpan di tempat aman.',{yes:'Buat Backup',no:'Batal'}))) return;
+  busy(true);
+  try{
+    const r=await api('backupCreate',{});
+    JSON.parse(r.file.payload); // pastikan isi dapat dibaca sebelum diberikan
+    dlBlob(bkName(r.id),'application/json',JSON.stringify(r.file)); busy(false);
+    toast(`Backup berhasil: ${r.total} baris, ${r.ukuranKb} KB. File ${bkName(r.id)} telah diunduh.`,'ok'); admBk();
+  }catch(e){ busy(false); toast(e.message,'err'); }
+}
+async function bkDownload(id){
+  busy(true);
+  try{ const r=await api('backupDownload',{id}); busy(false); dlBlob(bkName(id),'application/json',JSON.stringify(r.file)); snack('File backup diunduh'); }
+  catch(e){ busy(false); toast(e.message,'err'); }
+}
+async function bkPick(file){
+  if(!/\.json$/i.test(file.name)) return toast('File harus berformat .json hasil Backup Database','err');
+  if(file.size>40*1024*1024) return toast('Ukuran file terlalu besar (maksimal 40 MB)','err');
+  let f; try{ f=JSON.parse(await file.text()); }catch(e){ return toast('File tidak dapat dibaca: isinya bukan JSON yang valid','err'); }
+  if(!f||typeof f!=='object'||f.format!=='erapor-pkl-backup'||typeof f.payload!=='string') return toast('Ini bukan file backup e-Rapor PKL','err');
+  bkPreview({file:f});
+}
+async function bkPreview(src){
+  busy(true); let p;
+  try{ p=await api('restorePreview',src); }catch(e){ busy(false); return toast(e.message,'err'); }
+  busy(false);
+  openModal(`<form id="bkRs" novalidate style="display:grid;gap:10px"><h3 style="margin:0"><i data-lucide="database-zap"></i> Konfirmasi Restore Database</h3>
+  <div class="warnbox" style="margin:0"><i data-lucide="triangle-alert"></i><div><b>Seluruh data saat ini akan diganti</b> dengan isi backup di bawah. Kata sandi dan akun pengguna kembali seperti saat backup dibuat, dan Anda akan diminta masuk kembali. Salinan pengaman kondisi saat ini dibuat otomatis lebih dulu.</div></div>
+  <table class="kv"><tr><td>Dibuat</td><td>${WKT(p.dibuat)}</td></tr><tr><td>Dibuat oleh</td><td>${esc(p.oleh||'-')}</td></tr><tr><td>Versi aplikasi</td><td>${esc(p.app||'-')}</td></tr><tr><td>Tanda keaslian</td><td><code>${esc(p.tanda)}</code> <span class="bdg ok">Valid</span></td></tr></table>
+  <div class="tablewrap" style="max-height:220px"><table class="grid dt"><thead><tr><th>Tab</th><th>Saat ini</th><th>Di backup</th></tr></thead><tbody>${p.rows.map(r=>`<tr><td>${esc(r.tab)}</td><td class="cnum">${esc(r.sekarang)}</td><td class="cnum"><b>${esc(r.backup)}</b></td></tr>`).join('')}</tbody></table></div>
+  ${p.warn&&p.warn.length?`<div class="warnbox" style="margin:0"><div><b>Catatan:</b><br>${p.warn.map(esc).join('<br>')}</div></div>`:''}
+  <label class="lbl">Kata sandi Anda (verifikasi)<input type="password" id="bkPw" autocomplete="current-password"></label>
+  <label class="lbl">Ketik <b>RESTORE</b> untuk melanjutkan<input type="text" id="bkTx" autocomplete="off" spellcheck="false" placeholder="RESTORE"></label>
+  <p id="bkRsErr" style="margin:0;font-size:13px;color:var(--err);min-height:1.2em"></p>
+  <div class="bar" style="margin:0"><button class="btn" type="submit" id="bkGo" disabled style="background:var(--err)"><i data-lucide="database-zap"></i> Restore Sekarang</button><button class="btn sec" type="button" data-mc>Batal</button></div></form>`,1);
+  const chk=()=>{ $('#bkGo').disabled=!($('#bkPw').value&&$('#bkTx').value.trim()==='RESTORE'); };
+  $('#bkPw').oninput=chk; $('#bkTx').oninput=chk;
+  $('#bkRs').onsubmit=async e=>{
+    e.preventDefault(); $('#bkRsErr').textContent=''; if($('#bkGo').disabled) return;
+    busy(true);
+    try{
+      const r=await api('restoreApply',Object.assign({},src,{password:$('#bkPw').value,konfirmasi:$('#bkTx').value.trim()}));
+      busy(false); closeModal();
+      await popup('ok',`Restore berhasil: ${r.restored} baris dipulihkan. Salinan pengaman kondisi sebelumnya: ${r.pengaman}. Silakan masuk kembali.`);
+      logout('Restore selesai. Silakan masuk kembali.');
+    }catch(err){ busy(false); $('#bkRsErr').textContent=err.message; $('#bkPw').value=''; chk(); }
+  };
+}
+
+/* ---------- Log Aktivitas ---------- */
+const AKT_CLS={'Login':'ok','Login Gagal':'er','Logout':'in','Tambah Data':'ok','Edit Data':'in','Hapus Data':'er','Import Data':'wr','Export Data':'wr','Input Nilai':'ok','Perubahan Pengaturan':'wr','Backup':'in','Restore':'er'};
+const aktBdg=a=>`<span class="bdg ${AKT_CLS[a]||''}">${esc(a)}</span>`;
+function admLog(){
+  ADM.lg.q={page:1,size:+(ADM.lg.q.size)||10};
+  $('#v-adm').innerHTML=`<div class="pnl"><div class="ph"><h3><i data-lucide="scroll-text"></i>Log Aktivitas</h3><button type="button" class="btn sec sm" data-adm="log-reload"><i data-lucide="refresh-cw"></i>Muat ulang</button><button type="button" class="btn sec sm" data-adm="log-exp"><i data-lucide="file-spreadsheet"></i>Export Excel</button></div>
+  <p class="rhint">Riwayat aktivitas nyata yang dicatat server. Kata sandi dan informasi autentikasi tidak pernah dicatat. Catatan Export berasal dari laporan aplikasi di peramban.</p>
+  <div class="lgf"><label class="lbl">Cari<input type="search" id="lgQ" placeholder="Nama, aktivitas, keterangan"></label>
+  <label class="lbl">Pengguna<select id="lgU"><option value="">Semua pengguna</option></select></label>
+  <label class="lbl">Aktivitas<select id="lgA"><option value="">Semua aktivitas</option></select></label>
+  <label class="lbl">Modul<select id="lgM"><option value="">Semua modul</option></select></label>
+  <label class="lbl">Dari tanggal<input type="date" id="lgFrom"></label><label class="lbl">Sampai tanggal<input type="date" id="lgTo"></label>
+  <label class="lbl">Baris per halaman<select id="lgN"><option>10</option><option>25</option><option>50</option><option>100</option></select></label>
+  <button type="button" class="btn sec" data-adm="log-reset">Reset filter</button></div>
+  <div class="tablewrap"><table class="grid dt" id="lgT"><tbody><tr><td class="muted" style="padding:18px">Memuat…</td></tr></tbody></table></div><div class="dt-foot" id="lgF"></div></div>`;
+  $('#lgN').value=String(ADM.lg.q.size); icons(); logLoad();
+}
+function fillLogFilters(d){
+  const fill=(id,opts,keep)=>{ const el=$(id), cur=keep; const first=el.options[0].outerHTML; el.innerHTML=first+opts; el.value=cur||''; };
+  const q=ADM.lg.q;
+  fill('#lgU',d.users.map(u=>`<option value="${esc(u.username)}">${esc(u.nama)} (${esc(u.username)})</option>`).join(''),q.user);
+  fill('#lgA',d.acts.map(a=>`<option>${esc(a)}</option>`).join(''),q.akt);
+  fill('#lgM',d.moduls.map(m=>`<option>${esc(m)}</option>`).join(''),q.modul);
+}
+async function logLoad(){
+  const my=++ADM.lg.seq;
+  try{
+    const d=await api('logList',{q:ADM.lg.q}); if(my!==ADM.lg.seq||S.route!=='log') return;
+    ADM.lg.data=d; ADM.lg.q.page=d.page; fillLogFilters(d); drawLog();
+  }catch(e){ if(my===ADM.lg.seq&&S.route==='log'){ const t=$('#lgT'); if(t) t.innerHTML=`<tbody><tr><td class="muted" style="padding:18px">Gagal memuat log: ${esc(e.message)}</td></tr></tbody>`; } }
+}
+function drawLog(){
+  const d=ADM.lg.data, s=(d.page-1)*d.size;
+  $('#lgT').innerHTML='<thead><tr><th>Waktu</th><th>Pengguna</th><th>Role</th><th>Aktivitas</th><th>Modul</th><th>Keterangan</th><th>Detail</th></tr></thead><tbody>'+
+   (d.rows.length?d.rows.map(r=>`<tr><td>${WKT(r.waktu)}</td><td>${esc(r.nama)} <small class="muted">(${esc(r.username)})</small></td><td>${esc(ROLE_LABEL[r.role]||r.role)}</td><td>${aktBdg(r.aktivitas)}</td><td>${esc(r.modul)}</td><td class="lgk" title="${esc(r.keterangan)}">${esc(r.keterangan)}</td><td><button type="button" class="btn sec" style="padding:4px 8px" data-adm="log-det" data-id="${esc(r.id)}"><i data-lucide="eye"></i></button></td></tr>`).join('')
+   :`<tr><td colspan="7" class="muted" style="text-align:center;padding:18px">${d.all?'Tidak ada catatan yang cocok dengan filter.':'Belum ada aktivitas tercatat.'}</td></tr>`)+'</tbody>';
+  let a=Math.max(1,d.page-2), z=Math.min(d.pages,a+4); a=Math.max(1,z-4); let nums='';
+  for(let i=a;i<=z;i++) nums+=`<button type="button" data-lp="${i}" class="${i===d.page?'on':''}">${i}</button>`;
+  $('#lgF').innerHTML=`<span>${d.total?`Menampilkan ${s+1}–${s+d.rows.length} dari ${d.total} catatan`:'Tidak ada data'}${d.total!==d.all?` (disaring dari ${d.all})`:''}</span><div class="pg"><button type="button" data-lp="${d.page-1}" ${d.page<=1?'disabled':''}>Sebelumnya</button>${nums}<button type="button" data-lp="${d.page+1}" ${d.page>=d.pages?'disabled':''}>Berikutnya</button></div>`;
+  icons();
+}
+function logDetail(id){
+  const r=ADM.lg.data.rows.find(x=>x.id===id); if(!r) return;
+  openModal(`<h3 style="margin:0 0 10px"><i data-lucide="scroll-text"></i> Detail Log</h3><table class="kv"><tr><td>ID log</td><td><code>${esc(r.id)}</code></td></tr><tr><td>Tanggal dan waktu</td><td>${WKT(r.waktu)}</td></tr><tr><td>Nama pengguna</td><td>${esc(r.nama)}</td></tr><tr><td>Username</td><td>${esc(r.username)}</td></tr><tr><td>Role</td><td>${esc(ROLE_LABEL[r.role]||r.role)}</td></tr><tr><td>Aktivitas</td><td>${aktBdg(r.aktivitas)}</td></tr><tr><td>Modul</td><td>${esc(r.modul)}</td></tr><tr><td>Keterangan</td><td style="white-space:pre-wrap;word-break:break-word">${esc(r.keterangan)}</td></tr></table><div class="bar" style="margin:12px 0 0"><button class="btn sec" type="button" data-mc>Tutup</button></div>`);
+}
+async function logExportXls(){
+  busy(true);
+  try{
+    const r=await api('logExportAll',{q:ADM.lg.q}); busy(false);
+    if(!r.rows.length) return snack('Tidak ada data untuk diekspor');
+    const safe=v=>/^[=+\-@\t\r]/.test(String(v))?"'"+v:v;
+    const rows=r.rows.map(x=>({w:safe(x.waktu),n:safe(x.nama),u:safe(x.username),r:ROLE_LABEL[x.role]||x.role,a:x.aktivitas,m:safe(x.modul),k:safe(x.keterangan)}));
+    dlBlob('log-aktivitas-'+new Date().toISOString().slice(0,10)+'.xls','application/vnd.ms-excel','\ufeff<html><head><meta charset="utf-8"></head><body>'+tableHTML([{h:'Waktu',k:'w'},{h:'Nama',k:'n'},{h:'Username',k:'u'},{h:'Role',k:'r'},{h:'Aktivitas',k:'a'},{h:'Modul',k:'m'},{h:'Keterangan',k:'k'}],rows)+'</body></html>');
+    snack(r.dipotong?`Diekspor ${r.rows.length} dari ${r.total} catatan (dibatasi)`:`${r.rows.length} catatan diekspor`);
+  }catch(e){ busy(false); toast(e.message,'err'); }
+}
+function logQ(){
+  const q=ADM.lg.q; q.q=$('#lgQ').value.trim(); q.user=$('#lgU').value; q.akt=$('#lgA').value; q.modul=$('#lgM').value; q.from=$('#lgFrom').value; q.to=$('#lgTo').value; q.size=+$('#lgN').value; q.page=1;
+  if(q.from&&q.to&&q.from>q.to){ snack('Tanggal awal tidak boleh setelah tanggal akhir'); q.to=''; $('#lgTo').value=''; }
+}
+
+/* ---------- penanganan peristiwa halaman administrasi ---------- */
+const admv=$('#v-adm');
+admv.addEventListener('click',e=>{
+  const lp=e.target.closest('[data-lp]'); if(lp&&!lp.disabled){ ADM.lg.q.page=+lp.dataset.lp; logLoad(); return; }
+  const k=e.target.closest('[data-bk]'); if(k){
+    if(k.dataset.bk==='dl') bkDownload(k.dataset.id); else if(k.dataset.bk==='rs') bkPreview({id:k.dataset.id}); return; }
+  const b=e.target.closest('[data-adm]'); if(!b) return;
+  switch(b.dataset.adm){
+    case 'reload': return renderAdm();
+    case 'status': return admStatus(b.dataset.to);
+    case 'reset-ui': UI={}; saveUI(); return snack('Tampilan dikembalikan ke bawaan');
+    case 'reset-cetak': CT=ctNorm({}); try{ localStorage.setItem('rapor_print',JSON.stringify(CT)); }catch(x){} return snack('Pengaturan cetak dikembalikan ke bawaan');
+    case 'bk-create': return bkCreate();
+    case 'bk-pick': return $('#bkFile').click();
+    case 'log-reload': return logLoad();
+    case 'log-exp': return logExportXls();
+    case 'log-det': return logDetail(b.dataset.id);
+    case 'log-reset': ADM.lg.q={page:1,size:ADM.lg.q.size}; ['#lgQ','#lgFrom','#lgTo'].forEach(i=>$(i).value=''); return logLoad();
+  }
+});
+admv.addEventListener('change',e=>{
+  if(e.target.id==='bkFile'){ const f=e.target.files[0]; e.target.value=''; if(f) bkPick(f); return; }
+  if(e.target.closest('.lgf')&&e.target.id!=='lgQ'){ logQ(); logLoad(); }
+});
+admv.addEventListener('input',e=>{ if(e.target.id==='lgQ'){ clearTimeout(ADM.lg.t); ADM.lg.t=setTimeout(()=>{ logQ(); logLoad(); },350); } });
+admv.addEventListener('submit',e=>{ if(e.target.id==='admPer'){ e.preventDefault(); admSavePer(); } });
 
 /* ---------- boot ---------- */
 (function init(){
