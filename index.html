@@ -507,7 +507,7 @@ table.grid tr.dirty:hover td{background:#f9ecbc}
       <datalist id="dlKurRg"><option value="Kurikulum Merdeka"><option value="Kurikulum 2013"></datalist><datalist id="dlFaseRg"><option value="E"><option value="F"></datalist>
       <div class="dv">Akun Administrator (untuk masuk)</div>
       <div class="ig"><label for="rgUser">Username</label><input type="text" id="rgUser" autocapitalize="none" spellcheck="false" maxlength="30" autocomplete="username"></div>
-      <div class="ig"><label for="rgPw">Kata Sandi</label><input type="password" id="rgPw" autocomplete="new-password" placeholder="Min. 8 karakter, huruf dan angka"></div>
+      <div class="ig"><label for="rgPw">Kata Sandi</label><input type="password" id="rgPw" autocomplete="new-password" placeholder="Min. 8 karakter (huruf boleh semua)"></div>
       <div class="ig"><label for="rgPw2">Ulangi Sandi</label><input type="password" id="rgPw2" autocomplete="new-password"></div>
       <button class="btn go" type="submit"><i data-lucide="user-plus"></i>Daftar &amp; Masuk</button>
     </form>
@@ -671,7 +671,7 @@ table.grid tr.dirty:hover td{background:#f9ecbc}
 
 <div id="pwModal" class="modal hidden"><form class="card" id="pwForm" style="display:grid;gap:10px">
   <h3 style="margin:0">Ganti kata sandi</h3>
-  <p class="muted" id="pwHint" style="margin:0;font-size:13px">Minimal 8 karakter, memuat huruf dan angka, dan berbeda dari kata sandi lama.</p>
+  <p class="muted" id="pwHint" style="margin:0;font-size:13px">Minimal 8 karakter (boleh huruf saja), dan berbeda dari kata sandi lama.</p>
   <label class="lbl">Kata sandi lama<input type="password" id="pwOld" autocomplete="current-password" required></label>
   <label class="lbl">Kata sandi baru<input type="password" id="pwNew" autocomplete="new-password" minlength="8" required></label>
   <label class="lbl">Ulangi kata sandi baru<input type="password" id="pwNew2" autocomplete="new-password" minlength="8" required></label>
@@ -1067,7 +1067,7 @@ $('#btnLogout').onclick=doLogout; $('#btnLogoutSide').onclick=doLogout;
 /* ---------- ganti kata sandi ---------- */
 function openPw(forced){
   S.pwForced=!!forced; $('#pwMsg').textContent=''; $('#pwForm').reset();
-  $('#pwHint').textContent = forced ? 'Ini login pertama (atau kata sandi baru direset). Anda wajib membuat kata sandi baru: minimal 8 karakter, memuat huruf dan angka.' : 'Minimal 8 karakter, memuat huruf dan angka, dan berbeda dari kata sandi lama.';
+  $('#pwHint').textContent = forced ? 'Ini login pertama (atau kata sandi baru direset). Anda wajib membuat kata sandi baru: minimal 8 karakter (boleh huruf saja).' : 'Minimal 8 karakter (boleh huruf saja), dan berbeda dari kata sandi lama.';
   $('#pwCancel').classList.toggle('hidden',!!forced);
   $('#pwModal').classList.remove('hidden');
 }
@@ -1416,7 +1416,7 @@ $('#dashBody').addEventListener('click',async e=>{
   const g=e.target.closest('[data-go]'); if(g){ location.hash=g.dataset.go; return; }
   const t=e.target.closest('[data-itab]'); if(t){ S.itab=t.dataset.itab; drawDash(); return; }
   const a=e.target.closest('[data-act]'); if(!a||a.disabled) return;
-  if(a.dataset.act==='refresh'){ S.dash=null; loadDash(); return; }
+  if(a.dataset.act==='refresh'){ S.dl=false; S.dash=null; S.dashErr=null; loadDash().then(()=>{ if(S.dash) snack('Dashboard dimuat ulang'); }); return; }
   const st=a.dataset.act;
   if(!(await popup('ask',st==='dibuka'?'Buka penilaian? Guru dapat menyimpan nilai PKL.':'Tutup penilaian? Guru tidak dapat menyimpan nilai. Administrator tetap dapat mengubah nilai.',{yes:st==='dibuka'?'Ya, Buka':'Ya, Tutup',no:'Batal'}))) return;
   busy(true);
@@ -1707,14 +1707,15 @@ $('#btnTplNilaiKelas').onclick = async () => {
     catatan: r.catatan || ''
   }));
   const slug = S.kelas.replace(/[^\w]+/g, '-').toLowerCase();
+  if(!(await popup('info', `Blangko Nilai PKL untuk kelas ${S.kelas} (${tplRows.length} siswa) akan diunduh dalam format .xlsx.\n\nSilakan isi kolom Nilai TP 1 s.d. TP 4 (0–100), Sakit, Izin, Alpa (hari), dan Catatan, lalu unggah kembali melalui menu Import Nilai Excel → Import Nilai Kelas Ini.`, {title: 'Blangko Nilai Per Kelas (.xlsx)', yes:'OK', no:'Batal'}))) return;
   dlXlsx(`blangko-nilai-pkl-kelas-${slug}.xlsx`, NILAI_TPL_COLS, tplRows, {
     sheetName: ('Nilai ' + S.kelas).slice(0, 31),
     blankRows: tplRows.length ? 0 : 25
   });
-  popup('info', `Blangko Nilai PKL untuk kelas ${S.kelas} (${tplRows.length} siswa) telah diunduh dalam format .xlsx.\n\nSilakan isi kolom Nilai TP 1 s.d. TP 4 (0–100), Sakit, Izin, Alpa (hari), dan Catatan, lalu unggah kembali melalui menu Import Nilai Excel → Import Nilai Kelas Ini.`, {title: 'Blangko Nilai Per Kelas (.xlsx)'});
 };
 
 $('#btnTplNilaiSemua').onclick = async () => {
+  if(!(await popup('info','Blangko Nilai PKL Semua Kelas akan diunduh dalam format .xlsx.\n\nIsi kolom Nilai TP 1 s.d. TP 4 (0–100), Sakit, Izin, Alpa, dan Catatan, lalu unggah kembali melalui menu Import Nilai Excel → Import Nilai Semua Kelas.\n\nKlik OK untuk mulai mengunduh.',{title:'Blangko Nilai Semua Kelas (.xlsx)',yes:'OK',no:'Batal'}))) return;
   busy(true, 'Menyiapkan blangko nilai semua kelas…');
   try {
     let allRows = [];
@@ -1749,7 +1750,7 @@ $('#btnTplNilaiSemua').onclick = async () => {
       sheetName: 'Nilai Semua Kelas',
       blankRows: tplRows.length ? 0 : 35
     });
-    popup('info', `Blangko Nilai PKL Semua Kelas (${tplRows.length} siswa dari ${klsCount} kelas) telah diunduh dalam format .xlsx.\n\nSilakan isi kolom Nilai TP 1 s.d. TP 4 (0–100), Sakit, Izin, Alpa, dan Catatan, lalu unggah kembali melalui menu Import Nilai Excel → Import Nilai Semua Kelas.`, {title: 'Blangko Nilai Semua Kelas (.xlsx)'});
+    snack(`Blangko ${tplRows.length} siswa dari ${klsCount} kelas diunduh`);
   } catch (err) {
     busy(false);
     toast(err.message, 'err');
@@ -2179,7 +2180,7 @@ async function renderRekap(force){
 
 $('#btnTogDescR').onclick=()=>{ RK.showDesc=!RK.showDesc; renderRekap(false); };
 $('#btnTogCatR').onclick=()=>{ RK.showCat=!RK.showCat; renderRekap(false); };
-$('#rkRefresh').onclick=()=>renderRekap(true);
+$('#rkRefresh').onclick=async()=>{ await renderRekap(true); if(RK.loaded) snack('Rekapitulasi nilai dimuat ulang'); };
 $('#rkFProg').onchange=e=>{ RK.prog=e.target.value; renderRekap(false); };
 $('#rkFKelas').onchange=e=>{ RK.kelas=e.target.value; renderRekap(false); };
 $('#rkFStat').onchange=e=>{ RK.stat=e.target.value; renderRekap(false); };
@@ -2364,8 +2365,8 @@ $('#uTpl').onclick=async()=>{
     {h:'NIP',k:'nip',w:24,txt:1},
     {h:'Status',k:'aktif',w:14,txt:1}
   ];
+  if(!(await popup('info','File template-import-pengguna.xlsx akan diunduh dengan kolom yang rapi dan berformat Teks (@).\n\nIsi kolom Role dengan: Administrator, Kepala Sekolah, Wali Kelas, atau Guru Pembimbing. Status: Aktif atau Nonaktif (kosong = Aktif). Kolom NIP wajib selain untuk Administrator. Simpan file .xlsx lalu klik Import Excel.',{title:'Template Import Excel (.xlsx)',yes:'OK',no:'Batal'}))) return;
   dlXlsx('template-import-pengguna.xlsx', tplCols, [], {sheetName:'Template Pengguna', blankRows:25});
-  popup('info','File template-import-pengguna.xlsx telah diunduh dengan kolom yang rapi dan berformat Teks (@).\n\nIsi kolom Role dengan: Administrator, Kepala Sekolah, Wali Kelas, atau Guru Pembimbing. Status: Aktif atau Nonaktif (kosong = Aktif). Kolom NIP wajib selain untuk Administrator. Simpan file .xlsx lalu klik Import Excel.',{title:'Template Import Excel (.xlsx)'});
 };
 $('#usrDT').addEventListener('click',async e=>{
   const b=e.target.closest('[data-ua]'); if(!b) return;
@@ -2411,7 +2412,6 @@ function ufCheck(d,edit){
   if(d.nip&&!/^[0-9]{8,25}$/.test(d.nip.replace(/[\s.\-]/g,''))) return 'NIP harus 8-25 digit angka';
   if(d.password!==undefined&&(!edit||d.password!=='')){
     if(d.password.length<8) return 'Kata sandi minimal 8 karakter';
-    if(!/[A-Za-z]/.test(d.password)||!/[0-9]/.test(d.password)) return 'Kata sandi harus memuat huruf dan angka';
   }
   return '';
 }
@@ -2424,7 +2424,7 @@ function userForm(u){
     <label class="lbl">Role<select id="ufRole" ${self?'disabled':''}>${UROLE_OPTS.map(o=>`<option value="${o[0]}">${o[1]}</option>`).join('')}</select></label>
     <label class="lbl">Status<select id="ufAktif" ${self?'disabled':''}><option value="ya">Aktif</option><option value="tidak">Nonaktif</option></select></label>
     ${self?'':`<label class="lbl full">${edit?'Kata sandi baru <small>(kosongkan jika tidak diganti)</small>':'Kata sandi awal'}<input type="password" id="ufPw" autocomplete="new-password"></label>`}
-  </div><p class="muted" style="font-size:.85em;margin:10px 0">${self?'Untuk mengganti kata sandi Anda sendiri, gunakan menu Profil.':'Kata sandi minimal 8 karakter dan memuat huruf dan angka. Pengguna wajib menggantinya saat login pertama.'}</p>
+  </div><p class="muted" style="font-size:.85em;margin:10px 0">${self?'Untuk mengganti kata sandi Anda sendiri, gunakan menu Profil.':'Kata sandi minimal 8 karakter (boleh huruf saja). Pengguna wajib menggantinya saat login pertama.'}</p>
   <div class="bar" style="margin:0"><button class="btn" type="submit">Simpan</button><button class="btn sec" type="button" data-mc>Batal</button></div><p id="ufErr" style="margin:8px 0 0;font-size:13px;color:var(--err);min-height:1.2em"></p></form>`,1);
   if(u){ $('#ufRole').value=u.role; $('#ufAktif').value=u.aktif?'ya':'tidak'; }
   $('#ufForm').onsubmit=async e=>{
@@ -2522,7 +2522,7 @@ function toUserRecords(m){
   return {rows,pre};
 }
 async function importFile(file){
-  if(file.size>2*1024*1024) return toast('Ukuran file maksimal 2 MB','err');
+  if(file.size>50*1024*1024) return toast('Ukuran file terlalu besar (maksimal 50 MB)','err');
   const nm=file.name.toLowerCase();
   busy(true);
   try{
@@ -2532,7 +2532,6 @@ async function importFile(file){
     else throw new Error('Format file harus .xlsx atau .csv. File .xls lama tidak didukung; simpan ulang sebagai .xlsx.');
     const {rows,pre}=toUserRecords(m);
     if(!rows.length) throw new Error('Tidak ada baris data pada file');
-    if(rows.length>500) throw new Error('Maksimal 500 baris per import');
     let errs=pre.slice(), total=0;
     const d=await api('importUsers',{dryRun:true,rows});
     if(!d.ok){ errs=errs.concat(d.errors); total+=Math.max(0,d.jumlahError-d.errors.length); }
@@ -2554,6 +2553,7 @@ async function importFile(file){
 /* ---------- Data Referensi: Sekolah, Program, Kelas, Tujuan Pembelajaran ---------- */
 /*PURE-START*/
 const NAME_RE=/^[\p{L}\p{M}][\p{L}\p{M}\s.,'’()\-]*$/u;
+const NAME_SISWA_RE=/^[\p{L}\p{M}][\p{L}\p{M}\s.,'’‘`"“”()\-]*$/u;
 const nz=v=>String(v??'').replace(/\s+/g,' ').trim();
 const normH=s=>String(s||'').toLowerCase().replace(/[^a-z0-9]/g,'');
 const SEL_KINDS=['sem','prog','notp','jk','kls','siswa','guru'];
@@ -2601,7 +2601,7 @@ const RF_FIELDS={
  siswa:[
   {k:'nis',label:'NIS',req:1,digits:[3,20],txtnum:1,ph:'Nomor Induk Siswa'},
   {k:'nisn',label:'NISN',req:1,digits:[10,10],txtnum:1,ph:'10 digit NISN'},
-  {k:'nama',label:'Nama Siswa',req:1,min:3,max:100,re:NAME_RE,msg:'Nama Siswa hanya boleh berisi huruf, spasi, titik, koma, apostrof, tanda hubung, dan tanda kurung',full:1,alias:['namasiswa','nama','namapesertadidik']},
+  {k:'nama',label:'Nama Siswa',req:1,min:3,max:100,re:NAME_SISWA_RE,msg:'Nama Siswa hanya boleh berisi huruf, spasi, titik, koma, tanda petik, tanda hubung, dan tanda kurung',full:1,alias:['namasiswa','nama','namapesertadidik']},
   {k:'jk',label:'Jenis Kelamin',req:1,kind:'jk',alias:['jeniskelamin','jk','lp','gender'],fn:v=>/^(l|p|laki-?laki|perempuan)$/i.test(v)?'':'Jenis Kelamin harus L atau P'},
   {k:'kelas',label:'Kelas',req:1,kind:'kls',alias:['namakelas']}],
  penempatan:[
@@ -2782,7 +2782,7 @@ function dlBlob(name,type,content){
   document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),1000);
 }
 async function fileMatrix(file){
-  if(file.size>2*1024*1024) throw new Error('Ukuran file maksimal 2 MB');
+  if(file.size>50*1024*1024) throw new Error('Ukuran file terlalu besar (maksimal 50 MB)');
   const nm=file.name.toLowerCase();
   if(nm.endsWith('.xlsx')) return readXlsx(await file.arrayBuffer());
   if(nm.endsWith('.csv')) return parseCSV(await file.text());
@@ -2839,13 +2839,12 @@ function refRows(t){
   const st=RS[t], cfg=RF[t];
   return st.rows.filter(r=>cfg.filters.every(f=>!st.fv[f.id]||f.test(r,st.fv[f.id]))).map((r,i)=>Object.assign({},r,{no:i+1}));
 }
-function refTemplate(t){
+async function refTemplate(t){
   const cfg=RF[t];
   const cols=cfg.fields.filter(f=>f.kind!=='nisn_ro').map(f=>({
     h:f.label, k:f.k, txt:1,
     w:f.full?36:(f.digits?22:18)
   }));
-  dlXlsx(`template-import-${t}.xlsx`, cols, [], {sheetName:'Template '+cfg.noun, blankRows:25});
   const extra={
     program:'Kode Program berisi huruf/angka tanpa spasi. Data dengan Kode Program yang sudah ada akan diperbarui.',
     kelas:'Kode Program harus sudah ada di Data Program. Kolom NIP Wali Kelas sudah diformat Teks (@).',
@@ -2854,14 +2853,14 @@ function refTemplate(t){
     siswa:'Kolom NIS dan NISN sudah diformat Teks (@). Jenis Kelamin diisi L atau P. Kelas harus sudah terdaftar di Data Kelas.',
     penempatan:'Kolom NIS sudah diformat Teks (@) dan harus terdaftar di Data Siswa. Guru Pembimbing harus terdaftar sebagai Guru Pembimbing aktif di Data Pengguna. Format Tanggal Mulai dan Tanggal Selesai: YYYY-MM-DD (mis. 2026-07-15).'
   }[t]||'';
-  popup('info',`File template-import-${t}.xlsx telah diunduh dengan kolom rapi dan format Teks (@).\n\nIsi data mulai baris ke-2, simpan sebagai .xlsx, lalu klik Import Excel (.xlsx). `+extra+' Tip: hasil Export Excel (.xlsx) pada tabel juga dapat diimpor kembali.',{title:'Template Import Excel (.xlsx)'});
+  if(!(await popup('info',`File template-import-${t}.xlsx akan diunduh dengan kolom rapi dan format Teks (@).\n\nIsi data mulai baris ke-2, simpan sebagai .xlsx, lalu klik Import Excel (.xlsx). `+extra+' Tip: hasil Export Excel (.xlsx) pada tabel juga dapat diimpor kembali.',{title:'Template Import Excel (.xlsx)',yes:'OK',no:'Batal'}))) return;
+  dlXlsx(`template-import-${t}.xlsx`, cols, [], {sheetName:'Template '+cfg.noun, blankRows:25});
 }
 async function refImport(t,file){
   const cfg=RF[t]; busy(true);
   try{
     const {rows,pre}=matrixToRecords(await fileMatrix(file),cfg.fields);
     if(!rows.length) throw new Error('Tidak ada baris data pada file');
-    if(rows.length>500) throw new Error('Maksimal 500 baris per import');
     let errs=pre.slice(), total=0;
     const d=await api('refImport',{type:t,dryRun:true,rows});
     if(!d.ok){ errs=errs.concat(d.errors); total+=Math.max(0,d.jumlahError-d.errors.length); }
@@ -3044,8 +3043,8 @@ $('#v-ref').addEventListener('click',async e=>{
     if(a==='exp') return skExport();
     if(a==='tpl'){
       const rows=SK_FIELDS.map(f=>({f:f.label,v:(S.sk&&S.sk[f.k])||''}));
+      if(!(await popup('info','File template-import-sekolah.xlsx akan diunduh. Isi kolom Isi pada file Excel (.xlsx), lalu klik Import Excel (.xlsx). Kolom NPSN, NSS, Kode Pos, dan NIP sudah diformat sebagai Teks (@).',{title:'Template Import Excel (.xlsx)',yes:'OK',no:'Batal'}))) return;
       dlXlsx('template-import-sekolah.xlsx',[{h:'Field',k:'f',w:28,txt:1},{h:'Isi',k:'v',w:42,txt:1}],rows,{sheetName:'Template Sekolah',blankRows:0});
-      popup('info','File template-import-sekolah.xlsx telah diunduh. Isi kolom Isi pada file Excel (.xlsx), lalu klik Import Excel (.xlsx). Kolom NPSN, NSS, Kode Pos, dan NIP sudah diformat sebagai Teks (@).',{title:'Template Import Excel (.xlsx)'});
     }
     return;
   }
@@ -3053,7 +3052,7 @@ $('#v-ref').addEventListener('click',async e=>{
   if(b.id==='rAdd') return refForm(t,null);
   if(b.id==='rImp') return $('#rFile').click();
   if(b.id==='rTpl') return refTemplate(t);
-  if(b.id==='rRetry'||b.id==='rReload') return loadRef(t,true);
+  if(b.id==='rRetry'||b.id==='rReload'){ busy(true,'Memuat ulang data…'); S.cache={}; try{ await loadRef(t,true); snack('Data dimuat ulang'); }finally{ busy(false); } return; }
   const a=b.dataset.ra; if(!a) return;
   const r=RS[t].rows.find(x=>x.id===b.dataset.id); if(!r) return;
   if(a==='detail') return refDetail(t,r);
@@ -3410,7 +3409,7 @@ function drawSet(){
     <p style="margin-top:0">Saat ini penilaian <span class="bdg ${open?'ok':'wr'}">${open?'Dibuka':'Ditutup'}</span>. ${open?'Guru dapat menyimpan nilai.':'Guru tidak dapat menyimpan nilai; Administrator tetap dapat.'}</p>
     <button type="button" class="btn${open?' sec':''}" data-adm="status" data-to="${open?'ditutup':'dibuka'}"><i data-lucide="${open?'lock':'lock-open'}"></i> ${open?'Tutup Penilaian':'Buka Penilaian'}</button></div>
   <div class="pnl"><div class="ph"><h3><i data-lucide="shield-check"></i>Keamanan</h3></div>
-    ${kv([['Masa berlaku sesi login',k.sesiJam+' jam'],['Batas percobaan login gagal',k.maksGagal+' kali, lalu dikunci '+k.kunciMenit+' menit'],['Kata sandi','Minimal '+k.minSandi+' karakter, memuat huruf dan angka; wajib diganti saat login pertama atau setelah direset'],['Penyimpanan kata sandi','Hash bergaram ('+k.hashPutaran+' putaran), tidak disimpan sebagai teks asli'],['Backup dan restore',d.backup.berwenang?'Akun Anda berwenang':'Akun Anda tidak berwenang']])}
+    ${kv([['Masa berlaku sesi login',k.sesiJam+' jam'],['Batas percobaan login gagal',k.maksGagal+' kali, lalu dikunci '+k.kunciMenit+' menit'],['Kata sandi','Minimal '+k.minSandi+' karakter (boleh huruf saja); wajib diganti saat login pertama atau setelah direset'],['Penyimpanan kata sandi','Hash bergaram ('+k.hashPutaran+' putaran), tidak disimpan sebagai teks asli'],['Backup dan restore',d.backup.berwenang?'Akun Anda berwenang':'Akun Anda tidak berwenang']])}
     <p class="rhint" style="margin:10px 0 0">Nilai ini ditetapkan di kode server (Kode.gs) dan tidak dapat diubah dari aplikasi. Pembatasan backup/restore ke Administrator tertentu diatur lewat Script property <b>BACKUP_ADMINS</b>.</p></div>
   <div class="pnl"><div class="ph"><h3><i data-lucide="palette"></i>Tampilan dan Cetak (peramban ini)</h3></div>
     <div class="ubar"><span class="muted">Tema</span><div class="seg"><button type="button" data-th="light">Terang</button><button type="button" data-th="dark">Gelap</button></div>
@@ -3598,7 +3597,7 @@ admv.addEventListener('click',e=>{
     case 'reset-cetak': CT=ctNorm({}); try{ localStorage.setItem('rapor_print',JSON.stringify(CT)); }catch(x){} return snack('Pengaturan cetak dikembalikan ke bawaan');
     case 'bk-create': return bkCreate();
     case 'bk-pick': return $('#bkFile').click();
-    case 'log-reload': return logLoad();
+    case 'log-reload': return logLoad().then(()=>snack('Log aktivitas dimuat ulang'));
     case 'log-exp': return logExportXls();
     case 'log-det': return logDetail(b.dataset.id);
     case 'log-reset': ADM.lg.q={page:1,size:ADM.lg.q.size}; ['#lgQ','#lgFrom','#lgTo'].forEach(i=>$(i).value=''); return logLoad();
@@ -3648,7 +3647,7 @@ function drawBeranda(){
 }
 $('#berBody').addEventListener('click',e=>{
   const g=e.target.closest('[data-go]'); if(g){ location.hash=g.dataset.go; return; }
-  if(e.target.closest('[data-bact="refresh"]')){ BR.d=null; loadBeranda(); }
+  if(e.target.closest('[data-bact="refresh"]')){ BR.l=false; BR.d=null; BR.err=null; loadBeranda().then(()=>{ if(BR.d) snack('Beranda dimuat ulang'); }); }
 });
 
 /* ---------- registrasi & pilihan periode ---------- */
