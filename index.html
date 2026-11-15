@@ -442,16 +442,19 @@ body.dark table.grid tbody tr:hover td,body.dark table.ctl tbody tr:hover td{bac
 table.grid tr.dirty:hover td{background:#f9ecbc}
 .ubar,.bar,.dt-bar{gap:8px 10px;align-items:center}
 .pnl{border-radius:12px;padding:18px 20px;box-shadow:0 2px 6px rgba(18,48,79,.05)}
+#register{min-height:100vh;display:flex;flex-direction:column;background:linear-gradient(180deg,#1c40d8,#132c96)}
+#register .rg-wrap{flex:1;display:grid;place-items:start center;padding:20px 12px}
+#register .lg-card{max-width:480px}#register .dv{margin:10px 0}
 </style>
 </head>
 <body>
 
 <div id="login" class="hidden">
   <div class="lg-head">
-    <div class="brand"><span class="logo" id="lgLogo"><img data-local-src="logo-sekolah.png" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='30' fill='%230b5db0'/><path d='M32 12L12 22l20 10 16-8v14h4V22L32 12zm0 24l-12-6v9c0 5 5.4 9 12 9s12-4 12-9v-9l-12 6z' fill='%23ffc933'/></svg>" alt="Logo SMK Negeri 2 Purbalingga" width="44" height="44"></span><span id="lgSchool">SMK Negeri 2 Purbalingga</span></div>
+    <div class="brand"><span class="logo" id="lgLogo"><img data-local-src="logo-sekolah.png" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='30' fill='%230b5db0'/><path d='M32 12L12 22l20 10 16-8v14h4V22L32 12zm0 24l-12-6v9c0 5 5.4 9 12 9s12-4 12-9v-9l-12 6z' fill='%23ffc933'/></svg>" alt="Logo sekolah" width="44" height="44"></span><span id="lgSchool">Sekolah Menengah Kejuruan</span></div>
     <span class="vsep" aria-hidden="true"></span>
     <div class="brand"><span class="logo"><img data-local-src="logo-rapor.png" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='30' fill='%2314304f'/><rect x='18' y='14' width='28' height='36' rx='4' fill='%23ffffff'/><path d='M24 24h16M24 32h16M24 40h10' stroke='%230b5db0' stroke-width='3.5' stroke-linecap='round'/><circle cx='42' cy='42' r='8' fill='%232e9e5b'/><path d='M38.5 42l2.3 2.5 4.7-5' stroke='%23ffffff' stroke-width='2.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>" alt="Logo Aplikasi e-Rapor PKL SMK" width="44" height="44"></span><span>Aplikasi e-Rapor PKL SMK</span></div>
-    <nav><button type="button" id="btnGoLogin"><i data-lucide="lock-keyhole"></i>Masuk</button><button type="button" class="y" id="btnGuide"><i data-lucide="book-open"></i>Panduan Aplikasi</button><button type="button" class="y rst"><i data-lucide="key-round"></i>Reset Password</button></nav>
+    <nav><button type="button" id="btnGoLogin"><i data-lucide="lock-keyhole"></i>Masuk</button><button type="button" id="btnGoReg"><i data-lucide="user-plus"></i>Registrasi</button><button type="button" class="y" id="btnGuide"><i data-lucide="book-open"></i>Panduan Aplikasi</button><button type="button" class="y rst"><i data-lucide="key-round"></i>Reset Password</button></nav>
   </div>
   <div class="lg-split">
     <div class="lg-left">
@@ -482,6 +485,34 @@ table.grid tr.dirty:hover td{background:#f9ecbc}
     </div></div>
   </div>
   <div class="lg-foot">Aplikasi e-Rapor PKL SMK | Versi 2026.1 | Sistem Informasi Pengelolaan Praktik Kerja Lapangan</div>
+</div>
+
+<div id="register" class="hidden">
+  <div class="lg-head">
+    <div class="brand"><span class="logo"><i data-lucide="graduation-cap"></i></span><span>Aplikasi e-Rapor PKL SMK</span></div>
+    <nav><button type="button" class="y" id="btnRegLogin"><i data-lucide="lock-keyhole"></i>Sudah punya akun? Masuk</button></nav>
+  </div>
+  <div class="rg-wrap"><div class="lg-card">
+    <h3><i data-lucide="user-plus"></i>REGISTRASI</h3>
+    <div class="dv">Daftarkan sekolah dan periode. Data lain dilengkapi setelah masuk</div>
+    <form id="regForm" novalidate autocomplete="off">
+      <div class="ig"><label for="rgNama">Nama Sekolah</label><input type="text" id="rgNama" maxlength="150"></div>
+      <div class="ig"><label for="rgNpsn">NPSN</label><input type="text" id="rgNpsn" inputmode="numeric" maxlength="8" placeholder="8 digit"></div>
+      <div class="ig"><label for="rgKepsek">Kepala Sekolah</label><input type="text" id="rgKepsek" maxlength="100"></div>
+      <div class="ig"><label for="rgNip">NIP Kepsek</label><input type="text" id="rgNip" inputmode="numeric" maxlength="30"></div>
+      <div class="ig"><label for="rgTa">Tahun Ajaran</label><input type="text" id="rgTa" maxlength="9" placeholder="2026/2027"></div>
+      <div class="ig"><label for="rgSem">Semester</label><select id="rgSem"><option>Ganjil</option><option>Genap</option></select></div>
+      <div class="ig"><label for="rgKur">Kurikulum</label><input type="text" id="rgKur" maxlength="60" list="dlKurRg" placeholder="mis. Kurikulum Merdeka"></div>
+      <div class="ig"><label for="rgFase">Fase</label><input type="text" id="rgFase" maxlength="20" list="dlFaseRg" placeholder="mis. F"></div>
+      <datalist id="dlKurRg"><option value="Kurikulum Merdeka"><option value="Kurikulum 2013"></datalist><datalist id="dlFaseRg"><option value="E"><option value="F"></datalist>
+      <div class="dv">Akun Administrator (untuk masuk)</div>
+      <div class="ig"><label for="rgUser">Username</label><input type="text" id="rgUser" autocapitalize="none" spellcheck="false" maxlength="30" autocomplete="username"></div>
+      <div class="ig"><label for="rgPw">Kata Sandi</label><input type="password" id="rgPw" autocomplete="new-password" placeholder="Min. 8 karakter, huruf dan angka"></div>
+      <div class="ig"><label for="rgPw2">Ulangi Sandi</label><input type="password" id="rgPw2" autocomplete="new-password"></div>
+      <button class="btn go" type="submit"><i data-lucide="user-plus"></i>Daftar &amp; Masuk</button>
+    </form>
+    <p id="regMsg" style="font-size:13px;color:var(--err);margin:8px 0 0"></p>
+  </div></div>
 </div>
 
 <div id="app" class="hidden"><div class="shell">
@@ -515,6 +546,7 @@ table.grid tr.dirty:hover td{background:#f9ecbc}
     </div>
 
     <section id="v-dashboard" class="hidden"><div id="dashBody"></div></section>
+    <section id="v-beranda" class="hidden"><div id="berBody"></div></section>
     <section id="v-profil" class="hidden"></section>
     <section id="v-soon" class="hidden"></section>
     <section id="v-nilai" class="card hidden">
@@ -664,6 +696,8 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt
 const BULAN = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
 const S = { token:null, boot:null, kelas:null, cache:{}, mem:{}, tab:'nilai', dudiNames:new Set() };
 const ROLE_LABEL={admin:'Administrator',kepsek:'Kepala Sekolah',wali_kelas:'Wali Kelas',guru:'Guru Pembimbing'};
+const roleText=u=>(u.roles&&u.roles.length?u.roles:[u.role]).map(r=>ROLE_LABEL[r]||r).join(' + ');
+const hasR=r=>{ const u=S.boot&&S.boot.user; return !!u&&(u.roles||[u.role]).includes(r); };
 
 /* ---------- util, spinner, auto-recovery & generator XLSX ---------- */
 const DOTS_HTML = Array.from({length:12},(_,i)=>`<span style="--i:${i}"></span>`).join('');
@@ -729,7 +763,7 @@ window.addEventListener('unhandledrejection', e => {
   console.warn('Auto-recovered promise rejection:', e.reason);
 });
 
-const READ_ACTIONS = new Set(['init','siswa','rekapNilai','listUsers','getUser','dashboard','getSekolah','refList','logList','getSettings','backupList']);
+const READ_ACTIONS = new Set(['init','siswa','rekapNilai','listUsers','getUser','dashboard','getSekolah','refList','logList','getSettings','backupList','beranda']);
 async function api(action, payload){
   const maxTry = READ_ACTIONS.has(action) ? 3 : 1;
   let lastErr = null;
@@ -1005,12 +1039,12 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeOpsiMenus();
 
 /* ---------- login ---------- */
 function showLogin(msg){
-  $('#app').classList.add('hidden'); $('#pwModal').classList.add('hidden'); $('#login').classList.remove('hidden');
-  $('#loginMsg').textContent = msg||''; loginBrand(); icons();
+  $('#app').classList.add('hidden'); $('#pwModal').classList.add('hidden'); $('#register').classList.add('hidden'); $('#login').classList.remove('hidden');
+  $('#loginMsg').textContent = msg||''; loginBrand(); icons(); loadPeriods();
 }
 function logout(msg){
   const tk=S.token; if(tk&&!msg){ try{ fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'logout',token:tk}),keepalive:true}).catch(()=>{}); }catch(e){} }
-  resetAdm(); resetUsers(); resetRef(); resetRekap(); resetCetak(); S.token=null; S.boot=null; S.dash=null; S.dashErr=null; ssSet('rapor_token',null); S.cache={}; S.mem={};
+  resetAdm(); resetUsers(); resetRef(); resetRekap(); resetCetak(); BR.d=null; BR.err=null; S.token=null; S.boot=null; S.dash=null; S.dashErr=null; ssSet('rapor_token',null); S.cache={}; S.mem={};
   $('#inPw').value=''; showLogin(msg);
 }
 $('#loginForm').onsubmit=async e=>{
@@ -1021,7 +1055,8 @@ $('#loginForm').onsubmit=async e=>{
   S.ta=$('#selTa').value; S.sem=$('#selSem').value; ssSet('rapor_ta',S.ta); ssSet('rapor_sem',S.sem);
   busy(true);
   try{
-    const d = await api('login',{ username:$('#inNip').value.trim(), password:$('#inPw').value });
+    const d = await api('login',{ username:$('#inNip').value.trim(), password:$('#inPw').value, ta:S.ta, sem:S.sem });
+    try{ localStorage.setItem('rapor_reg','1'); }catch(x){}
     S.token=d.token; ssSet('rapor_token',d.token); $('#inPw').value='';
     busy(false); await start();
   }catch(err){ busy(false); $('#loginMsg').textContent=err.message; $('#inPw').classList.add('bad'); }
@@ -1059,7 +1094,7 @@ async function start(){
   busy(false);
   const b=S.boot;
   if(b.user.wajibGanti){ $('#login').classList.add('hidden'); $('#app').classList.add('hidden'); openPw(true); return; }
-  $('#login').classList.add('hidden'); $('#app').classList.remove('hidden');
+  $('#login').classList.add('hidden'); $('#register').classList.add('hidden'); $('#app').classList.remove('hidden');
   applyShell();
   try{ localStorage.setItem('rapor_school',JSON.stringify({n:b.sekolah.nama_sekolah||'',l:b.sekolah.logo_url||b.sekolah.logo||'',ta:b.sekolah.tahun_ajaran||'',sm:b.sekolah.semester||''})); }catch(e){}
   icons();
@@ -1088,7 +1123,7 @@ async function loadKelas(){
   if(!S.cache[S.kelas]){
     busy(true);
     try{
-      const rows = await api('siswa',{kelas:S.kelas});
+      const rows = await api('siswa',{kelas:S.kelas,mode:'edit'});
       rows.forEach(r=>{ r._o = snap(r); });
       S.cache[S.kelas]=rows;
       rows.forEach(r=>{ if(r.nama_dudi) S.dudiNames.add(r.nama_dudi); });
@@ -1107,6 +1142,7 @@ window.addEventListener('beforeunload',e=>{ if(anyDirty()){ e.preventDefault(); 
 /* ---------- navigasi (hash routing) ---------- */
 const ROUTES={
   dashboard:{v:'dashboard',c:['Dashboard'],admin:1},
+  beranda:{v:'beranda',c:['Beranda'],roles:['guru','wali_kelas','kepsek']},
   profil:{v:'profil',c:['Profil']},
   pengguna:{v:'pengguna',c:['Data Pengguna'],admin:1},
   'ref-sekolah':{v:'ref',c:['Data Referensi','Data Sekolah'],admin:1},
@@ -1118,7 +1154,7 @@ const ROUTES={
   'ref-penempatan':{v:'ref',c:['Data Referensi','Data Penempatan'],admin:1},
   'penempatan-grid':{v:'penempatan',c:['Data Referensi','Data Penempatan (Grid Kelas)'],admin:1},
   'ref-pengguna':{v:'pengguna',c:['Data Referensi','Data Pengguna'],admin:1},
-  nilai:{v:'nilai',c:['Input Nilai PKL']},
+  nilai:{v:'nilai',c:['Input Nilai PKL'],roles:['admin','guru']},
   rekap:{v:'rekap',c:['Rekapitulasi Nilai PKL']},
   rapor:{v:'rapor',c:['Cetak Nilai PKL']},
   pengaturan:{v:'adm',c:['Pengaturan'],admin:1},
@@ -1127,7 +1163,7 @@ const ROUTES={
 };
 const SOON={};
 const MENU=[
-  {r:'dashboard',t:'Dashboard',i:'layout-dashboard'},{r:'profil',t:'Profil',i:'user-round'},{r:'pengguna',t:'Data Pengguna',i:'users'},
+  {r:'dashboard',t:'Dashboard',i:'layout-dashboard'},{r:'beranda',t:'Beranda',i:'layout-dashboard'},{r:'profil',t:'Profil',i:'user-round'},{r:'pengguna',t:'Data Pengguna',i:'users'},
   {g:'ref',t:'Data Referensi',i:'database',sub:[
     {r:'ref-sekolah',t:'Data Sekolah',i:'school'},{r:'ref-program',t:'Data Program',i:'layers'},{r:'ref-kelas',t:'Data Kelas',i:'presentation'},
     {r:'ref-tp',t:'Data Tujuan Pembelajaran',i:'target'},{r:'ref-kriteria',t:'Data Kriteria',i:'list-checks'},{r:'ref-siswa',t:'Data Siswa',i:'graduation-cap'},
@@ -1136,8 +1172,8 @@ const MENU=[
   {r:'pengaturan',t:'Pengaturan',i:'settings'},{r:'backup',t:'Backup dan Restore',i:'database-backup'},{r:'log',t:'Log Aktivitas',i:'scroll-text'}
 ];
 const KELAS_VIEWS=['nilai','penempatan'];
-const homeRoute=()=>{ const r=S.boot&&S.boot.user.role; return r==='admin'?'dashboard':(r==='guru'?'nilai':'profil'); };
-function canRoute(r){ const ro=ROUTES[r], role=S.boot.user.role; if(!ro) return false; if(r==='profil') return true; if(ro.admin) return role==='admin'; return role==='admin'||role==='guru'; }
+const homeRoute=()=>{ const r=S.boot&&S.boot.user.role; return r==='admin'?'dashboard':'beranda'; };
+function canRoute(r){ const ro=ROUTES[r], role=S.boot.user.role; if(!ro) return false; if(r==='profil') return true; if(ro.admin) return role==='admin'; if(ro.roles) return ro.roles.some(hasR); return true; }
 function buildNav(){
   const adm=S.boot.user.role==='admin', ok=r=>canRoute(r);
   const leaf=m=>`<a class="mi" href="#${m.r}" data-route="${m.r}"><i data-lucide="${m.i}"></i><span class="lt">${esc(m.t)}</span></a>`;
@@ -1181,17 +1217,18 @@ function applyShell(){
   const b=S.boot, sk=b.sekolah;
   $('#hdPeriod').textContent='Tahun Ajaran '+(sk.tahun_ajaran||S.ta||'-')+' · Semester '+(sk.semester||S.sem||'-');
   $('#sbSchool').textContent=sk.nama_sekolah||'Sistem Informasi PKL';
-  $('#whoName').textContent=b.user.nama; $('#whoRole').textContent=ROLE_LABEL[b.user.role]||b.user.role;
+  $('#whoName').textContent=b.user.nama; $('#whoRole').textContent=roleText(b.user);
   $('#avatar').innerHTML=avHTML(b.user);
-  $('#pfRole').textContent=ROLE_LABEL[b.user.role]||b.user.role;
+  $('#pfRole').textContent=roleText(b.user);
 }
 
 function renderAll(){
-  ['dashboard','profil','nilai','rekap','rapor','penempatan','pengguna','ref','soon','adm'].forEach(t=>$('#v-'+t).classList.toggle('hidden',S.tab!==t));
+  ['dashboard','beranda','profil','nilai','rekap','rapor','penempatan','pengguna','ref','soon','adm'].forEach(t=>$('#v-'+t).classList.toggle('hidden',S.tab!==t));
   $('#barKelas').classList.toggle('hidden',!KELAS_VIEWS.includes(S.tab));
   if(!S.boot) return;
   if(S.tab==='ref') renderRef();
   if(S.tab==='dashboard') renderDash();
+  if(S.tab==='beranda') renderBeranda();
   if(S.tab==='profil') renderProfil();
   if(S.tab==='soon') renderSoon();
   if(S.tab==='adm') renderAdm();
@@ -1419,7 +1456,7 @@ function fmtWaktu(s){ const m=/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}:\d{2})/.exec(s
 function renderProfil(){
   const u=S.boot.user, sk=S.boot.sekolah, adm=u.role==='admin';
   $('#v-profil').innerHTML=`<div class="pnl"><h3 style="margin-bottom:16px"><i data-lucide="user-round"></i>Profil Saya</h3><div class="prof"><span class="av">${avHTML(u)}</span>
-  <dl><dt>Nama Lengkap</dt><dd>${esc(u.nama)}</dd><dt>Username</dt><dd>${esc(u.username||'-')}</dd><dt>NIP</dt><dd>${esc(u.nip||'-')}</dd><dt>Role</dt><dd>${esc(ROLE_LABEL[u.role]||u.role)}</dd><dt>Status</dt><dd>${u.aktif?bdg('g','Aktif'):bdg('r','Nonaktif')}</dd><dt>Login Terakhir</dt><dd>${esc(fmtWaktu(u.loginTerakhir))}</dd><dt>Sekolah</dt><dd>${esc(sk.nama_sekolah||'-')}</dd><dt>Tahun / Semester</dt><dd>${esc(sk.tahun_ajaran||'-')} / ${esc(sk.semester||'-')}</dd></dl></div>
+  <dl><dt>Nama Lengkap</dt><dd>${esc(u.nama)}</dd><dt>Username</dt><dd>${esc(u.username||'-')}</dd><dt>NIP</dt><dd>${esc(u.nip||'-')}</dd><dt>Role</dt><dd>${esc(roleText(u))}</dd><dt>Status</dt><dd>${u.aktif?bdg('g','Aktif'):bdg('r','Nonaktif')}</dd><dt>Login Terakhir</dt><dd>${esc(fmtWaktu(u.loginTerakhir))}</dd><dt>Sekolah</dt><dd>${esc(sk.nama_sekolah||'-')}</dd><dt>Tahun / Semester</dt><dd>${esc(sk.tahun_ajaran||'-')} / ${esc(sk.semester||'-')}</dd></dl></div>
   <div class="acts" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px">${adm?'<button class="btn" data-pf="nama"><i data-lucide="pencil"></i> Ubah Nama Lengkap</button>':''}<button class="btn" data-pf="foto"><i data-lucide="image"></i> Ganti Foto Profil</button>${okFoto(u.foto)?'<button class="btn sec" data-pf="rmfoto">Hapus Foto</button>':''}<button class="btn" data-pf="pw"><i data-lucide="key-round"></i> Ganti Kata Sandi</button></div>
   ${adm?'':'<p class="muted" style="margin:12px 0 0;font-size:.88em">Nama lengkap hanya dapat diubah oleh Administrator.</p>'}</div>
   <input type="file" id="fFoto" class="hidden" accept="image/jpeg,image/png,image/webp">`; icons();
@@ -2052,15 +2089,14 @@ const RK_COLS=[
   {h:'Status',k:'status',html:r=>bdg(r.status==='Lengkap'?'g':(r.status==='Dalam Proses'?'y':'n'),r.status)},
   {h:'Deskripsi & Aksi',k:'aksi',c:'c-aksi',nx:1,html:r=>{
     const cnt=[1,2,3,4].filter(n=>r['desc_tp'+n]).length;
-    const nis=esc(r.nis), kls=esc(r.kelas), isAdm=S.boot&&S.boot.user.role==='admin';
+    const nis=esc(r.nis), kls=esc(r.kelas), isAdm=S.boot&&S.boot.user.role==='admin', canEd=isAdm||hasR('guru');
     return opsiWrap(
       `<button type="button" class="act-it" data-rka="desc" data-nis="${nis}"><i data-lucide="file-text"></i><span>Deskripsi TP (${cnt}/4)</span></button>`+
       `<button type="button" class="act-it" data-rka="cat" data-nis="${nis}"><i data-lucide="message-square-text"></i><span>Catatan</span></button>`+
-      `<button type="button" class="act-it" data-rka="edit" data-nis="${nis}" data-kelas="${kls}"><i data-lucide="pencil-line"></i><span>Edit Nilai</span></button>`+
+      (canEd?`<button type="button" class="act-it" data-rka="edit" data-nis="${nis}" data-kelas="${kls}"><i data-lucide="pencil-line"></i><span>Edit Nilai</span></button>`:'')+
       `<button type="button" class="act-it" data-rka="cetak" data-nis="${nis}" data-kelas="${kls}"><i data-lucide="printer"></i><span>Cetak Nilai PKL</span></button>`+
       (isAdm?`<button type="button" class="act-it" data-rka="backup" data-nis="${nis}"><i data-lucide="history"></i><span>Riwayat Backup</span></button>`:'')+
-      `<div class="act-sep"></div>`+
-      `<button type="button" class="act-it dg" data-rka="reset" data-nis="${nis}" data-kelas="${kls}"><i data-lucide="rotate-ccw"></i><span>Reset Nilai</span></button>`
+      (canEd?`<div class="act-sep"></div><button type="button" class="act-it dg" data-rka="reset" data-nis="${nis}" data-kelas="${kls}"><i data-lucide="rotate-ccw"></i><span>Reset Nilai</span></button>`:'')
     );
   }}
 ];
@@ -2280,6 +2316,7 @@ $('#btnSavePen').onclick=async()=>{
 /* ---------- data pengguna (admin) ---------- */
 const U={rows:[],role:'',stat:'',ctl:null,opt:null};
 const UROLES=['admin','kepsek','wali_kelas','guru'];
+const UROLE_OPTS=UROLES.map(r=>[r,ROLE_LABEL[r]]).concat([['wali_kelas,guru','Wali Kelas + Guru Pembimbing']]);
 function resetUsers(){ U.rows=[]; U.ctl=null; U.opt=null; U.role=''; U.stat=''; const h=$('#usrDT'); if(h) h.innerHTML=''; }
 const userSelf=r=>!!S.boot&&r.id===S.boot.user.id;
 function uAct(r){
@@ -2298,7 +2335,7 @@ function uAct(r){
 }
 const UCOLS=[{h:'No',k:'no',c:'cnum'},{h:'Nama Lengkap',k:'nama'},{h:'Username',k:'username',txt:1},{h:'NIP',k:'nip',txt:1},{h:'Role',k:'roleLabel'},
   {h:'Status',k:'statusLabel',html:r=>bdg(r.aktif?'g':'r',r.statusLabel)},{h:'Login Terakhir',k:'login'},{h:'Aksi',k:'aksi',c:'c-aksi',nx:1,html:uAct}];
-const uFilt=()=>U.rows.filter(r=>(!U.role||r.role===U.role)&&(!U.stat||(U.stat==='aktif')===r.aktif))
+const uFilt=()=>U.rows.filter(r=>(!U.role||r.role.split(',').includes(U.role))&&(!U.stat||(U.stat==='aktif')===r.aktif))
   .map((r,i)=>Object.assign({},r,{no:i+1,statusLabel:r.aktif?'Aktif':'Nonaktif',login:r.loginTerakhir?fmtWaktu(r.loginTerakhir):'-'}));
 async function renderUsers(force){
   if(!U.rows.length && !U.opt) $('#usrDT').innerHTML=inlineLoader('Memuat data pengguna…');
@@ -2384,7 +2421,7 @@ function userForm(u){
     <label class="lbl full">Nama Lengkap<input type="text" id="ufNama" maxlength="100" value="${esc(u?u.nama:'')}"></label>
     <label class="lbl">Username<input type="text" id="ufUser" maxlength="30" autocomplete="off" autocapitalize="none" spellcheck="false" value="${esc(u?u.username:'')}" ${self?'disabled':''}></label>
     <label class="lbl">NIP <small>(wajib kecuali Administrator)</small><input type="text" id="ufNip" inputmode="numeric" maxlength="30" autocomplete="off" value="${esc(u?u.nip:'')}"></label>
-    <label class="lbl">Role<select id="ufRole" ${self?'disabled':''}>${UROLES.map(r=>`<option value="${r}">${ROLE_LABEL[r]}</option>`).join('')}</select></label>
+    <label class="lbl">Role<select id="ufRole" ${self?'disabled':''}>${UROLE_OPTS.map(o=>`<option value="${o[0]}">${o[1]}</option>`).join('')}</select></label>
     <label class="lbl">Status<select id="ufAktif" ${self?'disabled':''}><option value="ya">Aktif</option><option value="tidak">Nonaktif</option></select></label>
     ${self?'':`<label class="lbl full">${edit?'Kata sandi baru <small>(kosongkan jika tidak diganti)</small>':'Kata sandi awal'}<input type="password" id="ufPw" autocomplete="new-password"></label>`}
   </div><p class="muted" style="font-size:.85em;margin:10px 0">${self?'Untuk mengganti kata sandi Anda sendiri, gunakan menu Profil.':'Kata sandi minimal 8 karakter dan memuat huruf dan angka. Pengguna wajib menggantinya saat login pertama.'}</p>
@@ -2532,13 +2569,14 @@ const SK_FIELDS=[
  {k:'kode_pos',label:'Kode Pos',digits:[5,5],ph:'5 digit',txtnum:1},
  {g:'Kontak',k:'telepon',label:'Telepon',re:/^[0-9+()\s.\-]{5,25}$/,msg:'Telepon tidak valid (5-25 karakter: angka, +, (), spasi, titik, tanda hubung)'},
  {k:'email',label:'Email',max:100,re:/^[^\s@]+@[^\s@]+\.[^\s@]+$/,msg:'Email tidak valid'},
- {k:'website',label:'Website',max:150,re:/^(https?:\/\/)?([a-z0-9\-]+\.)+[a-z]{2,}(\/\S*)?$/i,msg:'Website tidak valid, mis. https://smkn2.sch.id',full:1},
+ {k:'website',label:'Website',max:150,re:/^(https?:\/\/)?([a-z0-9\-]+\.)+[a-z]{2,}(\/\S*)?$/i,msg:'Website tidak valid, mis. https://sekolahanda.sch.id',full:1},
  {g:'Kepala Sekolah',k:'kepala_sekolah',label:'Kepala Sekolah',req:1,min:3,max:100,re:NAME_RE,msg:'Kepala Sekolah hanya boleh berisi huruf, spasi, titik, koma, apostrof, tanda hubung, dan tanda kurung'},
  {k:'nip_kepsek',label:'NIP Kepala Sekolah',req:1,digits:[8,25],txtnum:1,alias:['nipkepalasekolah','nipkepsek']},
  {g:'Periode dan Rapor',k:'tahun_ajaran',label:'Tahun Ajaran',req:1,ph:'2026/2027',fn:v=>{const m=/^(\d{4})\s*\/\s*(\d{4})$/.exec(v);return (!m||+m[2]!==+m[1]+1)?'Tahun Ajaran harus berformat 2026/2027 (tahun berurutan)':'';}},
  {k:'semester',label:'Semester',req:1,kind:'sem',fn:v=>/^(ganjil|genap)$/i.test(v)?'':'Semester harus Ganjil atau Genap'},
+ {k:'kurikulum',label:'Kurikulum',max:60,ph:'mis. Kurikulum Merdeka'},
  {k:'fase',label:'Fase',req:1,max:20,ph:'mis. F',list:['E','F']},
- {k:'tempat_ttd',label:'Tempat Tanda Tangan',req:1,min:2,max:60,ph:'mis. Purbalingga'},
+ {k:'tempat_ttd',label:'Tempat Tanda Tangan',req:1,min:2,max:60,ph:'mis. nama kota/kabupaten'},
  {k:'tanggal_rapor',label:'Tanggal Rapor',req:1,kind:'date'}
 ];
 const RF_FIELDS={
@@ -3573,11 +3611,100 @@ admv.addEventListener('change',e=>{
 admv.addEventListener('input',e=>{ if(e.target.id==='lgQ'){ clearTimeout(ADM.lg.t); ADM.lg.t=setTimeout(()=>{ logQ(); logLoad(); },350); } });
 admv.addEventListener('submit',e=>{ if(e.target.id==='admPer'){ e.preventDefault(); admSavePer(); } });
 
+/* ---------- beranda guru pembimbing, wali kelas, kepala sekolah ---------- */
+const BR={d:null,err:null,l:false,at:null};
+function renderBeranda(){ if(BR.d||BR.err) drawBeranda(); else loadBeranda(); }
+async function loadBeranda(){
+  BR.err=null; if(S.tab==='beranda') drawBeranda();
+  if(BR.l) return; BR.l=true;
+  try{ BR.d=await api('beranda',{}); BR.at=new Date(); }catch(e){ BR.d=null; BR.err=e.message; }
+  BR.l=false; if(S.tab==='beranda') drawBeranda();
+}
+function progRow(a,b,extra){
+  const p=b?Math.min(100,Math.round(a/b*100)):0;
+  return `<td>${a}/${b}</td><td><div class="pgl"><div class="pgb"><span style="width:${p}%"></span></div><b>${p}%</b></div></td>${extra||''}`;
+}
+function drawBeranda(){
+  const b=S.boot, sk=b.sekolah, u=b.user, d=BR.d;
+  const sub=hasR('kepsek')?'Seluruh siswa sekolah (hanya lihat)':(hasR('guru')&&hasR('wali_kelas')?'Siswa bimbingan Anda dan siswa pada kelas yang Anda walikan':(hasR('guru')?'Siswa bimbingan Anda':'Siswa pada kelas yang Anda walikan'));
+  let h=`<section class="hero"><div class="hi"><i data-lucide="graduation-cap"></i></div><div><h2>Selamat Datang, ${esc(u.nama)}</h2><p>${esc(roleText(u))} · ${esc(sub)}</p>
+  <div class="meta"><div><small>Nama Sekolah</small><b>${esc(sk.nama_sekolah||'-')}</b></div><div><small>Tahun Pelajaran</small><b>${esc(sk.tahun_ajaran||S.ta||'-')}</b></div><div><small>Semester</small><b>${esc(sk.semester||S.sem||'-')}</b></div><div><small>Kurikulum / Fase</small><b>${esc((sk.kurikulum||'-')+' / '+(sk.fase||'-'))}</b></div></div></div></section>`;
+  if(!d){
+    h+=BR.err?`<div class="pnl"><p style="margin-top:0">Data beranda tidak dapat dimuat: ${esc(BR.err)}</p><button class="btn" data-bact="refresh">Coba lagi</button></div>`:`<div class="pnl">${inlineLoader('Memuat data beranda…')}</div>`;
+    $('#berBody').innerHTML=h; icons(); return;
+  }
+  const ps=pklState(d), ns=nilaiState(d), tutup=d.statusPenilaian==='ditutup', pct=d.siswa?Math.min(100,Math.round(d.dinilai/d.siswa*100)):0;
+  h+=`<section class="pnl"><div class="ph"><h3><i data-lucide="calendar-check"></i>Status Pelaksanaan PKL</h3><button class="btn sec sm" data-bact="refresh"><i data-lucide="refresh-cw"></i>Muat ulang</button></div>
+  <div class="pkl"><div class="c"><small>Status Pelaksanaan</small>${bdg(...ps)}</div><div class="c"><small>Tanggal Mulai</small><b>${esc(d.tglMulai?tglID(d.tglMulai):'Belum diisi')}</b></div><div class="c"><small>Tanggal Selesai</small><b>${esc(d.tglSelesai?tglID(d.tglSelesai):'Belum diisi')}</b></div><div class="c"><small>Status Penilaian</small>${bdg(tutup?'r':'g',tutup?'Ditutup':'Dibuka')} ${bdg(...ns)}</div></div></section>`;
+  const st=[['Total Siswa',d.siswa,'graduation-cap','#0f9ba8',d.kelas+' kelas'],['Mitra DUDI',d.dudi,'building-2','#e08a1e',d.tanpaPen+' siswa belum punya penempatan'],['Sedang PKL',d.sedang,'briefcase','#d19a00',d.belumMulai+' siswa belum mulai'],['Selesai PKL',d.selesaiPkl,'flag','#2e9e5b','Tanggal selesai sudah lewat'],['Penilaian Selesai',d.dinilai,'clipboard-check','#12304f','dari '+d.siswa+' siswa ('+pct+'%)']];
+  h+='<section class="stats">'+st.map(s=>`<button type="button" class="stat" style="--c:${s[3]}" data-go="rekap"><span class="si"><i data-lucide="${s[2]}"></i></span><span><b class="v">${s[1]}</b><span class="k">${esc(s[0])}</span><span class="ds">${esc(s[4])}</span></span></button>`).join('')+'</section>';
+  const acts=[(hasR('guru')?['nilai','pencil-line','Input Nilai PKL']:null),['rekap','clipboard-list','Rekapitulasi Nilai'],['rapor','printer','Cetak Nilai PKL']].filter(Boolean);
+  h+=`<section class="pnl"><div class="ph"><h3><i data-lucide="zap"></i>Menu Cepat</h3></div><div class="ubar">${acts.map(a=>`<button type="button" class="btn sec" data-go="${a[0]}"><i data-lucide="${a[1]}"></i> ${a[2]}</button>`).join('')}</div></section>`;
+  const tbl=(head,rows)=>`<div class="tablewrap"><table class="grid"><thead><tr>${head.map(x=>`<th>${x}</th>`).join('')}</tr></thead><tbody>${rows||`<tr><td colspan="${head.length}" class="muted">Belum ada data.</td></tr>`}</tbody></table></div>`;
+  h+=`<section class="pnl"><div class="ph"><h3><i data-lucide="presentation"></i>Progres per Kelas</h3></div>${tbl(['Kelas','Wali Kelas','Siswa','Sedang PKL','Selesai PKL','Belum Ditempatkan','Dinilai','Progres'],d.perKelas.map(k=>`<tr><td>${esc(k.kelas)}</td><td>${esc(k.wali||'-')}</td><td>${k.total}</td><td>${k.sedang}</td><td>${k.selesai}</td><td>${k.tanpaPen}</td>${progRow(k.dinilai,k.total)}</tr>`).join(''))}</section>`;
+  if(hasR('kepsek')) h+=`<section class="pnl"><div class="ph"><h3><i data-lucide="user-check"></i>Progres per Guru Pembimbing</h3></div>${tbl(['Guru Pembimbing','Siswa Bimbingan','Dinilai','Progres'],d.perGuru.map(g=>`<tr><td>${esc(g.guru)}</td><td>${g.total}</td>${progRow(g.dinilai,g.total)}</tr>`).join(''))}</section>`;
+  h+=`<p class="muted" style="font-size:.8em">${BR.at?'Data diperbarui '+BR.at.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}):''}${hasR('guru')?'':' · Halaman ini bersifat hanya-lihat; nilai diinput oleh Guru Pembimbing.'}</p>`;
+  $('#berBody').innerHTML=h; icons();
+}
+$('#berBody').addEventListener('click',e=>{
+  const g=e.target.closest('[data-go]'); if(g){ location.hash=g.dataset.go; return; }
+  if(e.target.closest('[data-bact="refresh"]')){ BR.d=null; loadBeranda(); }
+});
+
+/* ---------- registrasi & pilihan periode ---------- */
+function showRegister(msg){
+  ['#app','#pwModal','#login'].forEach(s=>$(s).classList.add('hidden')); $('#register').classList.remove('hidden');
+  $('#regMsg').textContent=msg||'';
+  if(!$('#rgTa').value){ const d=new Date(), y=d.getFullYear(), ganjil=d.getMonth()>=6, t=ganjil?y:y-1; $('#rgTa').value=t+'/'+(t+1); $('#rgSem').value=ganjil?'Ganjil':'Genap'; }
+  icons();
+}
+async function loadPeriods(){
+  let p; try{ p=await api('periods',{}); }catch(e){ return; }
+  S.periods=p; if(!p.length){ if(!$('#login').classList.contains('hidden')) showRegister(''); return; }
+  const tas=[...new Set(p.map(x=>x.ta))], prev=ssGet('rapor_ta');
+  const ta=tas.includes(prev)?prev:tas[0];
+  $('#selTa').innerHTML=tas.map(t=>`<option${t===ta?' selected':''}>${esc(t)}</option>`).join('');
+  fillSem(ssGet('rapor_sem'));
+}
+function fillSem(pref){
+  const sems=(S.periods||[]).filter(x=>x.ta===$('#selTa').value).map(x=>x.sem);
+  if(!sems.length) return;
+  $('#selSem').innerHTML=sems.map(s=>`<option>${esc(s)}</option>`).join('');
+  $('#selSem').value=sems.includes(pref)?pref:sems[0];
+  S.ta=$('#selTa').value; S.sem=$('#selSem').value;
+}
+$('#selTa').onchange=()=>fillSem($('#selSem').value);
+$('#selSem').onchange=()=>{ S.sem=$('#selSem').value; };
+$('#btnGoReg').onclick=()=>showRegister('');
+$('#btnRegLogin').onclick=()=>showLogin('');
+$('#regForm').onsubmit=async e=>{
+  e.preventDefault(); const m=$('#regMsg'); m.textContent='';
+  document.querySelectorAll('#regForm .bad').forEach(x=>x.classList.remove('bad'));
+  const g=id=>nz($('#'+id).value);
+  const d={nama_sekolah:g('rgNama'),npsn:g('rgNpsn'),kepala_sekolah:g('rgKepsek'),nip_kepsek:g('rgNip'),tahun_ajaran:g('rgTa'),semester:$('#rgSem').value,kurikulum:g('rgKur'),fase:g('rgFase'),username:g('rgUser').toLowerCase(),password:$('#rgPw').value,password2:$('#rgPw2').value};
+  const need=[['nama_sekolah','rgNama','Nama Sekolah'],['npsn','rgNpsn','NPSN'],['kepala_sekolah','rgKepsek','Kepala Sekolah'],['nip_kepsek','rgNip','NIP Kepala Sekolah'],['tahun_ajaran','rgTa','Tahun Ajaran'],['kurikulum','rgKur','Kurikulum'],['fase','rgFase','Fase'],['username','rgUser','Username'],['password','rgPw','Kata sandi']];
+  const fail=(id,t)=>{ $('#'+id).classList.add('bad'); $('#'+id).focus(); m.textContent=t; };
+  for(const [k,id,l] of need) if(!d[k]) return fail(id,l+' wajib diisi');
+  if(!/^\d{8}$/.test(d.npsn)) return fail('rgNpsn','NPSN harus 8 digit angka');
+  const ta=/^(\d{4})\s*\/\s*(\d{4})$/.exec(d.tahun_ajaran);
+  if(!ta||+ta[2]!==+ta[1]+1) return fail('rgTa','Tahun Ajaran harus berformat 2026/2027 (tahun berurutan)');
+  if(d.password!==d.password2) return fail('rgPw2','Pengulangan kata sandi tidak sama');
+  busy(true,'Menyiapkan data periode… (bisa beberapa detik)');
+  try{
+    const r=await api('register',{data:d});
+    S.token=r.token; ssSet('rapor_token',r.token); try{ localStorage.setItem('rapor_reg','1'); }catch(x){}
+    $('#regForm').reset(); busy(false); $('#register').classList.add('hidden');
+    await popup('ok','Registrasi berhasil. Anda masuk sebagai Administrator. Lengkapi data sekolah, program, kelas, siswa, dan pengguna dari menu yang tersedia.');
+    await start();
+  }catch(err){ busy(false); m.textContent=err.message; }
+};
+
 /* ---------- boot ---------- */
 (function init(){
   const t=ssGet('rapor_token');
   if(t && tokExp(t)>Date.now()+60000){ S.token=t; start(); }
-  else showLogin('');
+  else if(localStorage.getItem('rapor_reg')) showLogin('');
+  else showRegister('');
 })();
 
 /* ---------- tampilan: login, sidebar, panduan ---------- */
