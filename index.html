@@ -78,9 +78,9 @@ table.grid input.w{width:200px}table.grid input.w2{width:260px}
 .sheet table.tp thead{display:table-header-group}
 .sheet .box{border:1px solid #000;padding:6px 8px;min-height:calc(20mm*var(--k));margin-bottom:calc(8px*var(--k));overflow-wrap:anywhere;white-space:pre-wrap;break-inside:avoid}
 .sheet table.att{border-collapse:collapse;margin-bottom:calc(10px*var(--k));break-inside:avoid}
-.sheet table.att td{padding:1px 10px 1px 0}
+.sheet table.att td{border:1px solid #000;padding:calc(3px*var(--k)) 10px}.sheet table.att td:first-child{min-width:42mm}.sheet table.att td.c{text-align:center;min-width:16mm}
 .sheet .ttd,.sheet .blk,.sheet .end{break-inside:avoid;page-break-inside:avoid}
-.sheet .sign{display:flex;justify-content:space-between;margin-top:10px;text-align:center}
+.sheet .sign{display:flex;justify-content:space-between;margin-top:10px;text-align:left}
 .sheet .sign>div{width:44%}
 .sheet .gap{height:calc(20mm*var(--k))}
 .sheet .kepsek{text-align:center;margin-top:8px}
@@ -3168,7 +3168,7 @@ function raporHTML(r,o){
   <h3>${esc((sk.nama_sekolah||'').toUpperCase())}</h3>
   <div class="sub">${esc(sk.tahun_ajaran||'')}</div>
   <table class="id">
-    <tr><td class="l">Nama Peserta Didik</td><td class="c">:</td><td>${esc(r.nama)}</td></tr>
+    <tr><td class="l">Nama Murid</td><td class="c">:</td><td>${esc(r.nama)}</td></tr>
     <tr><td class="l">NISN / NIS</td><td class="c">:</td><td>${esc(r.nisn)} / ${esc(r.nis)}</td></tr>
     <tr><td class="l">Kelas / Fase</td><td class="c">:</td><td>${esc(r.kelas)} / ${esc(sk.fase||'')}</td></tr>
     <tr><td class="l">Program Keahlian</td><td class="c">:</td><td>${esc(prog)}</td></tr>
@@ -3181,23 +3181,22 @@ function raporHTML(r,o){
     <tr><td class="l">Nama Pembimbing</td><td class="c">:</td><td>${esc(r.guru_pembimbing)}</td></tr>
   </table>
   <table class="tp"><thead><tr><th style="width:8%">No</th><th style="width:38%">Tujuan Pembelajaran</th><th style="width:10%">Nilai</th><th>Deskripsi</th></tr></thead><tbody>${tpRows}</tbody>
-    <tfoot><tr><td colspan="2" style="text-align:right">Nilai Akhir</td><td class="c">${esc(na)}</td><td>${na===''?'':'Rata-rata nilai seluruh Tujuan Pembelajaran'}</td></tr></tfoot></table>
+    <tfoot><tr><td colspan="2" style="text-align:center">Nilai Akhir</td><td class="c">${esc(na)}</td><td>${na===''?'':'Rata-rata nilai seluruh Tujuan Pembelajaran'}</td></tr></tfoot></table>
   <div class="blk"><div><b>Catatan:</b></div>
   <div class="box">${esc(r.catatan)}</div></div>
   <div class="end">
   <div class="blk"><div><b>Kehadiran</b></div>
   <table class="att">
-    <tr><td>Sakit</td><td>:</td><td>${esc(att(r.sakit))}</td><td>Hari</td></tr>
-    <tr><td>Ijin</td><td>:</td><td>${esc(att(r.izin))}</td><td>Hari</td></tr>
-    <tr><td>Tanpa Keterangan</td><td>:</td><td>${esc(att(r.alpa))}</td><td>Hari</td></tr>
+    <tr><td>Sakit</td><td class="c">${esc(att(r.sakit))}</td><td>Hari</td></tr>
+    <tr><td>Ijin</td><td class="c">${esc(att(r.izin))}</td><td>Hari</td></tr>
+    <tr><td>Tanpa Keterangan</td><td class="c">${esc(att(r.alpa))}</td><td>Hari</td></tr>
   </table></div>
   <div class="ttd">
-  <div style="text-align:right">${esc(sk.tempat_ttd||'')}, ${esc(sk.tanggal_rapor||'')}</div>
   <div class="sign">
-    <div>Orang Tua / Wali Peserta Didik<div class="gap"></div>(................................)</div>
-    <div>Wali Kelas<div class="gap"></div><u>${esc(kl.wali_kelas||'')}</u><br>NIP. ${esc(kl.nip_wali||'')}</div>
+    <div>&nbsp;<br>Orang Tua / Wali Murid<div class="gap"></div>(................................)</div>
+    <div>${esc(sk.tempat_ttd||'')}, ${esc(sk.tanggal_rapor||'')}<br>Wali Kelas<div class="gap"></div><b><u>${esc(kl.wali_kelas||'')}</u></b><br>NIP. ${esc(kl.nip_wali||'')}</div>
   </div>
-  <div class="kepsek">Mengetahui,<br>Kepala Sekolah<div class="gap"></div><u>${esc(sk.kepala_sekolah||'')}</u><br>NIP. ${esc(sk.nip_kepsek||'')}</div>
+  <div class="kepsek">Mengetahui,<br>Kepala Sekolah<div class="gap"></div><b><u>${esc(sk.kepala_sekolah||'')}</u></b><br>NIP. ${esc(sk.nip_kepsek||'')}</div>
   </div>
   </div>
   ${o.no!=null?`<div class="pgno">Halaman ${esc(o.no)}</div>`:''}
