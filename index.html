@@ -1327,7 +1327,7 @@ const GUIDE_APP=[
  ['Masuk','Masuk dengan username (atau NIP) dan kata sandi. Pada login pertama atau setelah reset, Anda wajib membuat kata sandi baru.'],
  ['Dashboard','Pantau jumlah pengguna, siswa, DUDI, status PKL, dan progres penilaian. Klik kartu statistik untuk membuka halaman terkait.'],
  ['Buka / Tutup Penilaian','Gunakan tombol pada panel Status Pelaksanaan PKL. Saat ditutup, guru tidak dapat menyimpan nilai; Administrator tetap dapat.'],
- ['Data Penempatan','Pilih kelas, isi DuDi, alamat, instruktur, guru pembimbing, dan tanggal PKL, lalu simpan perubahan.'],
+ ['Data Penempatan','Pilih kelas, isi DUDI, alamat, instruktur, guru pembimbing, dan tanggal PKL, lalu simpan perubahan.'],
  ['Input Nilai PKL','Pilih kelas, isi nilai TP1–TP4, kehadiran, dan catatan, lalu simpan. Nilai Akhir dan Deskripsi terhitung otomatis sesuai referensi TP dan Kriteria.'],
  ['Rekapitulasi Nilai','Pantau rekapitulasi nilai TP1–TP4, Nilai Akhir, Deskripsi, Catatan, dan Kehadiran dengan fitur pencarian, filter Kelas/Program/Status Penilaian, paginasi, serta Export Excel, PDF, dan Print.'],
  ['Cetak Nilai PKL','Atur ukuran kertas dan margin, pilih kelas, klik Generate Laporan (nilai diambil dari database), lihat preview, lalu cetak satu siswa, siswa terpilih, atau seluruh kelas. Di jendela cetak: Margin Default, Skala 100%, matikan Header dan footer.'],
@@ -2277,7 +2277,7 @@ $('#rkDT').addEventListener('click',async e=>{
 /* ---------- penempatan (admin) ---------- */
 function renderPen(){
   const rows=rowsNow();
-  let h=`<thead><tr><th>No</th><th>Nama</th><th>Nama DuDi</th><th>Alamat DuDi</th><th>Instruktur</th><th>Guru pembimbing</th><th>Mulai</th><th>Selesai</th></tr></thead><tbody>`;
+  let h=`<thead><tr><th>No</th><th>Nama</th><th>Nama DUDI</th><th>Alamat DUDI</th><th>Instruktur</th><th>Guru pembimbing</th><th>Mulai</th><th>Selesai</th></tr></thead><tbody>`;
   rows.forEach((r,i)=>{
     h+=`<tr data-i="${i}"><td class="n">${i+1}</td><td>${esc(r.nama)}</td>`+
       `<td><input class="w" type="text" list="dlDudi" data-f="nama_dudi" value="${esc(r.nama_dudi)}"></td>`+
@@ -3173,8 +3173,8 @@ function raporHTML(r,o){
     <tr><td class="l">Kelas / Fase</td><td class="c">:</td><td>${esc(r.kelas)} / ${esc(sk.fase||'')}</td></tr>
     <tr><td class="l">Program Keahlian</td><td class="c">:</td><td>${esc(prog)}</td></tr>
     <tr><td class="l">Konsentrasi Keahlian</td><td class="c">:</td><td>${esc(kons)}</td></tr>
-    <tr><td class="l">Nama DuDi PKL</td><td class="c">:</td><td>${esc(r.nama_dudi)}</td></tr>
-    <tr><td class="l">Alamat DuDi PKL</td><td class="c">:</td><td>${esc(r.alamat_dudi)}</td></tr>
+    <tr><td class="l">Nama DUDI PKL</td><td class="c">:</td><td>${esc(r.nama_dudi)}</td></tr>
+    <tr><td class="l">Alamat DUDI PKL</td><td class="c">:</td><td>${esc(r.alamat_dudi)}</td></tr>
     <tr><td class="l">Tanggal PKL</td><td class="c">:</td><td>Mulai ${esc(tglID(r.tgl_mulai))} &nbsp; Selesai ${esc(tglID(r.tgl_selesai))}</td></tr>
     <tr><td class="l">Semester</td><td class="c">:</td><td>${esc(sk.semester||'')}</td></tr>
     <tr><td class="l">Nama Instruktur</td><td class="c">:</td><td>${esc(r.instruktur)}</td></tr>
@@ -3262,7 +3262,7 @@ function ctDrawList(){
   $('#ctStamp').textContent=`Kelas ${CTS.kelas}: ${rows.length} siswa (${lengkap} lengkap, ${rows.length-lengkap} belum lengkap). Data diambil dari database pada ${CTS.at.toLocaleString('id-ID')}.`;
   if(!rows.length){ box.innerHTML=''; return; }
   const dirty=(typeof anyDirty==='function'&&anyDirty())?'<div class="ctnote">Ada perubahan pada Input Nilai yang belum disimpan. Laporan ini memakai nilai yang sudah tersimpan di database.</div>':'';
-  box.innerHTML=dirty+`<div class="cttbl"><table class="ctl"><thead><tr><th class="n"><input type="checkbox" id="ctChkAll" aria-label="Pilih semua siswa"></th><th class="n">No</th><th>Nama</th><th>NIS</th><th>DuDi</th><th class="n">Nilai Akhir</th><th>Status</th><th>Aksi</th></tr></thead><tbody>`+
+  box.innerHTML=dirty+`<div class="cttbl"><table class="ctl"><thead><tr><th class="n"><input type="checkbox" id="ctChkAll" aria-label="Pilih semua siswa"></th><th class="n">No</th><th>Nama</th><th>NIS</th><th>DUDI</th><th class="n">Nilai Akhir</th><th>Status</th><th>Aksi</th></tr></thead><tbody>`+
     rows.map((r,i)=>{ const na=nilaiNA(r);
       const nis=esc(r.nis);
       const actMenu=opsiWrap(
