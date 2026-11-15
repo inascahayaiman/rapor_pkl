@@ -83,7 +83,7 @@ table.grid input.w{width:200px}table.grid input.w2{width:260px}
 .sheet .sign{display:flex;justify-content:space-between;margin-top:10px;text-align:left}
 .sheet .sign>div{width:44%}.sheet .sign>div:last-child{width:auto;white-space:nowrap}
 .sheet .gap{height:calc(20mm*var(--k))}
-.sheet .kepsek{text-align:center;margin-top:8px}
+.sheet .kepsek{text-align:center;margin-top:calc(16px*var(--k))}
 .sheet .pgno{margin-top:auto;padding-top:calc(6px*var(--k));text-align:center;font-size:.8em;color:#333}
 .sheet.msr{display:block;width:100%;min-height:0;padding:0;margin:0;box-shadow:none}
 #ctMeasure{position:absolute;left:-10000px;top:0;visibility:hidden;pointer-events:none;column-gap:0;column-fill:auto;overflow:visible}
@@ -445,6 +445,26 @@ table.grid tr.dirty:hover td{background:#f9ecbc}
 #register{min-height:100vh;display:flex;flex-direction:column;background:linear-gradient(180deg,#1c40d8,#132c96)}
 #register .rg-wrap{flex:1;display:grid;place-items:start center;padding:20px 12px}
 #register .lg-card{max-width:480px}#register .dv{margin:10px 0}
+
+/* ===== Responsif HP ===== */
+@media(max-width:640px){
+  main{padding:10px}
+  .pnl,.card{padding:14px 12px}
+  .btn,.btn-opsi{min-height:40px}
+  .ubar,.bar{gap:8px}.ubar>.btn,.ubar>label,.ubar>.dd{flex:1 1 100%}
+  .ubar .spacer,.bar .spacer{display:none}
+  .dt-bar{flex-direction:column;align-items:stretch}.dt-s{margin-left:0}.dt-s input{width:100%}
+  .dt-bar .dt-btns .btn{flex:1}
+  .stats{grid-template-columns:1fr 1fr;gap:10px}.stat{padding:12px;flex-direction:column;gap:8px}.stat b.v{font-size:1.5em}
+  .hero{padding:16px}.hero h2{font-size:1.25em}.hero .hi{width:56px;height:56px}
+  .pkl{grid-template-columns:1fr 1fr}
+  .pg button{min-width:30px;padding:6px}
+  .modal{padding:8px}.modal .card.w{max-height:94vh}
+  .prof{flex-direction:column;align-items:flex-start}
+  .lgf{grid-template-columns:1fr 1fr}
+  select,input[type=text],input[type=number],input[type=date],input[type=password],input[type=search]{font-size:16px}
+}
+@media(max-width:380px){.stats{grid-template-columns:1fr}.pkl{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -3166,7 +3186,7 @@ function raporHTML(r,o){
   return `<div class="sheet${o.msr?' msr':''}" style="${ctVars(o.c,o.k)}">
   <h2>LAPORAN HASIL BELAJAR PRAKTIK KERJA LAPANGAN (PKL)</h2>
   <h3>${esc((sk.nama_sekolah||'').toUpperCase())}</h3>
-  <div class="sub">${esc(sk.tahun_ajaran||'')}</div>
+  <h3 class="sub" style="margin:4px 0 calc(20px*var(--k))">TAHUN AJARAN ${esc(sk.tahun_ajaran||'')}</h3>
   <table class="id">
     <tr><td class="l">Nama Murid</td><td class="c">:</td><td>${esc(r.nama)}</td></tr>
     <tr><td class="l">NISN / NIS</td><td class="c">:</td><td>${esc(r.nisn)} / ${esc(r.nis)}</td></tr>
@@ -3395,18 +3415,40 @@ function perInput(f,v){
   if(f.kind==='date') return `<input type="date" ${a} value="${esc(txtToISO(v))}">`;
   return `<input type="text" ${a} maxlength="${f.max||20}" autocomplete="off" placeholder="${esc(f.ph||'')}" value="${esc(v)}"${f.list?' list="dlFaseAp"':''}>`;
 }
+function nextPer(p){
+  const m=/^(\d{4})\/(\d{4})$/.exec(p.tahun_ajaran||''), y=m?+m[1]:new Date().getFullYear();
+  if(/^genap$/i.test(p.semester||'')) return {ta:(y+1)+'/'+(y+2),sem:'Ganjil'};
+  return {ta:y+'/'+(y+1),sem:'Genap'};
+}
+async function admBuatPeriode(){
+  const ta=nz($('#npTa').value), sem=$('#npSem').value, er=$('#npErr'); er.textContent='';
+  const m=/^(\d{4})\s*\/\s*(\d{4})$/.exec(ta);
+  if(!m||+m[2]!==+m[1]+1){ er.textContent='Tahun Ajaran harus berformat 2026/2027 (tahun berurutan)'; $('#npTa').focus(); return; }
+  if(!(await popup('ask',`Buat periode ${ta} Semester ${sem}? Data referensi periode ini disalin ke periode baru, sedangkan Penempatan dan Nilai dimulai kosong.`,{yes:'Ya, Buat',no:'Batal'}))) return;
+  busy(true,'Membuat periode baru… (bisa beberapa detik)');
+  try{
+    const r=await api('buatPeriode',{data:{tahun_ajaran:ta,semester:sem}}); busy(false);
+    ssSet('rapor_ta',r.ta); ssSet('rapor_sem',r.sem);
+    if(await popup('ok',`Periode ${r.ta} Semester ${r.sem} berhasil dibuat (${r.disalin} baris data referensi disalin). Keluar lalu masuk kembali dan pilih periode baru untuk mulai bekerja di dalamnya.`,{yes:'Keluar dan Pilih Periode Baru',no:'Tetap di Periode Ini'})) logout('Periode baru siap. Pilih Tahun Pelajaran dan Semester baru, lalu masuk.');
+  }catch(e){ busy(false); er.textContent=e.message; toast(e.message,'err'); }
+}
 function drawSet(){
   const d=ADM.set, p=d.periode, F=SK_FIELDS.filter(f=>PER_KEYS.includes(f.k)), open=d.statusPenilaian==='dibuka', k=d.keamanan, s=d.sistem;
   const kv=a=>'<table class="kv">'+a.map(r=>`<tr><td>${esc(r[0])}</td><td>${r[1]}</td></tr>`).join('')+'</table>';
   $('#v-adm').innerHTML=`
   <div class="pnl"><div class="ph"><h3><i data-lucide="calendar-range"></i>Periode dan Rapor Aktif</h3></div>
-    <p class="rhint">Dipakai pada header aplikasi serta kop dan tanda tangan rapor. Identitas sekolah dikelola di <a href="#ref-sekolah">Data Sekolah</a>. Setiap perubahan dicatat di Log Aktivitas.</p>
+    <p class="rhint">Dipakai pada header aplikasi serta kop dan tanda tangan rapor. Identitas sekolah dikelola di <a href="#ref-sekolah">Data Sekolah</a>. Setiap perubahan dicatat di Log Aktivitas. Mengubah Tahun Ajaran atau Semester di sini hanya untuk memperbaiki periode ini; untuk tahun ajaran baru gunakan <b>Buat Periode Baru</b> di bawah.</p>
     <form id="admPer" novalidate><div class="fgrid">${F.map(f=>`<label class="lbl">${esc(f.label)} <span class="rq" style="color:var(--err)">*</span>${perInput(f,p[f.k]||'')}</label>`).join('')}</div>
     <datalist id="dlFaseAp"><option value="E"><option value="F"></datalist>
     <div class="skact"><button class="btn" type="submit"><i data-lucide="save"></i> Simpan</button><button class="btn sec" type="button" data-adm="reload">Batalkan perubahan</button><span id="admPerErr" style="font-size:13px;color:var(--err)"></span></div></form></div>
   <div class="pnl"><div class="ph"><h3><i data-lucide="lock-keyhole"></i>Status Penilaian</h3></div>
     <p style="margin-top:0">Saat ini penilaian <span class="bdg ${open?'ok':'wr'}">${open?'Dibuka':'Ditutup'}</span>. ${open?'Guru dapat menyimpan nilai.':'Guru tidak dapat menyimpan nilai; Administrator tetap dapat.'}</p>
     <button type="button" class="btn${open?' sec':''}" data-adm="status" data-to="${open?'ditutup':'dibuka'}"><i data-lucide="${open?'lock':'lock-open'}"></i> ${open?'Tutup Penilaian':'Buka Penilaian'}</button></div>
+  <div class="pnl"><div class="ph"><h3><i data-lucide="calendar-plus"></i>Buat Periode Baru</h3></div>
+    <p class="rhint">Membuat spreadsheet periode baru dan menyalin data referensi dari periode ini: Sekolah, Program, Kelas, Tujuan Pembelajaran, Kriteria, Siswa, dan Pengguna (kata sandi tetap berlaku). Data Penempatan dan Nilai dimulai kosong. Data periode ini tidak diubah dan tetap tersimpan sebagai arsip. Setelah itu, perbarui kelas dan siswa yang naik kelas di periode baru.</p>
+    <div class="fgrid"><label class="lbl">Tahun Ajaran<input type="text" id="npTa" maxlength="9" placeholder="2026/2027" value="${esc(nextPer(p).ta)}"></label>
+    <label class="lbl">Semester<select id="npSem"><option${nextPer(p).sem==='Ganjil'?' selected':''}>Ganjil</option><option${nextPer(p).sem==='Genap'?' selected':''}>Genap</option></select></label></div>
+    <div class="skact"><button type="button" class="btn" data-adm="periode-baru"><i data-lucide="calendar-plus"></i> Buat Periode Baru</button><span id="npErr" style="font-size:13px;color:var(--err)"></span></div></div>
   <div class="pnl"><div class="ph"><h3><i data-lucide="shield-check"></i>Keamanan</h3></div>
     ${kv([['Masa berlaku sesi login',k.sesiJam+' jam'],['Batas percobaan login gagal',k.maksGagal+' kali, lalu dikunci '+k.kunciMenit+' menit'],['Kata sandi','Minimal '+k.minSandi+' karakter (boleh huruf saja); wajib diganti saat login pertama atau setelah direset'],['Penyimpanan kata sandi','Hash bergaram ('+k.hashPutaran+' putaran), tidak disimpan sebagai teks asli'],['Backup dan restore',d.backup.berwenang?'Akun Anda berwenang':'Akun Anda tidak berwenang']])}
     <p class="rhint" style="margin:10px 0 0">Nilai ini ditetapkan di kode server (Kode.gs) dan tidak dapat diubah dari aplikasi. Pembatasan backup/restore ke Administrator tertentu diatur lewat Script property <b>BACKUP_ADMINS</b>.</p></div>
@@ -3592,6 +3634,7 @@ admv.addEventListener('click',e=>{
   switch(b.dataset.adm){
     case 'reload': return renderAdm();
     case 'status': return admStatus(b.dataset.to);
+    case 'periode-baru': return admBuatPeriode();
     case 'reset-ui': UI={}; saveUI(); return snack('Tampilan dikembalikan ke bawaan');
     case 'reset-cetak': CT=ctNorm({}); try{ localStorage.setItem('rapor_print',JSON.stringify(CT)); }catch(x){} return snack('Pengaturan cetak dikembalikan ke bawaan');
     case 'bk-create': return bkCreate();
