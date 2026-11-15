@@ -2335,7 +2335,7 @@ function uAct(r){
   );
 }
 const UCOLS=[{h:'No',k:'no',c:'cnum'},{h:'Nama Lengkap',k:'nama'},{h:'Username',k:'username',txt:1},{h:'NIP',k:'nip',txt:1},{h:'Role',k:'roleLabel'},
-  {h:'Status',k:'statusLabel',html:r=>bdg(r.aktif?'g':'r',r.statusLabel)},{h:'Login Terakhir',k:'login'},{h:'Aksi',k:'aksi',c:'c-aksi',nx:1,html:uAct}];
+  {h:'Status',k:'statusLabel',html:r=>bdg(r.aktif?'g':'r',r.statusLabel)},{h:'Login Terakhir',k:'login'},{h:'Sandi Sementara',k:'sandiSementara',nx:1,html:r=>r.sandiSementara?`<code>${esc(r.sandiSementara)}</code>`:'<span class="muted">—</span>'},{h:'Aksi',k:'aksi',c:'c-aksi',nx:1,html:uAct}];
 const uFilt=()=>U.rows.filter(r=>(!U.role||r.role.split(',').includes(U.role))&&(!U.stat||(U.stat==='aktif')===r.aktif))
   .map((r,i)=>Object.assign({},r,{no:i+1,statusLabel:r.aktif?'Aktif':'Nonaktif',login:r.loginTerakhir?fmtWaktu(r.loginTerakhir):'-'}));
 async function renderUsers(force){
@@ -2403,7 +2403,7 @@ async function userDetail(id){
   try{ u=await api('getUser',{id}); }catch(e){ busy(false); toast(e.message,'err'); return; }
   busy(false);
   const sandi=u.tanpaSandi?'Belum ada (tidak bisa login, lakukan Reset)':(u.wajibGanti?'Menunggu diganti pengguna saat login':'Sudah diatur pengguna');
-  openModal(`<h3 style="margin:0 0 14px"><i data-lucide="user-round"></i> Detail Pengguna</h3><div class="prof" style="margin-bottom:16px"><span class="av">${avHTML(u)}</span><dl><dt>Nama Lengkap</dt><dd>${esc(u.nama)}</dd><dt>Username</dt><dd>${esc(u.username||'-')}</dd><dt>NIP</dt><dd>${esc(u.nip||'-')}</dd><dt>Role</dt><dd>${esc(u.roleLabel)}</dd><dt>Status</dt><dd>${u.aktif?bdg('g','Aktif'):bdg('r','Nonaktif')}</dd><dt>Login Terakhir</dt><dd>${esc(u.loginTerakhir?fmtWaktu(u.loginTerakhir):'Belum pernah')}</dd><dt>Kata Sandi</dt><dd>${esc(sandi)}</dd></dl></div><div class="bar" style="margin:0"><button class="btn sec" type="button" data-mc>Tutup</button></div>`,1);
+  openModal(`<h3 style="margin:0 0 14px"><i data-lucide="user-round"></i> Detail Pengguna</h3><div class="prof" style="margin-bottom:16px"><span class="av">${avHTML(u)}</span><dl><dt>Nama Lengkap</dt><dd>${esc(u.nama)}</dd><dt>Username</dt><dd>${esc(u.username||'-')}</dd><dt>NIP</dt><dd>${esc(u.nip||'-')}</dd><dt>Role</dt><dd>${esc(u.roleLabel)}</dd><dt>Status</dt><dd>${u.aktif?bdg('g','Aktif'):bdg('r','Nonaktif')}</dd><dt>Login Terakhir</dt><dd>${esc(u.loginTerakhir?fmtWaktu(u.loginTerakhir):'Belum pernah')}</dd><dt>Kata Sandi</dt><dd>${esc(sandi)}</dd>${u.sandiSementara?`<dt>Sandi Sementara</dt><dd><code>${esc(u.sandiSementara)}</code></dd>`:''}</dl></div><div class="bar" style="margin:0"><button class="btn sec" type="button" data-mc>Tutup</button></div>`,1);
 }
 function ufCheck(d,edit){
   if(d.nama.length<3) return 'Nama lengkap minimal 3 karakter';
