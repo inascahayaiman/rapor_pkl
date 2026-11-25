@@ -2868,7 +2868,12 @@ function refRows(t){
 }
 async function refTemplate(t){
   const cfg=RF[t];
-  const cols=cfg.fields.filter(f=>f.kind!=='nisn_ro').map(f=>({
+  /* Template Penempatan memakai judul kolom yang sama dengan tabel di aplikasi (tanpa Status dan Aksi).
+     Kolom No, NISN, Nama Siswa, dan Kelas hanya petunjuk; saat impor yang dibaca NIS, DUDI, Instruktur, Guru, dan Tanggal. */
+  const tplW={no:6,nis:16,nisn:16,nama:30,kelas:14,nama_dudi:30,alamat_dudi:36,instruktur:26,guru_pembimbing:28,tgl_mulai:16,tgl_selesai:16};
+  const cols=t==='penempatan'
+    ? cfg.cols.filter(c=>c.k!=='status_pkl'&&c.k!=='aksi').map(c=>({h:c.h,k:c.k,txt:1,w:tplW[c.k]||18}))
+    : cfg.fields.filter(f=>f.kind!=='nisn_ro').map(f=>({
     h:f.label, k:f.k, txt:1,
     w:f.full?36:(f.digits?22:18)
   }));
@@ -2878,7 +2883,7 @@ async function refTemplate(t){
     tp:'Kode Program harus sudah ada di Data Program. Nomor TP 1 sampai 4. Data dengan Kode Program dan Nomor TP yang sama akan diperbarui.',
     kriteria:'Isi Rentang Skor (Batas Bawah) dengan angka 0-100 (mis. 86 atau 86-100), Kriteria Skor (Awalan), dan Deskripsi Skor (Akhiran).',
     siswa:'Kolom NIS dan NISN sudah diformat Teks (@). Jenis Kelamin diisi L atau P. Kelas harus sudah terdaftar di Data Kelas.',
-    penempatan:'Kolom NIS sudah diformat Teks (@) dan harus terdaftar di Data Siswa. Guru Pembimbing harus terdaftar sebagai Guru Pembimbing aktif di Data Pengguna. Format Tanggal Mulai dan Tanggal Selesai: YYYY-MM-DD (mis. 2026-07-15).'
+    penempatan:'Kolom pada template sama dengan tabel Data Penempatan PKL. Kolom No, NISN, Nama Siswa, dan Kelas hanya sebagai petunjuk (boleh dikosongkan) karena data siswa diambil dari NIS. Kolom NIS sudah diformat Teks (@) dan harus terdaftar di Data Siswa. Guru Pembimbing harus terdaftar sebagai Guru Pembimbing aktif di Data Pengguna. Format Tanggal Mulai dan Tanggal Selesai: YYYY-MM-DD (mis. 2026-07-15).'
   }[t]||'';
   if(!(await popup('info',`File template-import-${t}.xlsx akan diunduh dengan kolom rapi dan format Teks (@).\n\nIsi data mulai baris ke-2, simpan sebagai .xlsx, lalu klik Import Excel (.xlsx). `+extra+' Tip: hasil Export Excel (.xlsx) pada tabel juga dapat diimpor kembali.',{title:'Template Import Excel (.xlsx)',yes:'OK',no:'Batal'}))) return;
   dlXlsx(`template-import-${t}.xlsx`, cols, [], {sheetName:'Template '+cfg.noun, blankRows:25});
