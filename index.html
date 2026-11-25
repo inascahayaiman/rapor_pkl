@@ -63,9 +63,11 @@ table.grid input.w{width:200px}table.grid input.w2{width:260px}
 #busy{position:fixed;inset:0;background:rgba(255,255,255,.6);display:flex;align-items:center;justify-content:center;z-index:40;font-weight:600;color:var(--brand)}
 
 /* ---------- Lembar rapor ---------- */
-.sheet{--pw:210mm;--ph:297mm;--mt:14mm;--mr:16mm;--mb:14mm;--ml:16mm;--aw:178mm;--k:1;background:#fff;width:var(--pw);min-height:var(--ph);padding:var(--mt) var(--mr) var(--mb) var(--ml);margin:0 auto;color:#000;font:calc(12pt*var(--k))/1.35 Arial,Helvetica,sans-serif;box-shadow:0 1px 6px rgba(0,0,0,.15);display:flex;flex-direction:column}
-.sheet h2,.sheet h3{text-align:center;margin:0;font-size:calc(13pt*var(--k));letter-spacing:.3px}
+.sheet{--pw:210mm;--ph:297mm;--mt:14mm;--mr:16mm;--mb:14mm;--ml:16mm;--aw:178mm;--k:1;--fs:12;background:#fff;width:var(--pw);height:var(--ph);padding:var(--mt) var(--mr) var(--mb) var(--ml);margin:0 auto;color:#000;font:calc(var(--fs)*1pt)/1.35 Arial,Helvetica,sans-serif;box-shadow:0 1px 6px rgba(0,0,0,.15);display:flex;flex-direction:column;overflow:hidden;position:relative}
+.sheet .pgbody{flex:1 1 auto;min-height:0;display:flow-root;padding-bottom:6px}
+.sheet h2,.sheet h3{text-align:center;margin:0;font-size:calc((var(--fs) + 1)*1pt);letter-spacing:.3px}
 .sheet .sub{text-align:center;margin:4px 0 calc(10px*var(--k))}
+.sheet .cont{font-size:.85em;color:#333;border-bottom:.6pt solid #999;padding-bottom:3px;margin-bottom:calc(8px*var(--k))}
 .sheet table.id{width:100%;border-collapse:collapse;margin-bottom:calc(8px*var(--k))}
 .sheet table.id td{padding:1.5px 0;vertical-align:top;overflow-wrap:anywhere}
 .sheet table.id td.l{width:36%}.sheet table.id td.c{width:3%}
@@ -74,7 +76,7 @@ table.grid input.w{width:200px}table.grid input.w2{width:260px}
 .sheet table.tp th{text-align:center;background:#eee}
 .sheet table.tp td.c{text-align:center}
 .sheet table.tp tr{break-inside:avoid;page-break-inside:avoid}
-.sheet table.tp tfoot td{font-weight:700;background:#f4f4f4}
+.sheet table.tp tr.tf td{font-weight:700;background:#f4f4f4}
 .sheet table.tp thead{display:table-header-group}
 .sheet .box{border:1px solid #000;padding:6px 8px;min-height:calc(20mm*var(--k));margin-bottom:calc(8px*var(--k));overflow-wrap:anywhere;white-space:pre-wrap;break-inside:avoid}
 .sheet table.att{border-collapse:collapse;margin-bottom:calc(10px*var(--k));break-inside:avoid}
@@ -84,9 +86,10 @@ table.grid input.w{width:200px}table.grid input.w2{width:260px}
 .sheet .sign>div{width:44%}.sheet .sign>div:last-child{width:auto;white-space:nowrap}
 .sheet .gap{height:calc(20mm*var(--k))}
 .sheet .kepsek{text-align:center;margin-top:calc(16px*var(--k))}
-.sheet .pgno{margin-top:auto;padding-top:calc(6px*var(--k));text-align:center;font-size:.8em;color:#333}
-.sheet.msr{display:block;width:100%;min-height:0;padding:0;margin:0;box-shadow:none}
-#ctMeasure{position:absolute;left:-10000px;top:0;visibility:hidden;pointer-events:none;column-gap:0;column-fill:auto;overflow:visible}
+.sheet .pgfoot{flex:none;margin-top:auto;padding-top:4px;border-top:.6pt solid #555;display:flex;justify-content:space-between;gap:12px;font-size:max(7pt,calc((var(--fs) - 2)*1pt));line-height:1.3;color:#222}
+.sheet.msr{display:block;width:100%;height:auto;min-height:0;padding:0;margin:0;box-shadow:none;overflow:visible}
+.sheet.msr .pgbody{flex:none}
+#ctMeasure{position:absolute;left:-10000px;top:0;visibility:hidden;pointer-events:none;overflow:visible}
 #printRoot{display:none}
 
 /* ===== Tema e-Rapor PKL ===== */
@@ -229,10 +232,11 @@ main{width:100%;flex:1}.foot{padding:12px 16px;text-align:center;font-size:12.5p
 .pbtn button.no{background:#e8edf3;color:var(--ink)}
 @media print{
   @page{size:A4;margin:0}
-  body{background:#fff}
+  html,body{margin:0!important;padding:0!important;background:#fff!important}
   body>*:not(#printRoot){display:none!important}
   #printRoot{display:block!important}
-  .sheet{box-shadow:none;margin:0;width:auto;padding:0;height:calc(var(--ph) - var(--mt) - var(--mb) - 3mm);min-height:0;overflow:hidden;break-inside:avoid;page-break-after:always;break-after:page}
+  #printRoot,.sheet{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .sheet{box-shadow:none;margin:0;height:calc(var(--ph) - 1mm);break-inside:avoid;page-break-after:always;break-after:page}
   .sheet:last-child{page-break-after:auto;break-after:auto}
 }
 
@@ -261,6 +265,7 @@ body.dark .ctpv{background:#0b121b}
 .ctpv .wrap{margin:0 auto;position:relative}
 .ctpv .scale{transform-origin:top left}
 .ctpv .sheet{margin:0}
+.ctpv .sheet+.sheet{margin-top:14px}
 .ctnote{background:#fff6d6;border:1px solid #ecd68a;color:#6b5200;border-radius:8px;padding:8px 12px;font-size:.88em;margin-top:10px}
 body.dark .ctnote{background:#3a3213;border-color:#6b5a1d;color:#f0dc9a}
 /* ===== Dashboard Administrator ===== */
@@ -629,12 +634,14 @@ table.grid tr.dirty:hover td{background:#f9ecbc}
           <label class="lbl">Margin Kanan (mm)<input type="number" id="ctMr" min="0" max="50" step="0.5" inputmode="decimal"></label>
           <label class="lbl">Margin Atas (mm)<input type="number" id="ctMt" min="0" max="50" step="0.5" inputmode="decimal"></label>
           <label class="lbl">Margin Bawah (mm)<input type="number" id="ctMb" min="0" max="50" step="0.5" inputmode="decimal"></label>
+          <label class="lbl">Ukuran Font (pt)<select id="ctFs" aria-label="Ukuran font hasil cetak"></select></label>
+          <label class="lbl">Tata Letak Halaman<select id="ctMode" aria-label="Tata letak halaman"></select></label>
           <label class="lbl">Halaman Pertama<input type="number" id="ctFirst" min="1" max="9999" step="1" inputmode="numeric"></label>
           <label class="ctchk"><input type="checkbox" id="ctNum">Cetak nomor halaman</label>
         </div>
         <p class="cterr" id="ctErr" role="alert"></p>
         <p class="cthint" id="ctInfo"></p>
-        <p class="cthint">Pengaturan tersimpan di browser ini. Di jendela cetak browser: Margin = <b>Default</b>, Skala = <b>100%</b>, matikan <b>Header dan footer</b>, lalu pilih Simpan sebagai PDF atau printer.</p>
+        <p class="cthint">Pengaturan tersimpan di browser ini. Hasil cetak otomatis tanpa tanggal, judul, alamat web, dan nomor halaman dari browser; footer berisi NISN / NIS murid. Di jendela cetak cukup pilih Skala = <b>100%</b>, lalu Simpan sebagai PDF atau printer. Tata Letak Halaman: <b>Normal</b> merapatkan spasi secukupnya lalu melanjutkan ke halaman berikutnya bila belum muat; <b>Padatkan spasi</b> merapatkan spasi lebih jauh agar lebih sering muat satu halaman; <b>Paksa 1 halaman</b> memperkecil huruf seperlunya (paling kecil 7 pt) agar satu rapor selalu satu halaman.</p>
       </div>
 
       <div class="pnl" id="ctB">
@@ -1350,7 +1357,7 @@ const GUIDE_APP=[
  ['Data Penempatan','Pilih kelas, isi DUDI, alamat, instruktur, guru pembimbing, dan tanggal PKL, lalu simpan perubahan.'],
  ['Input Nilai PKL','Pilih kelas, isi nilai TP1–TP4, kehadiran, dan catatan, lalu simpan. Nilai Akhir dan Deskripsi terhitung otomatis sesuai referensi TP dan Kriteria.'],
  ['Rekapitulasi Nilai','Pantau rekapitulasi nilai TP1–TP4, Nilai Akhir, Deskripsi, Catatan, dan Kehadiran dengan fitur pencarian, filter Kelas/Program/Status Penilaian, paginasi, serta Export Excel, PDF, dan Print.'],
- ['Cetak Nilai PKL','Atur ukuran kertas dan margin, pilih kelas, klik Generate Laporan (nilai diambil dari database), lihat preview, lalu cetak satu siswa, siswa terpilih, atau seluruh kelas. Di jendela cetak: Margin Default, Skala 100%, matikan Header dan footer.'],
+ ['Cetak Nilai PKL','Atur ukuran kertas, margin, dan ukuran font (10–14 pt), pilih kelas, klik Generate Laporan (nilai diambil dari database), lihat preview, lalu cetak satu siswa, siswa terpilih, atau seluruh kelas. Hasil cetak otomatis tanpa header/footer browser dan di footer tercetak NISN / NIS murid. Di jendela cetak: Skala 100%.'],
  ['Data Pengguna','Tambah, lihat, ubah, aktifkan/nonaktifkan, dan hapus pengguna (Administrator, Kepala Sekolah, Wali Kelas, Guru Pembimbing); reset kata sandi; import dan export Excel.'],
  ['Data Referensi','Menu Data Sekolah, Data Program, Data Kelas, Data Tujuan Pembelajaran, Data Kriteria, Data Siswa, dan Data Penempatan dikelola langsung di aplikasi (tambah, detail, ubah, hapus, import, dan export Excel).'],
  ['Pengaturan','Atur periode (tahun ajaran, semester, fase, tempat dan tanggal rapor), buka/tutup penilaian, lihat kebijakan keamanan, dan tampilan.'],
@@ -3112,7 +3119,9 @@ const PAPER={
   Letter:{n:'Letter (216 × 279 mm)',w:216,h:279},
   Legal:{n:'Legal (216 × 356 mm)',w:216,h:356}
 };
-const CT_DEF={paper:'A4',mt:14,mr:16,mb:14,ml:16,first:1,num:true};
+const FS_OPTS=[10,11,12,13,14];
+const CT_MODES={normal:'Normal (lanjut halaman berikutnya bila perlu)',padat:'Padatkan spasi (font tetap)',satu:'Paksa 1 halaman (font boleh mengecil)'};
+const CT_DEF={paper:'A4',mt:14,mr:16,mb:14,ml:16,first:1,num:false,fs:12,mode:'normal'};
 const CT_MARGINS=[['mt','#ctMt','Margin Atas'],['mr','#ctMr','Margin Kanan'],['mb','#ctMb','Margin Bawah'],['ml','#ctMl','Margin Kiri']];
 const MM_PX=96/25.4;
 function ctNorm(o){
@@ -3120,7 +3129,9 @@ function ctNorm(o){
   v.paper=PAPER[o.paper]?o.paper:CT_DEF.paper;
   CT_MARGINS.forEach(([k])=>{ const n=Number(o[k]); v[k]=(o[k]!==''&&o[k]!=null&&isFinite(n)&&n>=0&&n<=50)?Math.round(n*10)/10:CT_DEF[k]; });
   const f=Number(o.first); v.first=(Number.isInteger(f)&&f>=1&&f<=9999)?f:CT_DEF.first;
-  v.num=o.num!==false;
+  v.fs=FS_OPTS.includes(Number(o.fs))?Number(o.fs):CT_DEF.fs;
+  v.mode=CT_MODES[o.mode]?o.mode:CT_DEF.mode;
+  v.num=(o.fs===undefined||o.num===undefined)?CT_DEF.num:!!o.num; /* pengaturan lama (tanpa fs) mengikuti default baru */
   return v;
 }
 let CT=ctNorm((()=>{ try{ return JSON.parse(localStorage.getItem('rapor_print')||'{}'); }catch(e){ return {}; } })());
@@ -3130,16 +3141,22 @@ function ctFill(){
   $('#ctPaper').innerHTML=Object.keys(PAPER).map(k=>`<option value="${k}">${esc(PAPER[k].n)}</option>`).join('');
   $('#ctPaper').value=CT.paper;
   CT_MARGINS.forEach(([k,id])=>{ $(id).value=CT[k]; });
+  $('#ctFs').innerHTML=FS_OPTS.map(n=>`<option value="${n}">${n} pt${n===CT_DEF.fs?' (default)':''}</option>`).join('');
+  $('#ctFs').value=CT.fs;
+  $('#ctMode').innerHTML=Object.keys(CT_MODES).map(k=>`<option value="${k}">${esc(CT_MODES[k])}</option>`).join('');
+  $('#ctMode').value=CT.mode;
   $('#ctFirst').value=CT.first; $('#ctNum').checked=CT.num;
 }
 function ctRead(){
   const num=id=>{ const s=String($(id).value).trim().replace(',','.'); return s===''?NaN:Number(s); };
-  const v={paper:$('#ctPaper').value,first:num('#ctFirst'),num:$('#ctNum').checked};
+  const v={paper:$('#ctPaper').value,first:num('#ctFirst'),num:$('#ctNum').checked,fs:num('#ctFs'),mode:$('#ctMode').value};
   CT_MARGINS.forEach(([k,id])=>{ v[k]=num(id); });
   let err='', bad=[];
   const p=PAPER[v.paper];
   if(!p){ err='Ukuran kertas tidak valid'; bad.push('#ctPaper'); }
   CT_MARGINS.forEach(([k,id,l])=>{ if(!(v[k]>=0&&v[k]<=50)){ bad.push(id); if(!err) err=l+' harus berupa angka 0–50 mm'; } });
+  if(!CT_MODES[v.mode]){ bad.push('#ctMode'); if(!err) err='Tata letak halaman tidak valid'; }
+  if(!FS_OPTS.includes(v.fs)){ bad.push('#ctFs'); if(!err) err='Ukuran font harus salah satu dari 10, 11, 12, 13, atau 14 pt'; }
   if(!(Number.isInteger(v.first)&&v.first>=1&&v.first<=9999)){ bad.push('#ctFirst'); if(!err) err='Halaman Pertama harus bilangan bulat 1–9999'; }
   let aw=0, ah=0;
   if(!err){
@@ -3172,19 +3189,22 @@ function ctUpdateBtns(){
 /* ----- isi lembar (format rapor yang sama, dengan identitas sekolah, Nilai Akhir, dan tata letak mengikuti kertas) ----- */
 function ctVars(c,k){
   const p=PAPER[c.paper], f=x=>+(+x).toFixed(1);
-  return `--pw:${p.w}mm;--ph:${p.h}mm;--mt:${f(c.mt)}mm;--mr:${f(c.mr)}mm;--mb:${f(c.mb)}mm;--ml:${f(c.ml)}mm;--aw:${f(p.w-c.ml-c.mr)}mm;--k:${k}`;
+  return `--pw:${p.w}mm;--ph:${p.h}mm;--mt:${f(c.mt)}mm;--mr:${f(c.mr)}mm;--mb:${f(c.mb)}mm;--ml:${f(c.ml)}mm;--aw:${f(p.w-c.ml-c.mr)}mm;--k:${k};--fs:${c.fs}`;
 }
-function raporHTML(r,o){
+const CT_THEAD='<thead><tr><th style="width:8%">No</th><th style="width:38%">Tujuan Pembelajaran</th><th style="width:10%">Nilai</th><th>Deskripsi</th></tr></thead>';
+/* Isi rapor dipecah menjadi blok agar dapat disusun per halaman: baris tabel TP dapat berpindah halaman,
+   sedangkan Catatan serta Kehadiran + tanda tangan selalu utuh dalam satu halaman. */
+function raporBlocks(r){
   const sk=S.boot.sekolah||{}, kl=(S.boot.kelas||[]).find(k=>k.nama_kelas===r.kelas)||{}, pr=progByKelas(r.kelas), tps=tpByKelas(r.kelas);
   const na=nilaiNA(r);
-  const tpRows = tps.length ? tps.map((t,i)=>{
+  const trs = tps.length ? tps.map((t,i)=>{
     const sc=r['tp'+t.no_tp];
     return `<tr><td class="c">${i+1}</td><td>${esc(ucfirst(t.teks_tp))}</td><td class="c">${esc(sc)}</td><td>${esc(deskripsi(sc===''?'':+sc,t.teks_tp))}</td></tr>`;
-  }).join('') : '<tr><td colspan="4" class="c">Tujuan Pembelajaran belum diatur untuk program keahlian ini</td></tr>';
+  }) : ['<tr><td colspan="4" class="c">Tujuan Pembelajaran belum diatur untuk program keahlian ini</td></tr>'];
+  const tf=`<tr class="tf"><td colspan="2" style="text-align:center">Nilai Akhir</td><td class="c">${esc(na)}</td><td>${na===''?'':'Rata-rata nilai seluruh Tujuan Pembelajaran'}</td></tr>`;
   const att=v=>(+v>0? v : '-');
   const prog=r.program_keahlian||pr.program_keahlian||'', kons=r.konsentrasi_keahlian||pr.konsentrasi_keahlian||'';
-  return `<div class="sheet${o.msr?' msr':''}" style="${ctVars(o.c,o.k)}">
-  <h2>LAPORAN HASIL BELAJAR PRAKTIK KERJA LAPANGAN (PKL)</h2>
+  const head=`<h2>LAPORAN HASIL BELAJAR PRAKTIK KERJA LAPANGAN (PKL)</h2>
   <h3>${esc((sk.nama_sekolah||'').toUpperCase())}</h3>
   <h3 class="sub" style="margin:4px 0 calc(20px*var(--k))">TAHUN AJARAN ${esc(sk.tahun_ajaran||'')}</h3>
   <table class="id">
@@ -3199,12 +3219,10 @@ function raporHTML(r,o){
     <tr><td class="l">Semester</td><td class="c">:</td><td>${esc(sk.semester||'')}</td></tr>
     <tr><td class="l">Nama Instruktur</td><td class="c">:</td><td>${esc(r.instruktur)}</td></tr>
     <tr><td class="l">Nama Pembimbing</td><td class="c">:</td><td>${esc(r.guru_pembimbing)}</td></tr>
-  </table>
-  <table class="tp"><thead><tr><th style="width:8%">No</th><th style="width:38%">Tujuan Pembelajaran</th><th style="width:10%">Nilai</th><th>Deskripsi</th></tr></thead><tbody>${tpRows}</tbody>
-    <tfoot><tr><td colspan="2" style="text-align:center">Nilai Akhir</td><td class="c">${esc(na)}</td><td>${na===''?'':'Rata-rata nilai seluruh Tujuan Pembelajaran'}</td></tr></tfoot></table>
-  <div class="blk"><div><b>Catatan:</b></div>
-  <div class="box">${esc(r.catatan)}</div></div>
-  <div class="end">
+  </table>`;
+  const cat=`<div class="blk"><div><b>Catatan:</b></div>
+  <div class="box">${esc(r.catatan)}</div></div>`;
+  const end=`<div class="end">
   <div class="blk"><div><b>Kehadiran</b></div>
   <table class="att">
     <tr><td>Sakit</td><td class="c">${esc(att(r.sakit))}</td><td>Hari</td></tr>
@@ -3218,25 +3236,65 @@ function raporHTML(r,o){
   </div>
   <div class="kepsek">Mengetahui,<br>Kepala Sekolah<div class="gap"></div><b><u>${esc(sk.kepala_sekolah||'')}</u></b><br>NIP. ${esc(sk.nip_kepsek||'')}</div>
   </div>
-  </div>
-  ${o.no!=null?`<div class="pgno">Halaman ${esc(o.no)}</div>`:''}
   </div>`;
+  /* baris TP terakhir selalu satu halaman dengan baris Nilai Akhir */
+  const rows=trs.map((h,i)=>({t:'row',h:i===trs.length-1?h+tf:h}));
+  return {blocks:[{t:'html',h:head},...rows,{t:'html',h:cat},{t:'html',h:end}],nama:r.nama,kelas:r.kelas,nisn:r.nisn,nis:r.nis};
 }
-/* Satu rapor = satu halaman. Isi diperkecil secukupnya (pencarian biner, paling kecil 45%) sampai muat di area cetak
-   kertas dan margin terpilih. Muat/tidaknya diukur dengan simulasi kolom setinggi area cetak. */
-const CT_KMIN=45;
+function ctBody(items,cont,meta){
+  let h=cont?`<div class="cont">${esc(meta.nama)} · ${esc(meta.kelas)} <i>(lanjutan)</i></div>`:'';
+  for(let i=0;i<items.length;){
+    if(items[i].t==='row'){
+      let j=i, rows='';
+      while(j<items.length&&items[j].t==='row'){ rows+=items[j].h; j++; }
+      h+=`<table class="tp">${CT_THEAD}<tbody>${rows}</tbody></table>`; i=j;
+    } else { h+=items[i].h; i++; }
+  }
+  return h;
+}
+/* Footer setiap halaman memuat NISN / NIS murid (identitas halaman); nomor halaman hanya bila diaktifkan. */
+function ctSheet(body,c,k,meta,no,msr){
+  const foot=`<div class="pgfoot"><span>NISN / NIS : ${esc(meta.nisn||'-')} / ${esc(meta.nis||'-')}</span>${no!=null?`<span>Halaman ${esc(no)}</span>`:''}</div>`;
+  return `<div class="sheet${msr?' msr':''}" style="${ctVars(c,k)}"><div class="pgbody">${body}</div>${foot}</div>`;
+}
+/* Tata letak halaman:
+   - normal : spasi dirapatkan bertahap (sampai 55%); bila belum muat, isi dilanjutkan ke halaman berikutnya.
+   - padat  : spasi boleh dirapatkan sampai 25%; bila belum muat, dilanjutkan ke halaman berikutnya.
+   - satu   : spasi dirapatkan, lalu huruf diperkecil seperlunya (paling kecil 7 pt) agar tetap satu halaman.
+   Tinggi diukur pada elemen tersembunyi dengan lebar area cetak yang sama. */
+const CT_KSEQ=[1,.85,.7,.55], CT_KPADAT=[1,.85,.7,.55,.4,.25], CT_FSMIN=7;
 function ctFit(r,c,no){
-  const m=$('#ctMeasure'), p=PAPER[c.paper], aw=p.w-c.ml-c.mr, ah=p.h-c.mt-c.mb-3;
-  m.style.width=aw+'mm'; m.style.height=ah+'mm'; m.style.columnWidth=aw+'mm';
-  const one=k=>{ m.innerHTML=raporHTML(r,{c,k,no,msr:true}); return m.scrollWidth<=m.clientWidth+1; };
-  let pc=100, fits=true;
-  if(!one(1)){
-    let lo=CT_KMIN, hi=99; fits=one(lo/100);
-    if(fits){ while(lo<hi){ const mid=Math.ceil((lo+hi)/2); if(one(mid/100)) lo=mid; else hi=mid-1; } pc=lo; }
-    else pc=CT_KMIN;
+  const m=$('#ctMeasure'), p=PAPER[c.paper], aw=p.w-c.ml-c.mr, availPx=(p.h-c.mt-c.mb-2.5)*MM_PX;
+  m.style.width=aw+'mm';
+  const meta=raporBlocks(r), blocks=meta.blocks;
+  const tall=(items,idx,k,cc)=>{ m.innerHTML=ctSheet(ctBody(items,idx>0,meta),cc||c,k,meta,c.num?1:null,true); return m.firstElementChild.offsetHeight; };
+  const seq=c.mode==='normal'?CT_KSEQ:CT_KPADAT;
+  let pages=null, kUse=1, over=false, cUse=c;
+  for(const k of seq){ if(tall(blocks,0,k)<=availPx){ pages=[blocks]; kUse=k; break; } }
+  if(!pages&&c.mode==='satu'){
+    /* cari ukuran huruf terbesar (langkah 0,25 pt) yang muat pada spasi 70%, lalu longgarkan kembali spasinya */
+    const at=fs=>tall(blocks,0,.7,Object.assign({},c,{fs}))<=availPx;
+    let lo=CT_FSMIN*4, hi=c.fs*4;
+    if(at(lo/4)){
+      while(lo<hi){ const mid=Math.ceil((lo+hi)/2); if(at(mid/4)) lo=mid; else hi=mid-1; }
+      cUse=Object.assign({},c,{fs:lo/4});
+      kUse=.7;
+      for(const k of [1,.85]){ if(tall(blocks,0,k,cUse)<=availPx){ kUse=k; break; } }
+      pages=[blocks];
+    }
+  }
+  if(!pages){
+    kUse=1; cUse=c; pages=[[]];
+    blocks.forEach(b=>{
+      let cur=pages[pages.length-1];
+      if(cur.length&&tall(cur.concat([b]),pages.length-1,1)>availPx){ cur=[b]; pages.push(cur); }
+      else cur.push(b);
+      if(cur.length===1&&tall(cur,pages.length-1,1)>availPx) over=true;
+    });
   }
   m.innerHTML='';
-  return {html:raporHTML(r,{c,k:pc/100,no}), k:pc/100, fits, pages:1};
+  const html=pages.map((items,i)=>ctSheet(ctBody(items,i>0,meta),cUse,kUse,meta,c.num?no+i:null,false)).join('');
+  return {html,k:kUse,fs:cUse.fs,fits:!over,pages:pages.length};
 }
 
 /* ----- pemuatan data dan daftar siswa ----- */
@@ -3318,8 +3376,8 @@ function ctPreview(){
   box.innerHTML=`<div class="wrap" id="ctWrap"><div class="scale" id="ctScale">${f.html}</div></div>`;
   ctScaleFit(c.v);
   const i=CTS.rows.indexOf(r)+1;
-  info.textContent=`Siswa ${i} dari ${CTS.rows.length} · ${c.p.n} · margin atas/kanan/bawah/kiri ${c.v.mt}/${c.v.mr}/${c.v.mb}/${c.v.ml} mm · 1 halaman`+
-    (f.k<1?` (isi diperkecil ke ${Math.round(f.k*100)}% agar muat)`:'')+(f.fits?'':' · PERINGATAN: isi terlalu panjang, sebagian teks dapat terpotong; persingkat catatan atau kecilkan margin');
+  info.textContent=`Siswa ${i} dari ${CTS.rows.length} · ${c.p.n} · margin atas/kanan/bawah/kiri ${c.v.mt}/${c.v.mr}/${c.v.mb}/${c.v.ml} mm · font ${f.fs<c.v.fs?`${c.v.fs} pt diperkecil ke ${f.fs} pt`:`${c.v.fs} pt`} · ${f.pages} halaman`+
+    (f.k<1?' (jarak antarbagian dirapatkan agar muat satu halaman)':'')+(c.v.mode==='satu'&&f.pages>1?' · isi terlalu panjang untuk satu halaman bahkan pada 7 pt, dilanjutkan ke halaman berikutnya':'')+(f.fits?'':' · PERINGATAN: ada bagian yang terlalu panjang untuk satu halaman dan dapat terpotong; persingkat catatan atau kecilkan margin');
 }
 function ctScaleFit(c){
   const wrap=$('#ctWrap'), sc=$('#ctScale'), box=$('#ctPvBox'); if(!wrap||!sc) return;
@@ -3331,7 +3389,8 @@ function ctScaleFit(c){
 let ctRz; window.addEventListener('resize',()=>{ clearTimeout(ctRz); ctRz=setTimeout(()=>{ if(S.tab==='rapor'){ const c=ctRead(); if(c.ok) ctScaleFit(c.v); } },120); });
 
 /* ----- cetak ----- */
-function ctCleanup(){ const s=document.getElementById('ctPageStyle'); if(s) s.remove(); }
+let ctOldTitle=null;
+function ctCleanup(){ const s=document.getElementById('ctPageStyle'); if(s) s.remove(); if(ctOldTitle!==null){ document.title=ctOldTitle; ctOldTitle=null; } }
 window.addEventListener('afterprint',()=>{ if(document.getElementById('ctPageStyle')){ ctCleanup(); $('#printRoot').innerHTML=''; } });
 async function ctPrint(rows,label){
   const c=ctRead();
@@ -3348,15 +3407,17 @@ async function ctPrint(rows,label){
   if(rows.length>1||inc.length||over){
     let msg=`Cetak ${rows.length} laporan ${label}?\nKertas ${c.p.n}, margin atas/kanan/bawah/kiri ${c.v.mt}/${c.v.mr}/${c.v.mb}/${c.v.ml} mm.`;
     if(inc.length){ const nm=inc.slice(0,3).map(r=>r.nama).join(', '); msg+=`\n\n${inc.length} siswa belum lengkap nilainya (${nm}${inc.length>3?' dan '+(inc.length-3)+' lainnya':''}). Bagian yang kosong dicetak kosong.`; }
-    if(over) msg+=`\n\nPERINGATAN: ${over} laporan terlalu panjang untuk satu halaman pada pengaturan ini dan dapat terpotong.`;
+    if(over) msg+=`\n\nPERINGATAN: ${over} laporan memuat bagian yang terlalu panjang untuk satu halaman pada pengaturan ini dan dapat terpotong.`;
     if(!(await popup('ask',msg,{yes:'Ya, Cetak',no:'Batal'}))) return;
   }
   ctCleanup();
   const st=document.createElement('style'); st.id='ctPageStyle';
-  st.textContent=`@page{size:${c.p.w}mm ${c.p.h}mm;margin:${c.v.mt}mm ${c.v.mr}mm ${c.v.mb}mm ${c.v.ml}mm}`;
+  /* margin kertas 0: margin pengguna dibuat lewat padding lembar, sehingga browser tidak mencetak header/footer-nya sendiri */
+  st.textContent=`@page{size:${c.p.w}mm ${c.p.h}mm;margin:0}`;
   document.head.appendChild(st);
   $('#printRoot').innerHTML=html;
   logExp('Cetak Nilai PKL',rows.length,'PDF/Cetak');
+  ctOldTitle=document.title; document.title=rows.length===1?('Rapor PKL - '+rows[0].nama):('Rapor PKL - '+(CTS.kelas?'Kelas '+CTS.kelas:'Siswa terpilih')); /* nama file PDF bawaan */
   window.print();
 }
 
@@ -3767,7 +3828,7 @@ $('#btnGoLogin').onclick=()=>$('#inNip').focus();
 $('#btnEye').onclick=()=>{ const i=$('#inPw'), show=i.type==='password'; i.type=show?'text':'password';
   $('#btnEye').innerHTML='<i data-lucide="'+(show?'eye-off':'eye')+'"></i>'; icons(); };
 document.querySelectorAll('.rst').forEach(b=>b.onclick=()=>popup('info','Kata sandi hanya dapat direset oleh Administrator. Hubungi admin sekolah dengan menyebutkan NIP Anda; setelah direset, Anda akan diminta membuat kata sandi baru saat masuk.'));
-$('#btnGuide').onclick=()=>popup('info','1. Masuk dengan NIP dan kata sandi.\n2. Pilih kelas, lalu isi nilai PKL pada menu Input Nilai.\n3. Simpan perubahan.\n4. Buka menu Cetak Nilai PKL, atur kertas dan margin, klik Generate Laporan, lalu cetak.',{title:'Panduan Aplikasi'});
+$('#btnGuide').onclick=()=>popup('info','1. Masuk dengan NIP dan kata sandi.\n2. Pilih kelas, lalu isi nilai PKL pada menu Input Nilai.\n3. Simpan perubahan.\n4. Buka menu Cetak Nilai PKL, atur kertas, margin, dan ukuran font, klik Generate Laporan, lalu cetak.',{title:'Panduan Aplikasi'});
 $('#btnMenu').onclick=()=>{ if(innerWidth<=900) document.body.classList.toggle('open'); else { UI.col=document.body.classList.toggle('collapsed')?1:0; saveUI(); } };
 $('#scrim').onclick=()=>document.body.classList.remove('open');
 applyUI(); loginBrand(); icons();
